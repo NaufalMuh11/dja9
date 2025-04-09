@@ -1,0 +1,89 @@
+    /* body {
+        font-family: Verdana;
+    } */
+
+    /* AxisLabel */
+    table.pvtTable .pvtAxisLabel {
+	    white-space: nowrap;
+        background-color: var(--tblr-bg-surface-secondary)!important;
+    }
+    table.pvtTable .pvtAxisLabel.expanded {
+	    white-space: nowrap;
+	    cursor: zoom-out !important;
+        background-color: var(--tblr-bg-surface-secondary!important);   
+    }
+    table.pvtTable .pvtAxisLabel.collapsed {
+	    white-space: nowrap;
+	    cursor: zoom-in !important;
+        background-color: var(--tblr-bg-surface-secondary!important);
+    }
+
+    /* RowLabel */
+    table.pvtTable tbody tr th.pvtRowLabel {
+	    vertical-align: top !important;
+	    white-space: nowrap !important;
+        background-color: var(--tblr-bg-surface-secondary!important);
+        border-width: 0px 0px thin 0px !important;
+    }
+    table.pvtTable tbody tr th.pvtRowLabel.rowexpanded {
+	    cursor: zoom-out !important;
+    }
+    table.pvtTable tbody tr th.pvtRowLabel.rowcollapsed {
+	    cursor: zoom-in !important;
+    }
+
+    /* RowLabelFiller */
+    table.pvtTable .pvtRowLabelFiller {
+        background-color: var(--tblr-bg-surface-secondary);
+        border-width: 0px 0px thin 0px !important;
+    }
+
+    /* RowSubtotal */
+    table.pvtTable .pvtRowSubtotal {
+        font-weight:bold;
+        background-color: var(--tblr-bg-surface-secondary)!important;
+    }
+    table.pvtTable tr td.pvtRowSubtotal.rowcollapsed {
+	    background-color:var(--tblr-bg-surface-secondary)!important;
+    }
+
+    /* ColLabel */
+    table.pvtTable thead tr th.pvtColLabel {
+	    white-space: nowrap;
+        background-color: var(--tblr-bg-surface-secondary)!important;
+    }
+    table.pvtTable thead tr th.pvtColLabel.colexpanded {
+        background-color: var(--tblr-bg-surface-secondary)!important;
+	    cursor: zoom-out !important;
+    }
+    table.pvtTable thead tr th.pvtColLabel.colcollapsed {
+        background-color: var(--tblr-bg-surface-secondary)!important;
+	    cursor: zoom-in !important;
+    }
+
+    /* ColLabelFiller */
+    table.pvtTable .pvtColLabelFiller {
+        background-color: var(--tblr-bg-surface-secondary)!important;
+    }
+
+    /* ColSubtotal */
+    table.pvtTable .pvtColSubtotal {
+        font-weight:bold;
+    }
+    table.pvtTable tr td.pvtColSubtotal {
+	    background-color: var(--tblr-bg-surface-secondary;!important;
+    }
+
+
+    /*
+    *
+    * IMPORTANT: Please do not remove the lines below this point
+    *
+    */
+    table.pvtTable tr .rowhide {
+        display: none;
+    }
+
+    table.pvtTable tr .colhide {
+        display: none;
+    }

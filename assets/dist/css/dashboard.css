@@ -1,0 +1,174 @@
+/*!
+* Tabler v1.0.0-beta19 (https://tabler.io)
+* @version 1.0.0-beta19
+* @link https://tabler.io
+* Copyright 2018-2023 The Tabler Authors
+* Copyright 2018-2023 codecalm.net Paweł Kuna
+* Licensed under MIT (https://github.com/tabler/tabler/blob/master/LICENSE)
+*/
+/* prettier-ignore */
+/* prettier-ignore */
+pre.highlight,
+.highlight pre {
+  max-height: 30rem;
+  margin: 1.5rem 0;
+  overflow: auto;
+  border-radius: var(--tblr-border-radius);
+}
+pre.highlight,
+.highlight pre {
+  scrollbar-color: rgba(var(--tblr-scrollbar-color, var(--tblr-body-color-rgb)), 0.16) transparent;
+}
+pre.highlight::-webkit-scrollbar,
+.highlight pre::-webkit-scrollbar {
+  width: 1rem;
+  height: 1rem;
+  -webkit-transition: background 0.3s;
+  transition: background 0.3s;
+}
+@media (prefers-reduced-motion: reduce) {
+  pre.highlight::-webkit-scrollbar,
+  .highlight pre::-webkit-scrollbar {
+    -webkit-transition: none;
+    transition: none;
+  }
+}
+pre.highlight::-webkit-scrollbar-thumb,
+.highlight pre::-webkit-scrollbar-thumb {
+  border-radius: 1rem;
+  border: 5px solid transparent;
+  box-shadow: inset 0 0 0 1rem rgba(var(--tblr-scrollbar-color, var(--tblr-body-color-rgb)), 0.16);
+}
+pre.highlight::-webkit-scrollbar-track,
+.highlight pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+pre.highlight:hover::-webkit-scrollbar-thumb,
+.highlight pre:hover::-webkit-scrollbar-thumb {
+  box-shadow: inset 0 0 0 1rem rgba(var(--tblr-scrollbar-color, var(--tblr-body-color-rgb)), 0.32);
+}
+pre.highlight::-webkit-scrollbar-corner,
+.highlight pre::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.highlight {
+  margin: 0;
+}
+.highlight code > * {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.highlight .c, .highlight .c1 {
+  color: #a0aec0;
+}
+.highlight .nt, .highlight .nc, .highlight .nx {
+  color: #ff8383;
+}
+.highlight .na, .highlight .p {
+  color: #ffe484;
+}
+.highlight .s, .highlight .dl, .highlight .s2 {
+  color: #b5f4a5;
+}
+.highlight .k {
+  color: #93ddfd;
+}
+.highlight .s1, .highlight .mi {
+  color: #d9a9ff;
+}
+
+.text-orange, .text-yellow, .text-green, .text-red{
+  margin: 0px!important;
+}
+
+.avatar-noborder { 
+  box-shadow: none;
+  border-radius: 100px
+}
+
+/* .w-1 {
+    padding: 0 0 0 10px !important;
+} */
+
+a {
+    text-decoration: none !important;
+    cursor: pointer;
+}
+
+.w-1 {
+    padding: 5px 0 0 7px !important;
+    width: 0.25rem !important;
+}
+
+.p-10 {
+    padding: 10px !important;
+}
+
+.pl-0 {
+    padding-left: 0 !important;
+}
+
+.pr-0 {
+    padding-right: 0 !important;
+}
+
+table tr:hover {
+  --tblr-table-accent-bg: var(--tblr-table-hover-bg);
+    color: var(--tblr-table-hover-color);
+}
+
+.info {
+    padding: 6px 8px;
+    font: 12px/14px Arial, Helvetica, sans-serif;
+    background: white;
+    border-radius: 0px;
+}
+
+.legend {
+    text-align: left;
+    line-height: 15px;
+    color: #555;
+}
+
+.legend i {
+    width: 15px;
+    height: 15px;
+    display: inline-block;
+    margin-right: 3px;
+    opacity: 0.7;
+}
+
+.leaflet-control-container .leaflet-top {
+    display: none !important;
+}
+
+#mapindonesia {
+    margin-left: -10px;
+    background: white;
+    height: 80%;
+}
+
+.dt-button {
+    position: relative;
+    min-width: calc(1.4285714286em + .875rem + calc(var(--tblr-border-width)* 2));
+    margin: 0;
+    padding: .4375rem .75rem;
+    font-size: .75rem;
+    line-height: 1.4285714286;
+    color: var(--tblr-muted);
+    background: var(--tblr-bg-forms);
+    text-align: center;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    border: var(--tblr-border-width) var(--tblr-border-style) var(--tblr-border-color);
+    border-radius: 3px;
+}
+
+.dt-button:hover {
+    color: var(--tblr-body-color);
+    background-color: #f6f6f6;
+}
