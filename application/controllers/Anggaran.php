@@ -2,8 +2,10 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 class Anggaran extends CI_Controller {
-	function __construct() {
+	function __construct()
+	{
 		parent::__construct();
+		$this->load->model('MyTask_model');
 	}
 
 	function index()
@@ -14,8 +16,16 @@ class Anggaran extends CI_Controller {
 		if ($menu == 'MyTask') $this->mytask();
 		else show_404();
 	}
-	
-	private function mytask() {
+
+	private function mytask()
+	{		
+		$year = $this->input->get('year') ? $this->input->get('year') : date('Y');
+		$month = $this->input->get('month') ? $this->input->get('month') : date('m');
+
+		$data['top_users_by_month'] = json_encode($this->MyTask_model->get_top_users_by_month($year, $month));
+		$data['current_year'] = $year;
+		$data['current_month'] = $month;
+
 		$data['view'] = 'anggaran/index';
 		$this->load->view('main/main', $data);
 	}
