@@ -33,7 +33,31 @@ $db['default'] = array(
 	'save_queries' => TRUE
 );
 
-//2025
+// satu
+$db['dbsatu'] = array(
+	'dsn'	=> '',
+	'hostname' => $db_host,
+	'username' => $db_username,
+	'password' => $db_password,
+	'port' 	   => $db_port,
+	'database' => 'dbsatu',
+	'dbdriver' => 'mysqli',
+	'dbprefix' => '',
+	'pconnect' => FALSE,
+	'db_debug' => FALSE,
+	'cache_on' => FALSE,
+	'cachedir' => '',
+	'char_set' => 'utf8',
+	'dbcollat' => 'utf8_general_ci',
+	'swap_pre' => '',
+	'encrypt' => FALSE,
+	'compress' => FALSE,
+	'stricton' => FALSE,
+	'failover' => array(),
+	'save_queries' => TRUE
+);
+
+// 2025
 $db['ref2025'] = array(
 	'dsn'	=> '',
 	'hostname' => $db_host,
@@ -80,36 +104,14 @@ $db['revisi2025'] = array(
 	'save_queries' => TRUE
 );
 
-$db['mytask_log'] = array(
+// 2026
+$db['dbref2026'] = array(
 	'dsn'	=> '',
 	'hostname' => $db_host,
 	'username' => $db_username,
 	'password' => $db_password,
 	'port' 	   => $db_port,
-	'database' => 't_mytask_log',
-	'dbdriver' => 'mysqli',
-	'dbprefix' => '',
-	'pconnect' => FALSE,
-	'db_debug' => FALSE,
-	'cache_on' => FALSE,
-	'cachedir' => '',
-	'char_set' => 'utf8',
-	'dbcollat' => 'utf8_general_ci',
-	'swap_pre' => '',
-	'encrypt' => FALSE,
-	'compress' => FALSE,
-	'stricton' => FALSE,
-	'failover' => array(),
-	'save_queries' => TRUE
-);
-
-$db['mytask_link'] = array(
-	'dsn'	=> '',
-	'hostname' => $db_host,
-	'username' => $db_username,
-	'password' => $db_password,
-	'port' 	   => $db_port,
-	'database' => 't_mytask_link_',
+	'database' => 'dbref2026',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
