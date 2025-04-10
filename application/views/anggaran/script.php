@@ -244,15 +244,7 @@
 
 		// Populate year dropdown
 		const yearSelect = document.getElementById('yearFilter');
-
-		// Add "All Years" option
-		const allYearsOption = document.createElement('option');
-		allYearsOption.value = 'all';
-		allYearsOption.textContent = 'Semua Tahun';
-		if (currentYear === 'all') {
-			allYearsOption.selected = true;
-		}
-		yearSelect.appendChild(allYearsOption);
+		yearSelect.innerHTML = ''; // Clear any existing options
 
 		// Add years (current year and 4 years back)
 		const thisYear = new Date().getFullYear();
@@ -261,7 +253,7 @@
 			option.value = year;
 			option.textContent = year;
 			// Select current year by default
-			if (year.toString() === currentYear.toString() && currentYear !== 'all') {
+			if (year.toString() === currentYear.toString()) {
 				option.selected = true;
 			}
 			yearSelect.appendChild(option);
@@ -269,15 +261,7 @@
 
 		// Populate month dropdown
 		const monthSelect = document.getElementById('monthFilter');
-
-		// Add "All Months" option
-		const allMonthsOption = document.createElement('option');
-		allMonthsOption.value = 'all';
-		allMonthsOption.textContent = 'Semua Bulan';
-		if (currentMonth === 'all') {
-			allMonthsOption.selected = true;
-		}
-		monthSelect.appendChild(allMonthsOption);
+		monthSelect.innerHTML = ''; // Clear any existing options
 
 		// Month names in Indonesian
 		const monthNames = [
@@ -291,7 +275,7 @@
 			option.value = month + 1; // Month values: 1-12
 			option.textContent = monthNames[month];
 			// Select current month by default
-			if ((month + 1).toString() === currentMonth.toString() && currentMonth !== 'all') {
+			if ((month + 1).toString() === currentMonth.toString()) {
 				option.selected = true;
 			}
 			monthSelect.appendChild(option);
@@ -315,13 +299,14 @@
 			return;
 		}
 
+		// Display the data
 		users.forEach(user => {
 			const profilePath = `files/profiles/${user.profilepic}`;
 			const row = `<tr>
             <td class="py-3">
                 <div class="d-flex align-items-center">
                     <img src="${profilePath}" onerror="this.onerror=null; this.src='files/profiles/000.png';" class="rounded-circle me-2" width="40" height="40" alt="${user.nmuser}">
-                    <span>${user.nmuser}</span>
+                    <span>${user.nmuser ?? 'Nama Tidak Tersedia'}</span>
                 </div>
             </td>
             <td class="py-3">${user.iduser}</td>
@@ -335,4 +320,11 @@
 	function submitFilterForm() {
 		document.getElementById('filterForm').submit();
 	}
+
+
+	// Card
+	document.getElementById('totalUsers').textContent = usersData.total_users;
+	document.getElementById('activeUsers').textContent = usersData.active_users;
+	document.getElementById('totalModules').textContent = usersData.total_modules;
+	document.getElementById('totalServices').textContent = usersData.total_services;
 </script>

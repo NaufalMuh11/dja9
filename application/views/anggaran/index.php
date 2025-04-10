@@ -42,7 +42,7 @@
 								<div class="flex-grow-1">
 									<div class="d-flex justify-content-between align-items-center">
 										<div class="fw-bold fs-5">Total Pengguna</div>
-										<a href="" class="text-dark">
+										<a href="#" class="text-dark show-modal" data-type="users">
 											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-external-link">
 												<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 												<path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
@@ -51,7 +51,7 @@
 											</svg>
 										</a>
 									</div>
-									<div class="m-0 fw-bold d-flex justify-content-end" style="font-size: 35px;">1,231</div>
+									<div id="totalUsers" class="m-0 fw-bold d-flex justify-content-end" style="font-size: 35px;"></div>
 								</div>
 							</div>
 						</div>
@@ -69,7 +69,7 @@
 								<div class="flex-grow-1">
 									<div class="d-flex justify-content-between align-items-center">
 										<div class="fw-bold fs-5">Pengguna Aktif</div>
-										<a href="" class="text-dark">
+										<a href="#" class="text-dark show-modal" data-type="activeUsers">
 											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-external-link">
 												<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 												<path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
@@ -78,7 +78,7 @@
 											</svg>
 										</a>
 									</div>
-									<div class="m-0 fw-bold d-flex justify-content-end" style="font-size: 35px;">23</div>
+									<div id="activeUsers" class="m-0 fw-bold d-flex justify-content-end" style="font-size: 35px;"></div>
 								</div>
 							</div>
 						</div>
@@ -95,8 +95,8 @@
 								</div>
 								<div class="flex-grow-1">
 									<div class="d-flex justify-content-between align-items-center">
-										<div class="fw-bold fs-5">Jumlah Laporan</div>
-										<a href="" class="text-dark">
+										<div class="fw-bold fs-5">Jumlah Layanan</div>
+										<a href="#" class="text-dark show-modal" data-type="services">
 											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-external-link">
 												<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 												<path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
@@ -105,7 +105,7 @@
 											</svg>
 										</a>
 									</div>
-									<div class="m-0 fw-bold d-flex justify-content-end" style="font-size: 35px;">4</div>
+									<div id="totalServices" class="m-0 fw-bold d-flex justify-content-end" style="font-size: 35px;"></div>
 								</div>
 							</div>
 						</div>
@@ -124,10 +124,8 @@
 								<div class="flex-grow-1">
 									<div class="d-flex justify-content-between align-items-center">
 										<div class="fw-bold fs-5">Jumlah Modul</div>
-										<a href="" class="text-dark">
-											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-												stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-												class="icon icon-tabler icons-tabler-outline icon-tabler-external-link">
+										<a href="#" class="text-dark show-modal" data-type="modules">
+											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-external-link">
 												<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 												<path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
 												<path d="M11 13l9 -9" />
@@ -135,7 +133,7 @@
 											</svg>
 										</a>
 									</div>
-									<div class="m-0 fw-bold d-flex justify-content-end" style="font-size: 35px;">12</div>
+									<div id="totalModules" class="m-0 fw-bold d-flex justify-content-end" style="font-size: 35px;"></div>
 								</div>
 							</div>
 						</div>
@@ -166,16 +164,15 @@
 						<form id="filterForm" method="GET" action="">
 							<!-- Preserve the q parameter -->
 							<input type="hidden" name="q" value="MyTask">
-
 							<div class="card-header d-flex justify-content-around align-items-center p-2" style="background-color: #6f42c1;">
 								<div class="dropdown me-2">
 									<select name="year" class="form-select" id="yearFilter">
-										<!-- Will be populated by JavaScript -->
+										<!-- Data In Script -->
 									</select>
 								</div>
 								<div class="dropdown">
 									<select name="month" class="form-select" id="monthFilter">
-										<!-- Will be populated by JavaScript -->
+										<!-- Data In Script -->
 									</select>
 								</div>
 							</div>
@@ -194,7 +191,7 @@
 										</tr>
 									</thead>
 									<tbody>
-										<!-- Table content will be loaded dynamically -->
+										<!-- Data In Script -->
 									</tbody>
 								</table>
 							</div>
@@ -229,11 +226,17 @@
 	</div>
 </div>
 
-<!-- Event Listener -->
-<?php $this->load->view('anggaran/script'); ?>
-
 <script>
 	const usersData = {
+		/* Card */
+		total_users: <?php echo $total_users ?? '[]'; ?>,
+		active_users: <?php echo $active_users ?? '[]'; ?>,
+		total_modules: <?php echo $total_modules ?? '[]'; ?>,
+		total_services: <?php echo $total_services ?? '[]'; ?>,
+		/* Table */
 		top_users: <?php echo $top_users_by_month ?? '[]'; ?>
 	};
 </script>
+
+<!-- Event Listener -->
+<?php $this->load->view('anggaran/script'); ?>
