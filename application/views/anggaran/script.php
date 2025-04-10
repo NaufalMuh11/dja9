@@ -88,58 +88,58 @@
 		var chart = new ApexCharts(document.querySelector("#accessChart"), options);
 		chart.render();
 
+		// Module Access Chart
+		const moduleDistribution = <?php echo $module_distribution ?? '[]'; ?>;
+
 		var chartModul = new ApexCharts(
-			document.getElementById("chart-akses-modul"), {
-				chart: {
-					type: "donut",
-					height: 240,
-					sparkline: {
-						enabled: true
-					}
-				},
-				series: [35, 25, 22, 18],
-				labels: ['Anggaran', 'Kepegawaian', 'Keuangan', 'Perencanaan'],
-				colors: ['#5D3FD3', '#dc3545', '#ffc107', '#198754'],
-				plotOptions: {
-					pie: {
-						donut: {
-							size: '70%',
-							labels: {
-								show: true,
-								name: {
-									show: true
-								},
-								value: {
-									show: true,
-									formatter: function(val) {
-										return val + '%';
-									}
-								}
-							}
-						}
-					}
-				},
-				tooltip: {
-					y: {
-						formatter: function(val) {
-							return val + '%';
-						}
-					}
-				},
-				legend: {
-					show: true,
-					position: "right",
-					offsetY: 16,
-					markers: {
-						width: 10,
-						height: 10,
-						radius: 100
-					},
-					formatter: function(seriesName, opts) {
-						return seriesName;
-					}
-				}
-			});
+		    document.getElementById("chart-akses-modul"), {
+		        chart: {
+		            type: "donut",
+		            height: 240,
+		            sparkline: {
+		                enabled: true
+		            }
+		        },
+		        series: moduleDistribution.map(item => parseInt(item.access_count)),
+		        labels: moduleDistribution.map(item => item.keterangan),
+		        colors: ['#5D3FD3', '#dc3545', '#ffc107', '#198754', '#ff9800'],
+		        plotOptions: {
+		            pie: {
+		                donut: {
+		                    size: '70%',
+		                    labels: {
+		                        show: true,
+		                        name: {
+		                            show: true
+		                        },
+		                        value: {
+		                            show: true,
+		                            formatter: function(val) {
+		                                return val + ' kali';
+		                            }
+		                        }
+		                    }
+		                }
+		            }
+		        },
+		        tooltip: {
+		            y: {
+		                formatter: function(val) {
+		                    return val + ' kali';
+		                }
+		            }
+		        },
+		        legend: {
+		            show: true,
+		            position: "right",
+		            offsetY: 16,
+		            markers: {
+		                width: 10,
+		                height: 10,
+		                radius: 100
+		            }
+		        }
+		    });
 		chartModul.render();
 
 		// Module Activity Chart
