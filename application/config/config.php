@@ -1,13 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-$config['base_url'] = 'http://localhost/dja9';
-
-// if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
-//     $config['base_url'] = 'localhost/8080';
-// } else {
-//     $config['base_url'] = 'http://data.local:8080';
-// }
+$config['base_url'] = getenv('BASE_URL', 'http://localhost/dja9');
 
 // $config['index_page'] = 'index.php';
 $config['index_page'] = '';
