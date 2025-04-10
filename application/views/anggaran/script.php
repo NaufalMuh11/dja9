@@ -88,6 +88,60 @@
         var chart = new ApexCharts(document.querySelector("#accessChart"), options);
         chart.render();
 
+        var chartModul = new ApexCharts(
+			document.getElementById("chart-akses-modul"), {
+				chart: {
+					type: "donut",
+					height: 240,
+					sparkline: {
+						enabled: true
+					}
+				},
+				series: [35, 25, 22, 18],
+				labels: ['Anggaran', 'Kepegawaian', 'Keuangan', 'Perencanaan'],
+				colors: ['#5D3FD3', '#dc3545', '#ffc107', '#198754'],
+				plotOptions: {
+					pie: {
+						donut: {
+							size: '70%',
+							labels: {
+								show: true,
+								name: {
+									show: true
+								},
+								value: {
+									show: true,
+									formatter: function(val) {
+										return val + '%';
+									}
+								}
+							}
+						}
+					}
+				},
+				tooltip: {
+					y: {
+						formatter: function(val) {
+							return val + '%';
+						}
+					}
+				},
+				legend: {
+					show: true,
+					position: "right",
+					offsetY: 16,
+					markers: {
+						width: 10,
+						height: 10,
+						radius: 100
+					},
+					formatter: function(seriesName, opts) {
+						return seriesName;
+					}
+				}
+			});
+		chartModul.render();
+
         const userData = [{
                 name: "Budiman",
                 avatar: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",

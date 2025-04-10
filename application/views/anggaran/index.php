@@ -208,7 +208,7 @@
 					<div class="card">
 						<div class="card-body">
 							<h5 class="card-title">Distribusi Akses Modul</h5>
-							<!-- Pie Chart Distribusi Akses Modul -->
+							<div id="chart-akses-modul"></div>
 						</div>
 					</div>
 				</div>
