@@ -1,9 +1,9 @@
 <script>
 	document.addEventListener("DOMContentLoaded", function() {
+		// Last update
 		document.getElementById('lastUpdate').innerHTML = `<?php echo get_last_update(); ?>`;
-	});
 
-	document.addEventListener("DOMContentLoaded", function() {
+		// Access Chart
 		var options = {
 			series: [{
 				name: 'Pengunjung',
@@ -142,14 +142,105 @@
 			});
 		chartModul.render();
 
+		// Module Activity Chart
+		var moduleActivityOptions = {
+			series: [{
+				name: 'SIPKD',
+				data: [10, 15, 12, 18, 20, 22, 15, 17, 21, 23, 19, 14, 16, 18, 20, 15, 13, 17, 19, 21, 16, 14, 18, 20, 22, 19, 17, 15, 18, 20]
+			}, {
+				name: 'SIMDA',
+				data: [5, 7, 6, 8, 9, 11, 8, 7, 10, 12, 9, 7, 8, 9, 11, 8, 6, 9, 10, 12, 8, 7, 9, 11, 13, 10, 8, 7, 9, 11]
+			}, {
+				name: 'E-Planning',
+				data: [3, 4, 5, 6, 7, 8, 6, 5, 7, 8, 6, 4, 5, 6, 7, 5, 4, 6, 7, 8, 6, 5, 7, 8, 9, 7, 6, 5, 7, 8]
+			}, {
+				name: 'SIMPEG',
+				data: [2, 3, 4, 5, 6, 7, 5, 4, 6, 7, 5, 3, 4, 5, 6, 4, 3, 5, 6, 7, 5, 4, 6, 7, 8, 6, 5, 4, 6, 7]
+			}],
+			chart: {
+				height: 350,
+				type: 'line',
+				toolbar: {
+					show: false
+				}
+			},
+			colors: ['#7a36b1', '#dc3545', '#ffc107', '#198754'],
+			dataLabels: {
+				enabled: false
+			},
+			stroke: {
+				curve: 'smooth',
+				width: 2
+			},
+			grid: {
+				borderColor: '#e0e0e0',
+				padding: {
+					top: 10,
+					right: 10,
+					bottom: 10,
+					left: 10
+				}
+			},
+			xaxis: {
+				categories: Array.from({
+					length: 30
+				}, (_, i) => {
+					const d = new Date();
+					d.setDate(d.getDate() - (29 - i));
+					return d.toLocaleDateString('id-ID', {
+						day: '2-digit',
+						month: 'short'
+					});
+				}),
+				labels: {
+					rotate: -45,
+					rotateAlways: false
+				}
+			},
+			yaxis: {
+				title: {
+					text: 'Jumlah Aktivitas'
+				}
+			},
+			legend: {
+				position: 'top',
+				horizontalAlign: 'right',
+				onItemClick: {
+					toggleDataSeries: true
+				},
+				onItemHover: {
+					highlightDataSeries: true
+				}
+			},
+			tooltip: {
+				shared: true,
+				intersect: false
+			},
+			markers: {
+				size: false,
+				hover: {
+					size: 7
+				}
+			}
+		};
 
+		// Add one more series (instead of two)
+		moduleActivityOptions.series.push({
+			name: 'E-Budgeting',
+			data: [4, 6, 5, 7, 8, 9, 7, 6, 8, 9, 7, 5, 6, 7, 8, 6, 5, 7, 8, 9, 7, 6, 8, 9, 10, 8, 7, 6, 8, 9]
+		});
+
+		// Update colors array for 5 series
+		moduleActivityOptions.colors = ['#7a36b1', '#dc3545', '#ffc107', '#198754', '#ff9800'];
+
+		var moduleActivityChart = new ApexCharts(document.querySelector("#chart-aktivitas-modul"), moduleActivityOptions);
+		moduleActivityChart.render();
 
 		const usersData = {
 			top_users: <?php echo $top_users_by_month ?? '[]'; ?>
 		};
 
 		console.log(Table.top_users);
-		
 		const userData = [{
 				name: "Budiman",
 				avatar: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",

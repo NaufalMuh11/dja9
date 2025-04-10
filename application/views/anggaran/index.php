@@ -218,7 +218,7 @@
 					<div class="card">
 						<div class="card-body">
 							<h5 class="card-title">Aktivitas Pengguna Modul</h5>
-							<!-- Line Chart Aktivitas Pengguna Modul -->
+							<div id="chart-aktivitas-modul"></div>
 						</div>
 					</div>
 				</div>
