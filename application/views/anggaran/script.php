@@ -236,11 +236,12 @@
 		var moduleActivityChart = new ApexCharts(document.querySelector("#chart-aktivitas-modul"), moduleActivityOptions);
 		moduleActivityChart.render();
 
-		const usersData = {
+		const Table = {
 			top_users: <?php echo $top_users_by_month ?? '[]'; ?>
 		};
 
 		console.log(Table.top_users);
+		
 		const userData = [{
 				name: "Budiman",
 				avatar: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
