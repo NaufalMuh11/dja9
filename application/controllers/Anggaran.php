@@ -16,12 +16,15 @@ class Anggaran extends CI_Controller {
 		if ($menu == 'MyTask') $this->mytask();
 		else show_404();
 	}
-	
-	private function mytask() {
-		$year = date('Y');
-		$month = date('m');
-		// Encode data ke JSON
+
+	private function mytask()
+	{		
+		$year = $this->input->get('year') ? $this->input->get('year') : date('Y');
+		$month = $this->input->get('month') ? $this->input->get('month') : date('m');
+
 		$data['top_users_by_month'] = json_encode($this->MyTask_model->get_top_users_by_month($year, $month));
+		$data['current_year'] = $year;
+		$data['current_month'] = $month;
 
 		$data['view'] = 'anggaran/index';
 		$this->load->view('main/main', $data);

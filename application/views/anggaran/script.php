@@ -235,47 +235,104 @@
 
 		var moduleActivityChart = new ApexCharts(document.querySelector("#chart-aktivitas-modul"), moduleActivityOptions);
 		moduleActivityChart.render();
+	});
 
-		const Table = {
-			top_users: <?php echo $top_users_by_month ?? '[]'; ?>
-		};
+	document.addEventListener('DOMContentLoaded', function() {
+		// Get current year and month from PHP data
+		const currentYear = <?php echo $current_year ?? 'null'; ?> || new Date().getFullYear();
+		const currentMonth = <?php echo $current_month ?? 'null'; ?> || new Date().getMonth() + 1;
 
-		console.log(Table.top_users);
-		
-		const userData = [{
-				name: "Budiman",
-				avatar: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-				unit: "Admin DJA",
-				aktivitas: 201
-			},
-			{
-				name: "Budiman",
-				avatar: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-				unit: "Admin DJA",
-				aktivitas: 201
-			},
-			{
-				name: "Budiman",
-				avatar: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-				unit: "Admin DJA",
-				aktivitas: 201
+		// Populate year dropdown
+		const yearSelect = document.getElementById('yearFilter');
+
+		// Add "All Years" option
+		const allYearsOption = document.createElement('option');
+		allYearsOption.value = 'all';
+		allYearsOption.textContent = 'Semua Tahun';
+		if (currentYear === 'all') {
+			allYearsOption.selected = true;
+		}
+		yearSelect.appendChild(allYearsOption);
+
+		// Add years (current year and 4 years back)
+		const thisYear = new Date().getFullYear();
+		for (let year = thisYear; year >= thisYear - 4; year--) {
+			const option = document.createElement('option');
+			option.value = year;
+			option.textContent = year;
+			// Select current year by default
+			if (year.toString() === currentYear.toString() && currentYear !== 'all') {
+				option.selected = true;
 			}
+			yearSelect.appendChild(option);
+		}
+
+		// Populate month dropdown
+		const monthSelect = document.getElementById('monthFilter');
+
+		// Add "All Months" option
+		const allMonthsOption = document.createElement('option');
+		allMonthsOption.value = 'all';
+		allMonthsOption.textContent = 'Semua Bulan';
+		if (currentMonth === 'all') {
+			allMonthsOption.selected = true;
+		}
+		monthSelect.appendChild(allMonthsOption);
+
+		// Month names in Indonesian
+		const monthNames = [
+			'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+			'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
 		];
 
+		// Add all months
+		for (let month = 0; month < 12; month++) {
+			const option = document.createElement('option');
+			option.value = month + 1; // Month values: 1-12
+			option.textContent = monthNames[month];
+			// Select current month by default
+			if ((month + 1).toString() === currentMonth.toString() && currentMonth !== 'all') {
+				option.selected = true;
+			}
+			monthSelect.appendChild(option);
+		}
+
+		// Add event listeners to dropdowns for form submission
+		yearSelect.addEventListener('change', submitFilterForm);
+		monthSelect.addEventListener('change', submitFilterForm);
+
+		// Display the initial data
+		displayUserData(usersData.top_users);
+	});
+
+	// Function to display user activity data
+	function displayUserData(users) {
 		const tableBody = document.querySelector("#userTable tbody");
-		userData.forEach(user => {
+		tableBody.innerHTML = ''; // Clear table
+
+		if (!users || users.length === 0) {
+			tableBody.innerHTML = '<tr><td colspan="3" class="text-center">Tidak ada data untuk periode ini</td></tr>';
+			return;
+		}
+
+		users.forEach(user => {
+			const profilePath = `files/profiles/${user.profilepic}`;
 			const row = `<tr>
-                            <td class="py-3">
-                            <div class="d-flex align-items-center">
-                                <img src="${user.avatar}" class="rounded-circle me-2" width="40" height="40" alt="${user.name}">
-                                <span>${user.name}</span>
-                            </div>
-                            </td>
-                            <td class="py-3">${user.unit}</td>
-                            <td class="py-3 text-end">${user.aktivitas}</td>
-                        </tr>
-                        `;
+            <td class="py-3">
+                <div class="d-flex align-items-center">
+                    <img src="${profilePath}" onerror="this.onerror=null; this.src='files/profiles/000.png';" class="rounded-circle me-2" width="40" height="40" alt="${user.nmuser}">
+                    <span>${user.nmuser}</span>
+                </div>
+            </td>
+            <td class="py-3">${user.iduser}</td>
+            <td class="py-3 text-end">${user.click_count}</td>
+        </tr>`;
 			tableBody.innerHTML += row;
 		});
-	});
+	}
+
+	// Submit form when filter changes
+	function submitFilterForm() {
+		document.getElementById('filterForm').submit();
+	}
 </script>
