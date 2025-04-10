@@ -4,12 +4,18 @@ defined('BASEPATH') or exit('No direct script access allowed');
 $active_group = 'default';
 $query_builder = TRUE;
 
+// setting db connection s
+$db_host = 'localhost';
+$db_username = 'root';
+$db_password = '';
+$db_port = '3306';
+
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => getenv('DB_HOST', 'localhost'),
-	'username' => getenv('DB_USERNAME', 'root'),
-	'password' => getenv('DB_PASSWORD', ''),
-	'port' 	   => getenv('DB_PORT', '3306'),
+	'hostname' => $db_host,
+	'username' => $db_username,
+	'password' => $db_password,
+	'port' 	   => $db_port,
 	'database' => 'dbsatu_',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
@@ -30,10 +36,10 @@ $db['default'] = array(
 //2025
 $db['ref2025'] = array(
 	'dsn'	=> '',
-	'hostname' => getenv('DB_HOST', 'localhost'),
-	'username' => getenv('DB_USERNAME', 'root'),
-	'password' => getenv('DB_PASSWORD', ''),
-	'port' 	   => getenv('DB_PORT', '3306'),
+	'hostname' => $db_host,
+	'username' => $db_username,
+	'password' => $db_password,
+	'port' 	   => $db_port,
 	'database' => 'dbref2025_',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
@@ -53,10 +59,10 @@ $db['ref2025'] = array(
 
 $db['revisi2025'] = array(
 	'dsn'	=> '',
-	'hostname' => getenv('DB_HOST', 'localhost'),
-	'username' => getenv('DB_USERNAME', 'root'),
-	'password' => getenv('DB_PASSWORD', ''),
-	'port' 	   => getenv('DB_PORT', '3306'),
+	'hostname' => $db_host,
+	'username' => $db_username,
+	'password' => $db_password,
+	'port' 	   => $db_port,
 	'database' => 'dbrkakl2025_revisi_',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
@@ -76,10 +82,10 @@ $db['revisi2025'] = array(
 
 $db['mytask_log'] = array(
 	'dsn'	=> '',
-	'hostname' => getenv('DB_HOST', 'localhost'),
-	'username' => getenv('DB_USERNAME', 'root'),
-	'password' => getenv('DB_PASSWORD', ''),
-	'port' 	   => getenv('DB_PORT', '3306'),
+	'hostname' => $db_host,
+	'username' => $db_username,
+	'password' => $db_password,
+	'port' 	   => $db_port,
 	'database' => 't_mytask_log',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
@@ -99,10 +105,10 @@ $db['mytask_log'] = array(
 
 $db['mytask_link'] = array(
 	'dsn'	=> '',
-	'hostname' => getenv('DB_HOST', 'localhost'),
-	'username' => getenv('DB_USERNAME', 'root'),
-	'password' => getenv('DB_PASSWORD', ''),
-	'port' 	   => getenv('DB_PORT', '3306'),
+	'hostname' => $db_host,
+	'username' => $db_username,
+	'password' => $db_password,
+	'port' 	   => $db_port,
 	'database' => 't_mytask_link_',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
