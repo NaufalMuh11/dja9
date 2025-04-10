@@ -25,8 +25,20 @@ class Anggaran extends CI_Controller {
 		$data['top_users_by_month'] = json_encode($this->MyTask_model->get_top_users_by_month($year, $month));
 		$data['current_year'] = $year;
 		$data['current_month'] = $month;
+		$data['module_distribution'] = json_encode($this->MyTask_model->get_top_module_distribution($year, $month));
 
 		$data['view'] = 'anggaran/index';
 		$this->load->view('main/main', $data);
+	}
+
+	public function get_module_distribution()
+	{
+        $year = $this->input->get('year');
+        $month = $this->input->get('month');
+        
+        $data = $this->MyTask_model->get_top_module_distribution($year, $month);
+        
+        header('Content-Type: application/json');
+        echo json_encode($data);
 	}
 }
