@@ -162,23 +162,24 @@
 				<!-- Tabel Pengguna dengan Aktivitas Task Terbanyak -->
 				<div class="col-xl-4 col-lg-5 mb-3">
 					<div class="card h-100">
-						<!-- Filter -->
-						<div class="card-header d-flex justify-content-around align-items-center p-2" style="background-color: #6f42c1;">
-							<div class="dropdown me-2">
-								<select class="form-select">
-									<option selected>Semua Tahun</option>
-									<option>2023</option>
-									<option>2022</option>
-								</select>
+						<!-- Filter Form -->
+						<form id="filterForm" method="GET" action="">
+							<!-- Preserve the q parameter -->
+							<input type="hidden" name="q" value="MyTask">
+
+							<div class="card-header d-flex justify-content-around align-items-center p-2" style="background-color: #6f42c1;">
+								<div class="dropdown me-2">
+									<select name="year" class="form-select" id="yearFilter">
+										<!-- Will be populated by JavaScript -->
+									</select>
+								</div>
+								<div class="dropdown">
+									<select name="month" class="form-select" id="monthFilter">
+										<!-- Will be populated by JavaScript -->
+									</select>
+								</div>
 							</div>
-							<div class="dropdown">
-								<select class="form-select">
-									<option selected>Semua Bulan</option>
-									<option>March</option>
-									<option>February</option>
-								</select>
-							</div>
-						</div>
+						</form>
 
 						<!-- Table -->
 						<div class="card-body d-flex flex-column">
@@ -193,6 +194,7 @@
 										</tr>
 									</thead>
 									<tbody>
+										<!-- Table content will be loaded dynamically -->
 									</tbody>
 								</table>
 							</div>
@@ -229,3 +231,9 @@
 
 <!-- Event Listener -->
 <?php $this->load->view('anggaran/script'); ?>
+
+<script>
+	const usersData = {
+		top_users: <?php echo $top_users_by_month ?? '[]'; ?>
+	};
+</script>
