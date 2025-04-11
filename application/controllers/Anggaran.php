@@ -18,27 +18,41 @@ class Anggaran extends CI_Controller {
 	}
 
 	private function mytask()
-	{		
-		$year = $this->input->get('year') ? $this->input->get('year') : date('Y');
-		$month = $this->input->get('month') ? $this->input->get('month') : date('m');
+{		
+	$year = $this->input->get('year') ? $this->input->get('year') : date('Y');
+	$month = $this->input->get('month') ? $this->input->get('month') : date('m');
 
-		$data['top_users_by_month'] = json_encode($this->MyTask_model->get_top_users_by_month($year, $month));
-		$data['current_year'] = $year;
-		$data['current_month'] = $month;
-		$data['module_distribution'] = json_encode($this->MyTask_model->get_top_module_distribution($year, $month));
+	// panggil sekali
+	$top_modules = $this->MyTask_model->get_top_module_distribution($year, $month);
 
-		$data['view'] = 'anggaran/index';
-		$this->load->view('main/main', $data);
-	}
+	$data['top_users_by_month'] = json_encode($this->MyTask_model->get_top_users_by_month($year, $month));
+	$data['current_year'] = $year;
+	$data['current_month'] = $month;
+	$data['module_distribution'] = json_encode($top_modules);
+
+	// gunakan ulang data top_modules untuk distribusi per hari
+	$data['module_daily_distribution'] = json_encode(
+		$this->MyTask_model->get_daily_distribution_from_top_modules($year, $month, $top_modules)
+	);
+
+	$data['view'] = 'anggaran/index';
+	$this->load->view('main/main', $data);
+}
 
 	public function get_module_distribution()
 	{
-        $year = $this->input->get('year');
-        $month = $this->input->get('month');
+        $year = $this->input->get('year') ?? date('Y');
+        $month = $this->input->get('month') ?? date('m');
         
-        $data = $this->MyTask_model->get_top_module_distribution($year, $month);
+        $top_modules = $this->MyTask_model->get_top_module_distribution($year, $month);
+        $daily_distribution = $this->MyTask_model->get_daily_distribution_from_top_modules($year, $month, $top_modules);
+        
+        $response = [
+            'module_distribution' => $top_modules,
+            'daily_distribution' => $daily_distribution
+        ];
         
         header('Content-Type: application/json');
-        echo json_encode($data);
+        echo json_encode($response);
 	}
 }

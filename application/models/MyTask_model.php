@@ -42,6 +42,28 @@ class MyTask_model extends CI_Model
 		$this->db->order_by('access_count', 'DESC');
 		$this->db->limit(5);
 		return $this->db->get()->result();
-}
+	}
+
+	public function get_daily_distribution_from_top_modules($year, $month, $top_modules)
+	{
+		if (empty($top_modules)) {
+			return [];
+		}
+
+		$start_date = date("{$year}-{$month}-01");
+		$end_date   = date("Y-m-t", strtotime($start_date));
+
+		$this->db->select("DATE(l.datetime) AS Tanggal, link.keterangan AS Nama_Modul, COUNT(*) AS Jumlah_Aktivitas");
+		$this->db->from("t_mytask_log l");
+		$this->db->join("t_mytask_link link", "l.buttonid = link.buttonid", "inner");
+		$this->db->where("l.datetime >=", $start_date);
+		$this->db->where("l.datetime <=", $end_date);
+		$this->db->where_in("link.keterangan", array_column($top_modules, 'keterangan'));
+		$this->db->group_by("DATE(l.datetime), link.keterangan");
+		$this->db->order_by("Tanggal, Nama_Modul");
+
+		return $this->db->get()->result();
+	}
+
 
 }
