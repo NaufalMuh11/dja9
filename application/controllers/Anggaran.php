@@ -27,13 +27,13 @@ class Anggaran extends CI_Controller
 		$data['top_users_by_month'] = json_encode($this->MyTask_model->get_top_users_by_month($year, $month));
 		$data['current_year'] = $year;
 		$data['current_month'] = $month;
-		#-- table total users --#
+		#-- card total users --#
 		$data['total_users'] = json_encode($this->MyTask_model->get_total_users());
-		#-- table active users --#
+		#-- card active users --#
 		$data['active_users'] = json_encode($this->MyTask_model->get_active_users());
-		#-- table total modules --#
+		#-- card total modules --#
 		$data['total_modules'] = json_encode($this->MyTask_model->get_total_modules());
-		#-- table total services --#
+		#-- card total services --#
 		$data['total_services'] = json_encode($this->MyTask_model->get_total_services());
 
 		$data['view'] = 'anggaran/index';

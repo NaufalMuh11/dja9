@@ -42,7 +42,7 @@
 								<div class="flex-grow-1">
 									<div class="d-flex justify-content-between align-items-center">
 										<div class="fw-bold fs-5">Total Pengguna</div>
-										<a href="#" class="text-dark show-modal" data-type="users">
+										<a href="javascript:void(0)" class="text-dark" data-bs-toggle="modal" data-bs-target="#dataModal" data-title="Total Pengguna" data-type="total_users">
 											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-external-link">
 												<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 												<path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
@@ -69,7 +69,7 @@
 								<div class="flex-grow-1">
 									<div class="d-flex justify-content-between align-items-center">
 										<div class="fw-bold fs-5">Pengguna Aktif</div>
-										<a href="#" class="text-dark show-modal" data-type="activeUsers">
+										<a href="javascript:void(0)" class="text-dark" data-bs-toggle="modal" data-bs-target="#dataModal" data-title="Pengguna Aktif" data-type="active_users">
 											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-external-link">
 												<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 												<path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
@@ -96,7 +96,7 @@
 								<div class="flex-grow-1">
 									<div class="d-flex justify-content-between align-items-center">
 										<div class="fw-bold fs-5">Jumlah Layanan</div>
-										<a href="#" class="text-dark show-modal" data-type="services">
+										<a href="javascript:void(0)" class="text-dark" data-bs-toggle="modal" data-bs-target="#dataModal" data-title="Jumlah Layanan" data-type="total_services">
 											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-external-link">
 												<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 												<path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
@@ -124,7 +124,7 @@
 								<div class="flex-grow-1">
 									<div class="d-flex justify-content-between align-items-center">
 										<div class="fw-bold fs-5">Jumlah Modul</div>
-										<a href="#" class="text-dark show-modal" data-type="modules">
+										<a href="javascript:void(0)" class="text-dark" data-bs-toggle="modal" data-bs-target="#dataModal" data-title="Jumlah Modul" data-type="total_modules">
 											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-external-link">
 												<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 												<path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
@@ -159,12 +159,12 @@
 
 				<!-- Tabel Pengguna dengan Aktivitas Task Terbanyak -->
 				<div class="col-xl-4 col-lg-5 mb-3">
-					<div class="card h-100">
+					<div class="card h-100 ">
 						<!-- Filter Form -->
-						<form id="filterForm" method="GET" action="">
-							<!-- Preserve the q parameter -->
+						<form id="filterForm" method="GET">
+							<!-- Preserve  the q parameter -->
 							<input type="hidden" name="q" value="MyTask">
-							<div class="card-header d-flex justify-content-around align-items-center p-2" style="background-color: #6f42c1;">
+							<div class="card-header rounded-top d-flex justify-content-around align-items-center p-2" style="background-color: #6f42c1;">
 								<div class="dropdown me-2">
 									<select name="year" class="form-select" id="yearFilter">
 										<!-- Data In Script -->
@@ -223,7 +223,47 @@
 				</div>
 			</div>
 		</div>
+
+		<div class="modal fade" id="dataModal" tabindex="-1" aria-labelledby="dataModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="dataModalLabel">Data</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="row mb-3">
+							<div class="col">
+								<div class="btn-group d-flex gap-3" role="group">
+									<button type="button" class="btn btn-sm btn-secondary" id="btn-copy">Copy</button>
+									<button type="button" class="btn btn-sm btn-secondary" id="btn-csv">CSV</button>
+									<button type="button" class="btn btn-sm btn-secondary" id="btn-pdf">PDF</button>
+									<button type="button" class="btn btn-sm btn-secondary" id="btn-print">Print</button>
+								</div>
+							</div>
+						</div>
+						<div class="table-responsive">
+							<table id="dataTable" class="table table-striped table-bordered" style="width:100%">
+								<thead>
+									<tr>
+										<!-- Headers will be added dynamically -->
+									</tr>
+								</thead>
+								<tbody>
+									<!-- Data will be populated by DataTables -->
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
+
+
 </div>
 
 <script>
@@ -236,6 +276,13 @@
 		/* Table */
 		top_users: <?php echo $top_users_by_month ?? '[]'; ?>
 	};
+
+	// console.log(usersData.total_users);
+	// console.log(usersData.active_users);
+	// console.log(usersData.total_modules)
+	// console.log(usersData.total_services)
+
+	console.log(usersData.top_users);
 </script>
 
 <!-- Event Listener -->
