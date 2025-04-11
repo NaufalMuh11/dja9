@@ -22,9 +22,32 @@ class Anggaran extends CI_Controller {
 	$year = $this->input->get('year') ? $this->input->get('year') : date('Y');
 	$month = $this->input->get('month') ? $this->input->get('month') : date('m');
 
-	// panggil sekali
 	$top_modules = $this->MyTask_model->get_top_module_distribution($year, $month);
+	$daily_data = $this->MyTask_model->get_daily_distribution_from_top_modules($year, $month, $top_modules);
 
+	// Prepare data for line chart
+	$series = [];
+	$dates = [];
+	
+	// Group data by module
+	foreach ($top_modules as $module) {
+	    $moduleData = [
+	        'name' => $module->keterangan,
+	        'data' => array_fill(0, 31, 0) // Initialize with zeros
+	    ];
+	    $series[] = $moduleData;
+	}
+
+	// Fill in actual values
+	foreach ($daily_data as $record) {
+	    $day = (int)date('d', strtotime($record->Tanggal)) - 1;
+	    $moduleIndex = array_search($record->Nama_Modul, array_column($series, 'name'));
+	    if ($moduleIndex !== false) {
+	        $series[$moduleIndex]['data'][$day] = (int)$record->Jumlah_Aktivitas;
+	    }
+	}
+
+	$data['module_activity_data'] = json_encode($series);
 	$data['top_users_by_month'] = json_encode($this->MyTask_model->get_top_users_by_month($year, $month));
 	$data['current_year'] = $year;
 	$data['current_month'] = $month;
