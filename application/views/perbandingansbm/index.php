@@ -123,8 +123,65 @@
             <!-- Perbandingan -->
             <div class="col-12">
                <div class="card">
+                  <div class="card-header">
+                     <h3 class="card-title">Perbandingan SBM 2025 vs 2026 per Provinsi</h3>
+                  </div>
                   <div class="card-body">
-                     PERBANDINGAN SBM
+                     <!-- Filter options -->
+                     <div class="mb-3">
+                        <div class="row">
+                           <div class="col-md-4">
+                              <label for="cost-type" class="form-label">Pilih Jenis Biaya</label>
+                              <div style="position: relative;">
+                                 <select id="cost-type" class="form-control" style="appearance: none; padding-right: 30px; border: 1px solid #ccc; border-radius: 4px;">
+                                    <option value="all">Semua Jenis Biaya</option>
+                                    <?php foreach ($cost_types as $type): ?>
+                                       <option value="<?= $type['code'] ?>"><?= $type['name'] ?></option>
+                                    <?php endforeach; ?>
+                                 </select>
+                                 <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none;">▼</span>
+                              </div>
+                           </div>
+                           <div class="col-md-4">
+                              <label for="province-search" class="form-label">Cari Provinsi</label>
+                              <input type="text" id="province-search" class="form-control" placeholder="Masukkan nama provinsi...">
+                           </div>
+                           <div class="col-md-4">
+                              <label for="province-sort" class="form-label">Urutkan Data</label>
+                              <div style="position: relative;">
+                                 <select id="province-sort" class="form-control" style="appearance: none; padding-right: 30px; border: 1px solid #ccc; border-radius: 4px;">
+                                    <option value="normal">Data Asli</option>
+                                    <option value="asc">Ascending (Biaya 2026)</option>
+                                    <option value="desc">Descending (Biaya 2026)</option>
+                                    <option value="change_asc">Perubahan % (Terendah)</option>
+                                    <option value="change_desc">Perubahan % (Tertinggi)</option>
+                                 </select>
+                                 <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none;">▼</span>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <!-- Chart container -->
+                     <div id="province-chart-container" style="height: 500px;"></div>
+
+                     <!-- Table container -->
+                     <div class="table-responsive mt-4">
+                        <table class="table table-bordered table-striped" id="province-table">
+                           <thead>
+                              <tr>
+                                 <th>Provinsi</th>
+                                 <th>Biaya 2025 (Rp)</th>
+                                 <th>Biaya 2026 (Rp)</th>
+                                 <th>Selisih (Rp)</th>
+                                 <!-- <th>Perubahan (%)</th> -->
+                              </tr>
+                           </thead>
+                           <tbody id="province-table-body">
+                              <!-- Data will be populated dynamically -->
+                           </tbody>
+                        </table>
+                     </div>
                   </div>
                </div>
             </div>
@@ -145,3 +202,4 @@
 
 <!-- Scripts -->
 <?php $this->load->view('perbandingansbm/sbm_script'); ?>
+<?php $this->load->view('perbandingansbm/footer_compare') ?>
