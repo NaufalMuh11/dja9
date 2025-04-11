@@ -10,7 +10,7 @@
                <h2 class="page-title">
                   <span class="text-cyan">Grafik&nbsp;</span> SBM
                   <input type="hidden" id="selected_thang">
-                  <div class="dropdown" id="selectThang">
+                  <div class="dropdown ms-1" id="selectThang">
                      <a class="dropdown-toggle text-muted text-decoration-none" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> </a>
                      <div class="dropdown-menu dropdown-menu-end">
                      </div>
