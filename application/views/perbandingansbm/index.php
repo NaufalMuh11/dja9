@@ -40,11 +40,22 @@
    <div class="page-body">
       <div class="container-fluid">
          <div class="row row-deck row-cards">
+            <!-- Perbandingan -->
+            <div class="col-8">
+               <div class="card">
+                  <div class="card-body">
+                     PERBANDINGAN SBM
+                  </div>
+               </div>
+            </div>
+            <!-- Presentase Perubahan -->
+            <div class="col-4">
+               <div class="card">
+                  <div class="card-body"></div>
+               </div>
+            </div>
             <div class="col-12">
                <div class="card">
-                  <!-- <div class="card-header">
-                     <h3 class="card-title">Filter SBM</h3>
-                  </div> -->
                   <div class="card-body">
                      <form id="filterForm" class="row g-3 align-items-end">
                         <div class="mb-3">
