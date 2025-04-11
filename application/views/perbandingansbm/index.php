@@ -8,9 +8,9 @@
                   Anggaran
                </div>
                <h2 class="page-title">
-                  <span class="text-cyan">Grafik&nbsp;</span> SBM
+                  <span class="text-cyan">Grafik&nbsp;</span>SBM&nbsp;
                   <input type="hidden" id="selected_thang">
-                  <div class="dropdown ms-1" id="selectThang">
+                  <div class="dropdown" id="selectThang">
                      <a class="dropdown-toggle text-muted text-decoration-none" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> </a>
                      <div class="dropdown-menu dropdown-menu-end">
                      </div>
@@ -40,20 +40,6 @@
    <div class="page-body">
       <div class="container-fluid">
          <div class="row row-deck row-cards">
-            <!-- Perbandingan -->
-            <div class="col-8">
-               <div class="card">
-                  <div class="card-body">
-                     PERBANDINGAN SBM
-                  </div>
-               </div>
-            </div>
-            <!-- Presentase Perubahan -->
-            <div class="col-4">
-               <div class="card">
-                  <div class="card-body"></div>
-               </div>
-            </div>
             <div class="col-12">
                <div class="card">
                   <div class="card-body">
@@ -78,19 +64,21 @@
                                  <option value="215">II.15. Satuan Biaya Sewa Gedung Pertemuan</option>
                                  <option value="216">II.16. Satuan Biaya Transportasi dari dan/atau ke Terminal Bus/Stasiun/Bandara/Pelabuhan dalam Rangka Perjalanan Dinas Dalam Negeri</option>
                               </select>
-                              <select class="form-select w-50" id="sbm-subtitle-select">
-
-                              </select>
+                              <select class="form-select w-50" id="sbm-subtitle-select"></select>
                            </div>
                         </div>
                      </form>
                   </div>
+               </div>
+            </div>
 
-
+            <div class="col-12">
+               <div class="card">
                   <div class="card-body">
                      <div class="d-flex flex-column align-items-center">
-                        <h3 id="boxplot-main-title" class="mb-1 text-center"></h3>
-                        <div id="boxplot-subtitle" class="text-center"></div>
+                        <h3 class="mb-1 text-center">
+                           Komposisi SBM dalam Nilai Maksimum, Nilai Minimum, Nilai Rata-Rata, dan Interkuartil
+                        </h3>
                         <div class="d-flex w-100 justify-content-end mt-2">
                            <small id="boxplot-note" class="text-muted">* Biaya dalam ribuan rupiah</small>
                         </div>
@@ -105,7 +93,7 @@
 
                   <div class="card-body">
                      <div class="d-flex flex-column align-items-center">
-                        <h3 id="bar-chart-main-title" class="mb-1 text-center">Detail</h3>
+                        <h3 class="mb-1 text-center">Rincian</h3>
 
                         <div id="bar-chart-dropdowns" class="d-flex gap-3 align-items-center mt-2">
                            <div class="dropdown" id="subtitle-dropdown">
@@ -128,6 +116,15 @@
                            <div id="chart-bar-detail"></div>
                         </div>
                      </div>
+                  </div>
+               </div>
+            </div>
+
+            <!-- Perbandingan -->
+            <div class="col-12">
+               <div class="card">
+                  <div class="card-body">
+                     PERBANDINGAN SBM
                   </div>
                </div>
             </div>

@@ -270,24 +270,6 @@
                 y: item.y.map(val => val / 1000)
             }));
 
-            // Get the selected SBM text
-            const mainTitle = document.querySelector('.form-select option:checked').text;
-
-            // Update the custom title elements
-            document.getElementById('boxplot-main-title').textContent = mainTitle;
-
-            // Update subtitle if available
-            const subtitleEl = document.getElementById('boxplot-subtitle');
-            if (subtitle) {
-                subtitleEl.textContent = subtitle;
-                subtitleEl.style.display = 'block';
-            } else {
-                subtitleEl.style.display = 'none';
-            }
-
-            // Make sure note is visible
-            document.getElementById('boxplot-note').style.display = 'block';
-
             const options = {
                 series: [{
                     type: 'boxPlot',
@@ -308,7 +290,7 @@
                 },
                 xaxis: {
                     labels: {
-                        rotate: -45,
+                        rotate: -90,
                         trim: false,
                         maxHeight: 120
                     }
@@ -583,10 +565,7 @@
 
             // Prepare data for chart
             const categories = data.map(item => item.name);
-            const values = data.map(item => parseFloat(item.data) / 1000); // Convert to thousands
-
-            // Update the custom title elements
-            document.getElementById('bar-chart-main-title').textContent = 'Detail';
+            const values = data.map(item => parseFloat(item.data) / 1000);
 
             // Get subtitle text if selected
             let subtitleText = "";
@@ -634,7 +613,7 @@
                 xaxis: {
                     categories: categories,
                     labels: {
-                        rotate: -45,
+                        rotate: -90,
                         trim: false,
                         maxHeight: 120
                     }
@@ -660,10 +639,6 @@
 
         // Helper function to update bar chart with no data
         function updateBarChartWithNoData() {
-            // Update title using the selected SBM text
-            const mainTitle = document.querySelector('.form-select option:checked').text;
-            document.getElementById('bar-chart-main-title').textContent = mainTitle;
-
             // Hide subtitle if exists
             const subtitleEl = document.getElementById('bar-chart-subtitle');
             if (subtitleEl) {
