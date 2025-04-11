@@ -95,7 +95,7 @@
 		    document.getElementById("chart-akses-modul"), {
 		        chart: {
 		            type: "donut",
-		            height: 240,
+		            height: 350,
 		            sparkline: {
 		                enabled: true
 		            }
@@ -115,7 +115,7 @@
 		                        value: {
 		                            show: true,
 		                            formatter: function(val) {
-		                                return val + ' kali';
+		                                return val + ' Aktivitas';
 		                            }
 		                        }
 		                    }
@@ -125,7 +125,7 @@
 		        tooltip: {
 		            y: {
 		                formatter: function(val) {
-		                    return val + ' kali';
+		                    return val + ' Aktivitas';
 		                }
 		            }
 		        },
@@ -143,20 +143,10 @@
 		chartModul.render();
 
 		// Module Activity Chart
+		const moduleActivityData = <?php echo $module_activity_data ?? '[]'; ?>;
+
 		var moduleActivityOptions = {
-			series: [{
-				name: 'SIPKD',
-				data: [10, 15, 12, 18, 20, 22, 15, 17, 21, 23, 19, 14, 16, 18, 20, 15, 13, 17, 19, 21, 16, 14, 18, 20, 22, 19, 17, 15, 18, 20]
-			}, {
-				name: 'SIMDA',
-				data: [5, 7, 6, 8, 9, 11, 8, 7, 10, 12, 9, 7, 8, 9, 11, 8, 6, 9, 10, 12, 8, 7, 9, 11, 13, 10, 8, 7, 9, 11]
-			}, {
-				name: 'E-Planning',
-				data: [3, 4, 5, 6, 7, 8, 6, 5, 7, 8, 6, 4, 5, 6, 7, 5, 4, 6, 7, 8, 6, 5, 7, 8, 9, 7, 6, 5, 7, 8]
-			}, {
-				name: 'SIMPEG',
-				data: [2, 3, 4, 5, 6, 7, 5, 4, 6, 7, 5, 3, 4, 5, 6, 4, 3, 5, 6, 7, 5, 4, 6, 7, 8, 6, 5, 4, 6, 7]
-			}],
+			series: moduleActivityData,
 			chart: {
 				height: 350,
 				type: 'line',
@@ -164,7 +154,7 @@
 					show: false
 				}
 			},
-			colors: ['#7a36b1', '#dc3545', '#ffc107', '#198754'],
+			colors: ['#5D3FD3', '#dc3545', '#ffc107', '#198754', '#ff9800'],
 			dataLabels: {
 				enabled: false
 			},
@@ -182,19 +172,15 @@
 				}
 			},
 			xaxis: {
-				categories: Array.from({
-					length: 30
-				}, (_, i) => {
-					const d = new Date();
-					d.setDate(d.getDate() - (29 - i));
-					return d.toLocaleDateString('id-ID', {
-						day: '2-digit',
-						month: 'short'
-					});
+				categories: Array.from({length: 31}, (_, i) => {
+					return (i + 1).toString().padStart(2, '0');
 				}),
 				labels: {
 					rotate: -45,
 					rotateAlways: false
+				},
+				title: {
+					text: 'Tanggal'
 				}
 			},
 			yaxis: {
@@ -204,34 +190,18 @@
 			},
 			legend: {
 				position: 'top',
-				horizontalAlign: 'right',
-				onItemClick: {
-					toggleDataSeries: true
-				},
-				onItemHover: {
-					highlightDataSeries: true
-				}
+				horizontalAlign: 'right'
 			},
 			tooltip: {
 				shared: true,
-				intersect: false
-			},
-			markers: {
-				size: false,
-				hover: {
-					size: 7
+				intersect: false,
+				y: {
+					formatter: function(val) {
+						return val + ' Aktivitas';
+					}
 				}
 			}
 		};
-
-		// Add one more series (instead of two)
-		moduleActivityOptions.series.push({
-			name: 'E-Budgeting',
-			data: [4, 6, 5, 7, 8, 9, 7, 6, 8, 9, 7, 5, 6, 7, 8, 6, 5, 7, 8, 9, 7, 6, 8, 9, 10, 8, 7, 6, 8, 9]
-		});
-
-		// Update colors array for 5 series
-		moduleActivityOptions.colors = ['#7a36b1', '#dc3545', '#ffc107', '#198754', '#ff9800'];
 
 		var moduleActivityChart = new ApexCharts(document.querySelector("#chart-aktivitas-modul"), moduleActivityOptions);
 		moduleActivityChart.render();
