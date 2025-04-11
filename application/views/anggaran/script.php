@@ -90,36 +90,58 @@
 
 		// Module Access Chart
 		const moduleDistribution = <?php echo $module_distribution ?? '[]'; ?>;
+		const totalModules = moduleDistribution.reduce((sum, item) => sum + parseInt(item.access_count), 0);
 
 		var chartModul = new ApexCharts(
 		    document.getElementById("chart-akses-modul"), {
 		        chart: {
 		            type: "donut",
-		            height: 350,
-		            sparkline: {
-		                enabled: true
-		            }
+		            height: 450,
+		            background: 'transparent'
 		        },
 		        series: moduleDistribution.map(item => parseInt(item.access_count)),
 		        labels: moduleDistribution.map(item => item.keterangan),
 		        colors: ['#5D3FD3', '#dc3545', '#ffc107', '#198754', '#ff9800'],
 		        plotOptions: {
 		            pie: {
+		                startAngle: -90,
+		                endAngle: 270,
 		                donut: {
-		                    size: '70%',
+		                    size: '75%',
 		                    labels: {
 		                        show: true,
-		                        name: {
-		                            show: true
+		                        total: {
+		                            show: true,
+		                            showAlways: true,
+		                            label: 'Jumlah Modul Yang Diakses',
+		                            fontSize: '16px',
+		                            fontWeight: 600,
+		                            formatter: function() {
+		                                return totalModules + ' Modul';
+		                            }
 		                        },
 		                        value: {
 		                            show: true,
+		                            fontSize: '22px',
+		                            fontWeight: 600,
 		                            formatter: function(val) {
 		                                return val + ' Aktivitas';
 		                            }
 		                        }
 		                    }
 		                }
+		            }
+		        },
+		        stroke: {
+		            width: 0
+		        },
+		        dataLabels: {
+		            enabled: true,
+		            formatter: function(val, opts) {
+		                return Math.round(val) + '%';
+		            },
+		            dropShadow: {
+		                enabled: false
 		            }
 		        },
 		        tooltip: {
@@ -132,11 +154,16 @@
 		        legend: {
 		            show: true,
 		            position: "right",
-		            offsetY: 16,
+		            offsetY: 20,
+		            height: 230,
 		            markers: {
-		                width: 10,
-		                height: 10,
-		                radius: 100
+		                width: 12,
+		                height: 12,
+		                radius: 2
+		            },
+		            itemMargin: {
+		                horizontal: 0,
+		                vertical: 8
 		            }
 		        }
 		    });
