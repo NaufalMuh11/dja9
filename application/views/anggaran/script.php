@@ -90,84 +90,123 @@
 
 		// Module Access Chart
 		const moduleDistribution = <?php echo $module_distribution ?? '[]'; ?>;
-		const totalModules = moduleDistribution.reduce((sum, item) => sum + parseInt(item.access_count), 0);
+const totalModules = moduleDistribution.reduce((sum, item) => sum + parseInt(item.access_count), 0);
 
-		var chartModul = new ApexCharts(
-		    document.getElementById("chart-akses-modul"), {
-		        chart: {
-		            type: "donut",
-		            height: 450,
-		            background: 'transparent'
-		        },
-		        series: moduleDistribution.map(item => parseInt(item.access_count)),
-		        labels: moduleDistribution.map(item => item.keterangan),
-		        colors: ['#5D3FD3', '#dc3545', '#ffc107', '#198754', '#ff9800'],
-		        plotOptions: {
-		            pie: {
-		                startAngle: -90,
-		                endAngle: 270,
-		                donut: {
-		                    size: '75%',
-		                    labels: {
-		                        show: true,
-		                        total: {
-		                            show: true,
-		                            showAlways: true,
-		                            label: 'Jumlah Modul Yang Diakses',
-		                            fontSize: '16px',
-		                            fontWeight: 600,
-		                            formatter: function() {
-		                                return totalModules + ' Modul';
-		                            }
-		                        },
-		                        value: {
-		                            show: true,
-		                            fontSize: '22px',
-		                            fontWeight: 600,
-		                            formatter: function(val) {
-		                                return val + ' Aktivitas';
-		                            }
-		                        }
-		                    }
-		                }
-		            }
-		        },
-		        stroke: {
-		            width: 0
-		        },
-		        dataLabels: {
-		            enabled: true,
-		            formatter: function(val, opts) {
-		                return Math.round(val) + '%';
-		            },
-		            dropShadow: {
-		                enabled: false
-		            }
-		        },
-		        tooltip: {
-		            y: {
-		                formatter: function(val) {
-		                    return val + ' Aktivitas';
-		                }
-		            }
-		        },
-		        legend: {
-		            show: true,
-		            position: "right",
-		            offsetY: 20,
-		            height: 230,
-		            markers: {
-		                width: 12,
-		                height: 12,
-		                radius: 2
-		            },
-		            itemMargin: {
-		                horizontal: 0,
-		                vertical: 8
-		            }
-		        }
-		    });
-		chartModul.render();
+var chartModul = new ApexCharts(
+    document.getElementById("chart-akses-modul"), {
+        chart: {
+            type: "donut",
+            height: 700,
+            background: 'transparent',
+            offsetY: 30,
+            offsetX: -10,
+            events: {
+                // Add this event handler to reset colors when clicking elsewhere
+                dataPointSelection: function(event, chartContext, config) {
+                    // Force the center label colors back to default after a short delay
+                    setTimeout(() => {
+                        const totalLabel = document.querySelector('.apexcharts-datalabels-group .apexcharts-datalabel-label');
+                        const totalValue = document.querySelector('.apexcharts-datalabels-group .apexcharts-datalabel-value');
+                        
+                        if (totalLabel) {
+                            totalLabel.style.fill = '#333333'; // Default color for the label
+                        }
+                        
+                        if (totalValue) {
+                            totalValue.style.fill = '#333333'; // Default color for the value
+                        }
+                    }, 50);
+                }
+            }
+        },
+        series: moduleDistribution.map(item => parseInt(item.access_count)),
+        labels: moduleDistribution.map(item => item.keterangan),
+        colors: ['#5D3FD3', '#dc3545', '#ffc107', '#198754', '#ff9800'],
+        plotOptions: {
+            pie: {
+                offsetY: 10,
+                startAngle: 0,
+                endAngle: 360,
+                donut: {
+                    size: '75%',
+                    labels: {
+                        show: true,
+                        name: {
+                            offsetY: -10
+                        },
+                        value: {
+                            offsetY: 0
+                        },
+                        total: {
+                            show: true,
+                            showAlways: true,
+                            label: 'Jumlah Modul Yang Diakses',
+                            fontSize: '12px',
+                            fontWeight: 400,
+                            color: '#333333',
+                            offsetY: -10,
+                            formatter: function() {
+                                return totalModules + ' Modul';
+                            }
+                        },
+                        value: {
+                            show: true,
+                            fontSize: '24px',
+                            fontWeight: 700,
+                            color: '#333333',
+                            offsetY: 5,
+                            formatter: function(val) {
+                                return val + ' Aktivitas';
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        stroke: {
+            width: 0
+        },
+        dataLabels: {
+            enabled: true,
+            formatter: function(val, opts) {
+                return Math.round(val) + '%';
+            },
+            dropShadow: {
+                enabled: false
+            }
+        },
+        tooltip: {
+            custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                const label = w.config.labels[seriesIndex];
+                const value = series[seriesIndex];
+                return `<div style="background: ${w.config.colors[seriesIndex]}; color: white; padding: 6px 12px; border-radius: 4px;">
+                    <span>${label}: ${value} Aktivitas</span>
+                </div>`;
+            },
+            style: {
+                fontSize: '14px',
+                fontFamily: undefined
+            },
+            theme: 'dark',
+            fillSeriesColor: true
+        },
+        legend: {
+            show: true,
+            position: "right",
+            offsetY: 40,
+            height: 230,
+            markers: {
+                width: 12,
+                height: 12,
+                radius: 2
+            },
+            itemMargin: {
+                horizontal: 0,
+                vertical: 8
+            }
+        }
+    });
+chartModul.render();
 
 		// Module Activity Chart
 		const moduleActivityData = <?php echo $module_activity_data ?? '[]'; ?>;
