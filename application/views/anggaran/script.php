@@ -146,7 +146,7 @@ var chartModul = new ApexCharts(
                             color: '#333333',
                             offsetY: -10,
                             formatter: function() {
-                                return totalModules + ' Modul';
+                                return totalModules.toLocaleString('id-ID') + ' Modul';
                             }
                         },
                         value: {
@@ -156,7 +156,7 @@ var chartModul = new ApexCharts(
                             color: '#333333',
                             offsetY: 5,
                             formatter: function(val) {
-                                return val + ' Aktivitas';
+                                return parseInt(val).toLocaleString('id-ID') + ' Aktivitas';
                             }
                         }
                     }
