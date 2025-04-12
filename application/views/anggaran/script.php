@@ -322,10 +322,20 @@
 		document.getElementById('filterForm').submit();
 	}
 
-
 	// Card
 	document.getElementById('totalUsers').textContent = usersData.total_users.length || 0;
-	document.getElementById('activeUsers').textContent = usersData.active_users.length || 0;
+	document.getElementById('activeUsers').innerHTML = `
+    <span class="badge py-2 px-3 text-white fs-6 cursor-pointer"
+		style="background-color: #6f42c1; cursor: pointer; transition: background-color 0.2s ease-in-out;"
+		onmouseover="this.style.backgroundColor='#996bed'"
+		onmouseout="this.style.backgroundColor='#6f42c1'"
+		data-bs-toggle="modal" 
+		data-bs-target="#dataModal" 
+		data-title="Pengguna Aktif" 
+		data-type="active_users">
+		<strong>${usersData.active_users.length || ''}</strong>
+    Pengguna Aktif        
+	</span>`;
 	document.getElementById('totalModules').textContent = usersData.total_modules.length || 0;
 	document.getElementById('totalServices').textContent = usersData.total_services.length || 0;
 
