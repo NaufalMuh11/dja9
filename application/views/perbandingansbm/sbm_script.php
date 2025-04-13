@@ -1,39 +1,61 @@
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Store common values
-        const baseUrl = '<?= base_url(); ?>';
-        const refreshInterval = 5 * 60 * 1000;
+    // Initialize the module using an IIFE
+    const SBMChartModule = (function() {
+        // Private variables
+        const baseUrl = document.querySelector('meta[name="base_url"]')?.content || '';
+        const refreshInterval = 5 * 60 * 1000; // 5 minutes
         let lastRefreshTime = new Date();
         let refreshTimer;
-        let charts = {};
-        let boxplotChart;
-        let barDetailChart;
-        let barData = [];
-        let boxplotData = [];
-        let currentSelections = {
-            title: '127',
-            subtitle: null,
-            subSubtitle: null
+
+        // Chart instances
+        let charts = {
+            boxplot: null,
+            barDetail: null,
+            province: null
         };
-        let currentBoxplotSubtitle = null;
 
-        // Display last update
-        updateLastUpdateTime();
+        // Data storage
+        let chartData = {
+            bar: [],
+            boxplot: [],
+            province: []
+        };
 
-        // Common chart colors
+        // DOM element selectors
+        const elements = {
+            sbmSelect: document.querySelector('.form-select'),
+            subtitleSelect: document.getElementById('sbm-subtitle-select'),
+            subSubtitleDropdown: document.getElementById('sub-subtitle-dropdown'),
+            subSubtitleMenu: document.getElementById('sub-subtitle-dropdown-menu'),
+            selectedSubSubtitle: document.getElementById('selected-sub-subtitle'),
+            yearToggle: document.querySelector('#selectThang .dropdown-toggle'),
+            yearInput: document.getElementById('selected_thang'),
+            yearMenu: document.querySelector('#selectThang .dropdown-menu'),
+            refreshButton: document.getElementById('refreshButton'),
+            refreshIndicator: document.getElementById('refresh-indicator'),
+            lastUpdateElement: document.getElementById('lastUpdate'),
+            barChartContainer: document.getElementById('chart-bar-detail'),
+            boxplotContainer: document.getElementById('chart-boxplot'),
+            provinceChartContainer: document.getElementById('province-chart-container'),
+            provinceTableBody: document.getElementById('province-table-body'),
+            barChartSubtitle: document.getElementById('bar-chart-subtitle'),
+            subtitleDropdown: document.getElementById('subtitle-dropdown')
+        };
+
+        // Chart colors
         const chartColors = {
             primary: "#648FFF",
-            secondary: tabler.getColor("secondary"),
-            success: tabler.getColor("green"),
+            secondary: typeof tabler !== 'undefined' ? tabler.getColor("secondary") : "#9e9e9e",
+            success: typeof tabler !== 'undefined' ? tabler.getColor("green") : "#4caf50",
             warning: "#ffb000",
-            danger: tabler.getColor("red"),
-            info: tabler.getColor("cyan"),
-            dark: tabler.getColor("dark"),
+            danger: typeof tabler !== 'undefined' ? tabler.getColor("red") : "#f44336",
+            info: typeof tabler !== 'undefined' ? tabler.getColor("cyan") : "#00bcd4",
+            dark: typeof tabler !== 'undefined' ? tabler.getColor("dark") : "#212121",
             purple: "#785EF0",
             orange: "#FE6100",
-            lime: tabler.getColor("lime"),
-            indigo: tabler.getColor("indigo"),
-            teal: tabler.getColor("teal"),
+            lime: typeof tabler !== 'undefined' ? tabler.getColor("lime") : "#cddc39",
+            indigo: typeof tabler !== 'undefined' ? tabler.getColor("indigo") : "#3f51b5",
+            teal: typeof tabler !== 'undefined' ? tabler.getColor("teal") : "#009688",
             pink: "#DC267F"
         };
 
@@ -68,6 +90,7 @@
             }
         };
 
+        // No data settings
         const noDataSettings = {
             text: 'Data tidak tersedia',
             align: 'center',
@@ -81,182 +104,112 @@
             }
         };
 
-        // Initialize subtitle select with disabled state
-        const subtitleSelect = document.getElementById('sbm-subtitle-select');
-        subtitleSelect.disabled = true;
-        subtitleSelect.innerHTML = '<option disabled selected>Subjudul</option>';
+        // Current user selections
+        let selections = {
+            title: '127',
+            subtitle: null,
+            subSubtitle: null,
+            year: getCurrentYear()
+        };
 
-        // Add event listener for SBM dropdown
-        document.querySelector('.form-select').addEventListener('change', function() {
-            const selectedSbmCode = this.value;
+        // Utility functions
+        function showLoader() {
+            if (elements.refreshIndicator) {
+                elements.refreshIndicator.style.display = 'block';
+            }
+        }
 
-            // Reset boxplot subtitle selection
-            currentBoxplotSubtitle = null;
+        function hideLoader() {
+            if (elements.refreshIndicator) {
+                elements.refreshIndicator.style.display = 'none';
+            }
+        }
 
-            // Reset and disable subtitle select
-            subtitleSelect.disabled = true;
-            subtitleSelect.innerHTML = '<option disabled selected>Subjudul</option>';
+        function getCurrentYear() {
+            return elements.yearInput ? elements.yearInput.value : '2025';
+        }
 
-            // Reset bar chart selections
-            currentSelections = {
-                title: selectedSbmCode,
-                subtitle: null,
-                subSubtitle: null
-            };
-
-            // Update both charts with the selected SBM code
-            updateBoxplotChart(selectedSbmCode);
-            loadBarData(selectedSbmCode);
-        });
-
-        // Initialize with default SBM code (127)
-        const defaultSbmCode = '127';
-        document.querySelector('.form-select').value = defaultSbmCode;
-
-        // Function for updating boxplot chart
-        async function updateBoxplotChart(titleCode) {
+        // Fetch data functions
+        async function fetchData(endpoint, params = {}) {
             try {
-                showRefreshIndicator();
-                const selectedYear = document.getElementById('selected_thang').value;
-                const response = await fetch(`${baseUrl}perbandingan/get_boxplot_data/${titleCode}/${selectedYear}`);
-                if (!response.ok) throw new Error('Network response was not ok');
+                // Add year parameter
+                params.thang = params.thang || selections.year;
 
-                const data = await response.json();
-                if (!data || data.length === 0) {
-                    console.warn('No boxplot data received');
-                    if (boxplotChart) {
-                        boxplotChart.updateOptions({
-                            series: [],
-                            noData: noDataSettings
-                        });
-                    }
-                    // Disable subtitle select
-                    subtitleSelect.disabled = true;
-                    subtitleSelect.innerHTML = '<option disabled selected>Subjudul</option>';
-                    return;
+                // Convert params to query string
+                const queryString = Object.keys(params)
+                    .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+                    .join('&');
+
+                const response = await fetch(`${baseUrl}${endpoint}?${queryString}`);
+
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok: ${response.status}`);
                 }
 
-                // Store the original data
-                boxplotData = data;
-
-                // Check if data has subtitle property
-                const hasSubtitles = data.some(item => item.hasOwnProperty('subtitle'));
-
-                if (hasSubtitles) {
-                    // Get unique subtitles
-                    const subtitles = [...new Set(data.map(item => item.subtitle))];
-
-                    // Populate subtitle select and enable it
-                    populateSubtitleSelect(subtitles);
-
-                    // Set initial subtitle if not already set
-                    if (!currentBoxplotSubtitle && subtitles.length > 0) {
-                        currentBoxplotSubtitle = subtitles[0];
-                        subtitleSelect.value = currentBoxplotSubtitle;
-                    }
-
-                    // Filter data by current subtitle
-                    const filteredData = data.filter(item =>
-                        !currentBoxplotSubtitle || item.subtitle === currentBoxplotSubtitle
-                    );
-
-                    // Update chart with filtered data
-                    updateBoxplotChartWithData(filteredData, currentBoxplotSubtitle);
-                } else {
-                    // No subtitles, use all data
-                    subtitleSelect.disabled = true;
-                    subtitleSelect.innerHTML = '<option disabled selected>Subjudul</option>';
-                    currentBoxplotSubtitle = null;
-                    updateBoxplotChartWithData(data, null);
-                }
+                return await response.json();
             } catch (error) {
-                console.error('Error updating boxplot chart:', error);
-                // Show error in chart area
-                if (boxplotChart) {
-                    boxplotChart.updateOptions({
-                        series: [],
-                        noData: {
-                            text: 'Error memuat data. Silakan coba lagi.',
-                            align: 'center',
-                            verticalAlign: 'middle',
-                            style: {
-                                color: '#ff0000',
-                                fontSize: '14px'
-                            }
-                        }
-                    });
-                }
-                // Disable subtitle select on error
-                subtitleSelect.disabled = true;
-                subtitleSelect.innerHTML = '<option disabled selected>Subjudul</option>';
-            } finally {
-                hideRefreshIndicator();
+                console.error(`Error fetching data from ${endpoint}:`, error);
+                throw error;
             }
         }
 
-        // Function to populate subtitle select
-        function populateSubtitleSelect(subtitles) {
-            subtitleSelect.innerHTML = '';
-
-            // First option - disabled
-            const defaultOption = document.createElement('option');
-            defaultOption.value = "";
-            defaultOption.textContent = "";
-            defaultOption.disabled = true;
-            defaultOption.selected = !currentBoxplotSubtitle;
-            subtitleSelect.appendChild(defaultOption);
-
-            // Add subtitle options
-            subtitles.forEach(subtitle => {
-                const option = document.createElement('option');
-                option.value = subtitle;
-                option.textContent = subtitle;
-                if (subtitle === currentBoxplotSubtitle) {
-                    option.selected = true;
-                }
-                subtitleSelect.appendChild(option);
-            });
-
-            // Enable the select
-            subtitleSelect.disabled = false;
-
-            // Add change event listener
-            if (!subtitleSelect.hasEventListener) {
-                subtitleSelect.addEventListener('change', (e) => {
-                    const selectedSubtitle = e.target.value;
-                    if (selectedSubtitle) {
-                        // Update current subtitle
-                        currentBoxplotSubtitle = selectedSubtitle;
-
-                        // Filter and update boxplot chart
-                        const filteredBoxplotData = boxplotData.filter(item => item.subtitle === selectedSubtitle);
-                        updateBoxplotChartWithData(filteredBoxplotData, selectedSubtitle);
-
-                        // Also update bar chart subtitle selection
-                        // Instead of updating the subtitle dropdown, we should update the title and subtitle
-                        // of the bar chart based on the selected subtitle from boxplot
-                        currentSelections.subtitle = selectedSubtitle;
-                        currentSelections.subSubtitle = null;
-
-                        // Filter bar data with the selected subtitle
-                        const filteredBarData = barData.filter(item =>
-                            (item.subtitle === selectedSubtitle) || (!item.subtitle && !selectedSubtitle)
-                        );
-
-                        // Update sub-subtitle dropdown if needed
-                        handleTitleAndSubtitleSelection(filteredBarData);
-                    }
+        async function fetchBoxplotData(titleCode) {
+            try {
+                const data = await fetchData('perbandingan/get_boxplot_data', {
+                    kode: titleCode
                 });
-                subtitleSelect.hasEventListener = true;
+                return data || [];
+            } catch (error) {
+                console.error('Error fetching boxplot data:', error);
+                return [];
             }
         }
 
-        // Function to update boxplot chart with filtered data
-        function updateBoxplotChartWithData(data, subtitle) {
+        async function fetchBarData(titleCode) {
+            try {
+                const data = await fetchData('perbandingan/get_bar_data', {
+                    kode: titleCode
+                });
+                return Array.isArray(data) ? data : [];
+            } catch (error) {
+                console.error('Error fetching bar data:', error);
+                return [];
+            }
+        }
+
+        async function fetchProvinceData() {
+            try {
+                const data = await fetchData('perbandingan/get_comparison_data', {
+                    kode: selections.title,
+                    thang: selections.year,
+                    subtitle: selections.subtitle,
+                    sub_subtitle: selections.subSubtitle
+                });
+                return data || [];
+            } catch (error) {
+                console.error('Error fetching province data:', error);
+                return [];
+            }
+        }
+
+        async function fetchYears() {
+            try {
+                return await fetchData('dashboard', {
+                    q: 'rangeThang'
+                });
+            } catch (error) {
+                console.error('Error fetching years:', error);
+                return ['2025'];
+            }
+        }
+
+        // Chart rendering functions
+        function renderBoxplotChart(data, subtitle) {
+            if (!elements.boxplotContainer) return;
+
             if (!data || data.length === 0) {
-                console.warn('No boxplot data to display');
-                if (boxplotChart) {
-                    boxplotChart.updateOptions({
+                if (charts.boxplot) {
+                    charts.boxplot.updateOptions({
                         series: [],
                         noData: noDataSettings
                     });
@@ -306,52 +259,34 @@
                 noData: noDataSettings
             };
 
-            if (boxplotChart) {
-                boxplotChart.updateOptions(options);
+            if (charts.boxplot) {
+                charts.boxplot.updateOptions(options);
             } else {
-                boxplotChart = new ApexCharts(document.querySelector("#chart-boxplot"), options);
-                boxplotChart.render();
+                charts.boxplot = new ApexCharts(elements.boxplotContainer, options);
+                charts.boxplot.render();
             }
         }
 
-        // Function to load bar data
-        async function loadBarData(titleCode) {
-            try {
-                showRefreshIndicator();
-                const selectedYear = document.getElementById('selected_thang').value;
-                const response = await fetch(`${baseUrl}perbandingan/get_bar_data/${titleCode}/${selectedYear}`);
-                if (!response.ok) {
-                    throw new Error(`Network response was not ok: ${response.status}`);
+        function renderBarChart(data) {
+            if (!elements.barChartContainer) return;
+
+            if (!data || data.length === 0) {
+                // Hide subtitle and dropdowns
+                if (elements.barChartSubtitle) {
+                    elements.barChartSubtitle.style.display = 'none';
                 }
 
-                const data = await response.json();
-                if (!Array.isArray(data) || data.length === 0) {
-                    console.warn('Bar data is empty or not an array:', data);
-                    barData = [];
-
-                    // Update bar chart to show no data
-                    updateBarChartWithNoData();
-                    return;
+                if (elements.subtitleDropdown) {
+                    elements.subtitleDropdown.style.display = 'none';
                 }
 
-                // Store the data
-                barData = data;
-                console.log('Loaded bar data:', barData.length, 'items');
+                if (elements.subSubtitleDropdown) {
+                    elements.subSubtitleDropdown.style.display = 'none';
+                }
 
-                // Reset selections
-                currentSelections = {
-                    title: titleCode,
-                    subtitle: null,
-                    subSubtitle: null
-                };
-
-                // Process the data for the bar chart
-                handleTitleAndSubtitleSelection(barData);
-            } catch (error) {
-                console.error('Error loading bar data:', error);
-                // Show error message
-                if (barDetailChart) {
-                    barDetailChart.updateOptions({
+                // Update chart with no data
+                if (charts.barDetail) {
+                    charts.barDetail.updateOptions({
                         series: [{
                             name: 'Biaya',
                             data: []
@@ -359,207 +294,23 @@
                         xaxis: {
                             categories: []
                         },
-                        noData: {
-                            text: 'Error memuat data. Silakan coba lagi.',
-                            align: 'center',
-                            verticalAlign: 'middle',
-                            style: {
-                                color: '#ff0000',
-                                fontSize: '14px'
-                            }
-                        }
+                        noData: noDataSettings
                     });
+                } else {
+                    charts.barDetail = new ApexCharts(elements.barChartContainer, {
+                        series: [{
+                            name: 'Biaya',
+                            data: []
+                        }],
+                        chart: {
+                            ...commonChartSettings,
+                            type: 'bar',
+                            height: 400
+                        },
+                        noData: noDataSettings
+                    });
+                    charts.barDetail.render();
                 }
-                // Hide dropdowns
-                document.getElementById('subtitle-dropdown').style.display = 'none';
-                document.getElementById('sub-subtitle-dropdown').style.display = 'none';
-            } finally {
-                hideRefreshIndicator();
-            }
-        }
-
-        // Function to handle title and subtitle selection for the bar chart
-        function handleTitleAndSubtitleSelection(data) {
-            if (!data || data.length === 0) {
-                updateBarChartWithNoData();
-                return;
-            }
-
-            // Check if we have any subtitles in the data
-            const hasSubtitles = data.some(item => item.hasOwnProperty('subtitle') && item.subtitle);
-
-            if (hasSubtitles) {
-                // Get unique subtitles
-                const subtitles = [...new Set(data.map(item => item.subtitle).filter(Boolean))];
-
-                // Update subtitle dropdown
-                updateSubtitleDropdown(subtitles);
-
-                // If we have a selected subtitle, filter by it
-                if (currentSelections.subtitle && subtitles.includes(currentSelections.subtitle)) {
-                    document.getElementById('selected-subtitle').textContent = currentSelections.subtitle;
-                    handleSubtitleChange(currentSelections.subtitle);
-                } else if (subtitles.length > 0) {
-                    // Auto-select first subtitle
-                    document.getElementById('selected-subtitle').textContent = subtitles[0];
-                    handleSubtitleChange(subtitles[0]);
-                }
-            } else {
-                // No subtitles, hide dropdowns
-                document.getElementById('subtitle-dropdown').style.display = 'none';
-                document.getElementById('sub-subtitle-dropdown').style.display = 'none';
-
-                // Update chart with all data
-                updateBarChartWithData(data);
-            }
-        }
-
-        // Function to update subtitle dropdown
-        function updateSubtitleDropdown(subtitles) {
-            const subtitleDropdown = document.getElementById('subtitle-dropdown');
-            const subtitleMenu = document.getElementById('subtitle-dropdown-menu');
-
-            // Clear existing menu items
-            subtitleMenu.innerHTML = '';
-
-            if (subtitles.length === 0) {
-                // Hide dropdown if no subtitles
-                subtitleDropdown.style.display = 'none';
-                return;
-            }
-
-            // Add subtitle options
-            subtitles.forEach(subtitle => {
-                const item = document.createElement('a');
-                item.className = 'dropdown-item';
-                item.href = '#';
-                item.textContent = subtitle;
-                item.setAttribute('data-value', subtitle);
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const selectedValue = this.getAttribute('data-value');
-                    document.getElementById('selected-subtitle').textContent = selectedValue;
-                    handleSubtitleChange(selectedValue);
-
-                    // Also update boxplot subtitle if it exists in boxplot data
-                    updateBoxplotSubtitleIfExists(selectedValue);
-                });
-                subtitleMenu.appendChild(item);
-            });
-
-            // Show dropdown
-            subtitleDropdown.style.display = 'block';
-        }
-
-        // Function to update boxplot subtitle if the selected subtitle exists in boxplot data
-        function updateBoxplotSubtitleIfExists(subtitle) {
-            if (boxplotData && boxplotData.some(item => item.subtitle === subtitle)) {
-                currentBoxplotSubtitle = subtitle;
-                subtitleSelect.value = subtitle;
-                const filteredBoxplotData = boxplotData.filter(item => item.subtitle === subtitle);
-                updateBoxplotChartWithData(filteredBoxplotData, subtitle);
-            }
-        }
-
-        // Function to handle subtitle change
-        function handleSubtitleChange(subtitle) {
-            // Update selection
-            currentSelections.subtitle = subtitle;
-            currentSelections.subSubtitle = null;
-
-            // Filter data by subtitle
-            const filteredData = barData.filter(item => item.subtitle === subtitle);
-
-            // Check if the filtered data has sub-subtitles
-            const subSubtitles = getSubSubtitlesFromData(filteredData);
-
-            if (subSubtitles.length > 0) {
-                // Update sub-subtitle dropdown
-                updateSubSubtitleDropdown(subSubtitles);
-
-                // Auto-select first sub-subtitle
-                if (subSubtitles.length > 0) {
-                    document.getElementById('selected-sub-subtitle').textContent = subSubtitles[0];
-                    handleSubSubtitleChange(subSubtitles[0]);
-                }
-            } else {
-                // No sub-subtitles, hide dropdown
-                document.getElementById('sub-subtitle-dropdown').style.display = 'none';
-
-                // Update chart with all data for this subtitle
-                updateBarChartWithData(filteredData);
-            }
-        }
-
-        // Function to extract sub-subtitles from data
-        function getSubSubtitlesFromData(data) {
-            // Extract unique sub_subtitle values
-            return [...new Set(data
-                .filter(item => item.hasOwnProperty('sub_subtitle') && item.sub_subtitle)
-                .map(item => item.sub_subtitle))];
-        }
-
-        // Function to update sub-subtitle dropdown
-        function updateSubSubtitleDropdown(subSubtitles) {
-            const subSubtitleDropdown = document.getElementById('sub-subtitle-dropdown');
-            const subSubtitleMenu = document.getElementById('sub-subtitle-dropdown-menu');
-            const selectedSubSubtitle = document.getElementById('selected-sub-subtitle');
-
-            // Clear existing menu items
-            subSubtitleMenu.innerHTML = '';
-
-            if (subSubtitles.length === 0) {
-                // Hide dropdown if no sub-subtitles
-                subSubtitleDropdown.style.display = 'none';
-                selectedSubSubtitle.textContent = 'Pilih Sub-subjudul';
-                return;
-            }
-
-            // Add sub-subtitle options
-            subSubtitles.forEach(subSubtitle => {
-                const item = document.createElement('a');
-                item.className = 'dropdown-item';
-                item.href = '#';
-                item.textContent = subSubtitle;
-                item.setAttribute('data-value', subSubtitle);
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const selectedValue = this.getAttribute('data-value');
-                    selectedSubSubtitle.textContent = selectedValue;
-                    handleSubSubtitleChange(selectedValue);
-                });
-                subSubtitleMenu.appendChild(item);
-            });
-
-            // Show dropdown
-            subSubtitleDropdown.style.display = 'block';
-
-            // Auto-select first option
-            if (subSubtitles.length > 0) {
-                selectedSubSubtitle.textContent = subSubtitles[0];
-                handleSubSubtitleChange(subSubtitles[0]);
-            }
-        }
-
-        // Function to handle sub-subtitle change
-        function handleSubSubtitleChange(subSubtitle) {
-            // Update selection
-            currentSelections.subSubtitle = subSubtitle;
-
-            // Filter data by both subtitle and sub-subtitle
-            const filteredData = barData.filter(item =>
-                item.subtitle === currentSelections.subtitle &&
-                item.sub_subtitle === subSubtitle
-            );
-
-            // Update chart with filtered data
-            updateBarChartWithData(filteredData);
-        }
-
-        // Function to update bar chart with data
-        function updateBarChartWithData(data) {
-            if (!data || data.length === 0) {
-                updateBarChartWithNoData();
                 return;
             }
 
@@ -567,29 +318,23 @@
             const categories = data.map(item => item.name);
             const values = data.map(item => parseFloat(item.data) / 1000);
 
-            // Get subtitle text if selected
-            let subtitleText = "";
-            if (currentSelections.subtitle) {
-                subtitleText = currentSelections.subtitle;
-
-                // Add sub-subtitle if selected
-                if (currentSelections.subSubtitle) {
-                    subtitleText += " - " + currentSelections.subSubtitle;
-                }
+            // Get chart title (from sub-subtitle if selected)
+            let chartTitle = "";
+            if (selections.subSubtitle) {
+                chartTitle = selections.subSubtitle;
             }
 
             // Update subtitle element
-            const subtitleEl = document.getElementById('bar-chart-subtitle');
-            if (subtitleEl) {
-                if (subtitleText) {
-                    subtitleEl.textContent = subtitleText;
-                    subtitleEl.style.display = 'block';
+            if (elements.barChartSubtitle) {
+                if (chartTitle) {
+                    elements.barChartSubtitle.textContent = chartTitle;
+                    elements.barChartSubtitle.style.display = 'block';
                 } else {
-                    subtitleEl.style.display = 'none';
+                    elements.barChartSubtitle.style.display = 'none';
                 }
             }
 
-            // Update bar chart
+            // Chart options
             const options = {
                 series: [{
                     name: 'Biaya',
@@ -629,79 +374,487 @@
                 noData: noDataSettings
             };
 
-            if (barDetailChart) {
-                barDetailChart.updateOptions(options);
+            if (charts.barDetail) {
+                charts.barDetail.updateOptions(options);
             } else {
-                barDetailChart = new ApexCharts(document.querySelector("#chart-bar-detail"), options);
-                barDetailChart.render();
+                charts.barDetail = new ApexCharts(elements.barChartContainer, options);
+                charts.barDetail.render();
             }
         }
 
-        // Helper function to update bar chart with no data
-        function updateBarChartWithNoData() {
-            // Hide subtitle if exists
-            const subtitleEl = document.getElementById('bar-chart-subtitle');
-            if (subtitleEl) {
-                subtitleEl.style.display = 'none';
+        function renderProvinceChart(data) {
+            if (!elements.provinceChartContainer) return;
+
+            if (!data || data.length === 0) {
+                // Update chart with no data
+                if (charts.province) {
+                    charts.province.updateOptions({
+                        series: [],
+                        noData: noDataSettings
+                    });
+                }
+
+                // Clear table
+                if (elements.provinceTableBody) {
+                    elements.provinceTableBody.innerHTML = '';
+                }
+                return;
             }
 
-            // Hide dropdowns
-            document.getElementById('subtitle-dropdown').style.display = 'none';
-            document.getElementById('sub-subtitle-dropdown').style.display = 'none';
+            const provinces = data.map(item => item.province);
+            const values2025 = data.map(item => item.biaya_2025 / 1000);
+            const values2026 = data.map(item => item.biaya_2026 / 1000);
+            const percentageChanges = data.map(item => item.percentage_change);
 
-            if (barDetailChart) {
-                barDetailChart.updateOptions({
-                    series: [{
-                        name: 'Biaya',
-                        data: []
-                    }],
-                    xaxis: {
-                        categories: []
+            const options = {
+                series: [{
+                        name: 'Biaya 2025',
+                        data: values2025,
+                        type: 'line'
                     },
-                    noData: noDataSettings
-                });
+                    {
+                        name: 'Biaya 2026',
+                        data: values2026,
+                        type: 'line'
+                    },
+                    {
+                        name: '% Perubahan',
+                        data: percentageChanges,
+                        yAxisIndex: 1
+                    }
+                ],
+                chart: {
+                    ...commonChartSettings,
+                    type: 'line',
+                    height: 500,
+                },
+                stroke: {
+                    width: [3, 3, 0],
+                    curve: 'smooth',
+                    dashArray: [0, 0, 0]
+                },
+                markers: {
+                    size: [5, 5, 0],
+                    hover: {
+                        size: 7
+                    }
+                },
+                xaxis: {
+                    categories: provinces,
+                    labels: {
+                        rotate: -90,
+                        rotateAlways: true,
+                        style: {
+                            fontSize: '11px'
+                        }
+                    },
+                    title: {
+                        text: 'Provinsi',
+                        style: {
+                            fontSize: '12px',
+                            fontWeight: 'bold'
+                        }
+                    }
+                },
+                yaxis: [{
+                        title: {
+                            text: 'Biaya (Rupiah)'
+                        },
+                        labels: {
+                            formatter: function(value) {
+                                return new Intl.NumberFormat('id-ID').format(value);
+                            }
+                        }
+                    },
+                    {
+                        opposite: true,
+                        title: {
+                            text: 'Persentase Perubahan (%)'
+                        },
+                        labels: {
+                            formatter: function(value) {
+                                return value.toFixed(2) + '%';
+                            }
+                        },
+                        min: function(min) {
+                            return Math.min(0, min);
+                        }
+                    }
+                ],
+                tooltip: {
+                    theme: "dark",
+                    shared: true,
+                    intersect: false,
+                    y: {
+                        formatter: function(value, {
+                            seriesIndex
+                        }) {
+                            if (seriesIndex === 2) {
+                                return value.toFixed(2) + '%';
+                            }
+                            return 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
+                        }
+                    }
+                },
+                colors: ['#4169E1', '#32CD32'],
+                legend: {
+                    position: 'top'
+                },
+                grid: {
+                    borderColor: '#e7e7e7',
+                    padding: {
+                        top: -20,
+                        right: 0,
+                        left: -4,
+                        bottom: -4
+                    },
+                    strokeDashArray: 4
+                },
+                dataLabels: {
+                    enabled: true,
+                    enabledOnSeries: [2],
+                    formatter: function(val) {
+                        return val.toFixed(2) + '%';
+                    },
+                    style: {
+                        fontSize: '10px',
+                        colors: ['#333']
+                    },
+                    offsetY: -5
+                },
+                noData: noDataSettings
+            };
+
+            if (charts.province) {
+                charts.province.updateOptions(options);
             } else {
-                barDetailChart = new ApexCharts(document.querySelector("#chart-bar-detail"), {
-                    series: [{
-                        name: 'Biaya',
-                        data: []
-                    }],
-                    chart: {
-                        ...commonChartSettings,
-                        type: 'bar',
-                        height: 400
-                    },
-                    noData: noDataSettings
+                charts.province = new ApexCharts(elements.provinceChartContainer, options);
+                charts.province.render();
+            }
+
+            // Update the table data
+            updateProvinceTable(data);
+        }
+
+        function updateProvinceTable(data) {
+            if (!elements.provinceTableBody) return;
+
+            elements.provinceTableBody.innerHTML = '';
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+
+                // Add CSS class for positive/negative values
+                const changeClass = item.percentage_change > 0 ?
+                    'text-success' :
+                    (item.percentage_change < 0 ? 'text-danger' : '');
+
+                row.innerHTML = `
+                    <td>${item.province}</td>
+                    <td>${new Intl.NumberFormat('id-ID').format(item.biaya_2025)}</td>
+                    <td>${new Intl.NumberFormat('id-ID').format(item.biaya_2026)}</td>
+                    <td class="${item.difference > 0 ? 'text-success' : (item.difference < 0 ? 'text-danger' : '')}">${new Intl.NumberFormat('id-ID').format(item.difference)}</td>
+                    <td class="${changeClass}">${item.percentage_change.toFixed(2)}%</td>
+                `;
+
+                elements.provinceTableBody.appendChild(row);
+            });
+        }
+
+        // Helper function for populating subtitle select
+        function populateSubtitleSelect(subtitles) {
+            if (!elements.subtitleSelect) return;
+
+            elements.subtitleSelect.innerHTML = '';
+
+            // Add subtitle options
+            subtitles.forEach(subtitle => {
+                const option = document.createElement('option');
+                option.value = subtitle;
+                option.textContent = subtitle;
+                if (subtitle === selections.subtitle) {
+                    option.selected = true;
+                }
+                elements.subtitleSelect.appendChild(option);
+            });
+
+            // Enable the select
+            elements.subtitleSelect.disabled = false;
+        }
+
+        // Helper function for sub-subtitles dropdown
+        function updateSubSubtitleDropdown(subSubtitles) {
+            if (!elements.subSubtitleDropdown || !elements.subSubtitleMenu || !elements.selectedSubSubtitle) return;
+
+            // Clear existing menu items
+            elements.subSubtitleMenu.innerHTML = '';
+
+            if (subSubtitles.length === 0) {
+                // Hide dropdown if no sub-subtitles
+                elements.subSubtitleDropdown.style.display = 'none';
+                elements.selectedSubSubtitle.textContent = 'Pilih Sub-subjudul';
+                return;
+            }
+
+            // Add sub-subtitle options
+            subSubtitles.forEach(subSubtitle => {
+                const item = document.createElement('a');
+                item.className = 'dropdown-item';
+                item.href = '#';
+                item.textContent = subSubtitle;
+                item.setAttribute('data-value', subSubtitle);
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const selectedValue = this.getAttribute('data-value');
+                    elements.selectedSubSubtitle.textContent = selectedValue;
+                    handleSubSubtitleChange(selectedValue);
                 });
-                barDetailChart.render();
+                elements.subSubtitleMenu.appendChild(item);
+            });
+
+            // Show dropdown
+            elements.subSubtitleDropdown.style.display = 'block';
+
+            // Auto-select first option
+            if (subSubtitles.length > 0) {
+                elements.selectedSubSubtitle.textContent = subSubtitles[0];
+                handleSubSubtitleChange(subSubtitles[0]);
             }
         }
 
-        // Function to update all charts
-        async function refreshAllCharts() {
-            showRefreshIndicator();
+        // Get unique sub-subtitles from data
+        function getSubSubtitles(data) {
+            if (!data || data.length === 0) return [];
 
+            return [...new Set(data
+                .filter(item => item.hasOwnProperty('sub_subtitle') && item.sub_subtitle)
+                .map(item => item.sub_subtitle))];
+        }
+
+        // Process sub-subtitles
+        function processSubSubtitles(data) {
+            if (!data || data.length === 0) {
+                renderBarChart([]);
+                return;
+            }
+
+            // Check if we have any sub-subtitles
+            const subSubtitles = getSubSubtitles(data);
+
+            if (subSubtitles.length > 0) {
+                // Update sub-subtitle dropdown
+                updateSubSubtitleDropdown(subSubtitles);
+
+                // Auto-select first sub-subtitle
+                if (subSubtitles.length > 0 && elements.selectedSubSubtitle) {
+                    elements.selectedSubSubtitle.textContent = subSubtitles[0];
+                    handleSubSubtitleChange(subSubtitles[0]);
+                }
+            } else {
+                // No sub-subtitles, hide dropdown
+                if (elements.subSubtitleDropdown) {
+                    elements.subSubtitleDropdown.style.display = 'none';
+                }
+
+                // Update chart with all data for this subtitle
+                renderBarChart(data);
+            }
+
+            // Always hide subtitle dropdown (legacy UI element)
+            if (elements.subtitleDropdown) {
+                elements.subtitleDropdown.style.display = 'none';
+            }
+        }
+
+        // Handle sub-subtitle change
+        function handleSubSubtitleChange(subSubtitle) {
+            // Update selection
+            selections.subSubtitle = subSubtitle;
+
+            // Filter data by both subtitle and sub-subtitle
+            const filteredData = chartData.bar.filter(item =>
+                (item.subtitle === selections.subtitle || !selections.subtitle) &&
+                item.sub_subtitle === subSubtitle
+            );
+
+            // Update chart with filtered data
+            renderBarChart(filteredData);
+
+            // Update province data
+            loadProvinceData();
+        }
+
+        // Data processing functions
+        async function loadBoxplotData(titleCode) {
             try {
-                // Update the last update time first
-                await updateLastUpdateTime();
+                showLoader();
 
-                // Get current selected SBM code
-                const sbmCode = document.querySelector('.form-select').value;
+                // Fetch boxplot data
+                const data = await fetchBoxplotData(titleCode);
 
-                // Update charts with current selection
-                await updateBoxplotChart(sbmCode);
-                await loadBarData(sbmCode);
+                // Store the data
+                chartData.boxplot = data;
 
-                // Update lastRefreshTime after successful refresh
-                lastRefreshTime = new Date();
+                // Reset subtitle selection if no data
+                if (!data || data.length === 0) {
+                    if (elements.subtitleSelect) {
+                        elements.subtitleSelect.disabled = true;
+                        elements.subtitleSelect.innerHTML = '<option disabled selected>Subjudul</option>';
+                    }
+                    renderBoxplotChart([], null);
+                    return;
+                }
+
+                // Check if data has subtitle property
+                const hasSubtitles = data.some(item => item.hasOwnProperty('subtitle'));
+
+                if (hasSubtitles) {
+                    // Get unique subtitles
+                    const subtitles = [...new Set(data.map(item => item.subtitle))];
+
+                    // Populate subtitle select
+                    populateSubtitleSelect(subtitles);
+
+                    // Set initial subtitle if not already set
+                    if (!selections.subtitle && subtitles.length > 0) {
+                        selections.subtitle = subtitles[0];
+                        if (elements.subtitleSelect) {
+                            elements.subtitleSelect.value = selections.subtitle;
+                        }
+                    }
+
+                    // Filter data by current subtitle
+                    const filteredData = data.filter(item =>
+                        !selections.subtitle || item.subtitle === selections.subtitle
+                    );
+
+                    // Update chart with filtered data
+                    renderBoxplotChart(filteredData, selections.subtitle);
+                } else {
+                    // No subtitles, use all data
+                    if (elements.subtitleSelect) {
+                        elements.subtitleSelect.disabled = true;
+                        elements.subtitleSelect.innerHTML = '<option disabled selected>Subjudul</option>';
+                    }
+                    selections.subtitle = null;
+                    renderBoxplotChart(data, null);
+                }
             } catch (error) {
-                console.error('Error refreshing charts:', error);
+                console.error('Error loading boxplot data:', error);
+                renderBoxplotChart([], null);
+
+                // Disable subtitle select on error
+                if (elements.subtitleSelect) {
+                    elements.subtitleSelect.disabled = true;
+                    elements.subtitleSelect.innerHTML = '<option disabled selected>Subjudul</option>';
+                }
             } finally {
-                hideRefreshIndicator();
+                hideLoader();
             }
         }
 
-        // Function to update the last update time
+        async function loadBarData(titleCode) {
+            try {
+                showLoader();
+
+                // Fetch bar data
+                const data = await fetchBarData(titleCode);
+
+                // Store the data
+                chartData.bar = data;
+
+                // Reset selections
+                selections.title = titleCode;
+                selections.subSubtitle = null;
+
+                // Get subtitle from boxplot if selected
+                if (selections.subtitle) {
+                    const filteredData = data.filter(item =>
+                        item.subtitle === selections.subtitle ||
+                        (!item.subtitle && !selections.subtitle)
+                    );
+                    processSubSubtitles(filteredData);
+                } else {
+                    // Get first subtitle from data if available
+                    const subtitles = [...new Set(data.map(item => item.subtitle).filter(Boolean))];
+                    if (subtitles.length > 0) {
+                        selections.subtitle = subtitles[0];
+                        const filteredData = data.filter(item => item.subtitle === subtitles[0]);
+                        processSubSubtitles(filteredData);
+                    } else {
+                        // No subtitles, use all data
+                        processSubSubtitles(data);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading bar data:', error);
+
+                // Show error message
+                renderBarChart([]);
+
+                // Hide dropdowns
+                if (elements.subSubtitleDropdown) {
+                    elements.subSubtitleDropdown.style.display = 'none';
+                }
+                if (elements.subtitleDropdown) {
+                    elements.subtitleDropdown.style.display = 'none';
+                }
+            } finally {
+                hideLoader();
+            }
+        }
+
+        async function loadProvinceData() {
+            try {
+                showLoader();
+
+                // Add loading state to chart container
+                if (elements.provinceChartContainer) {
+                    elements.provinceChartContainer.classList.add('opacity-50');
+                }
+
+                // Fetch province data
+                const data = await fetchProvinceData();
+
+                // Store the data
+                chartData.province = data;
+
+                // Update chart
+                renderProvinceChart(data);
+            } catch (error) {
+                console.error('Error loading province data:', error);
+
+                // Show error in chart
+                if (charts.province) {
+                    charts.province.updateOptions({
+                        series: [],
+                        noData: {
+                            text: 'Error memuat data perbandingan provinsi',
+                            align: 'center',
+                            verticalAlign: 'middle',
+                            style: {
+                                color: '#ff0000',
+                                fontSize: '14px'
+                            }
+                        }
+                    });
+                }
+
+                // Clear table
+                if (elements.provinceTableBody) {
+                    elements.provinceTableBody.innerHTML = '';
+                }
+            } finally {
+                // Remove loading state
+                if (elements.provinceChartContainer) {
+                    elements.provinceChartContainer.classList.remove('opacity-50');
+                }
+
+                hideLoader();
+            }
+        }
+
+        // Update functions
         async function updateLastUpdateTime() {
             const now = new Date();
 
@@ -723,57 +876,49 @@
             const dateStr = dateFormatter.format(now);
             const timeStr = timeFormatter.format(now);
 
-            document.getElementById('lastUpdate').innerHTML = `
+            if (elements.lastUpdateElement) {
+                elements.lastUpdateElement.innerHTML = `
         <div class="text-end">${dateStr}</div>
         <div class="mt-1 small text-muted text-end">
-            Update terakhir: <b>${timeStr}</b> WIB
+          Update terakhir: <b>${timeStr}</b> WIB
         </div>
-    `;
-        }
-
-        // Add event listener for refresh button
-        document.getElementById('refreshButton').addEventListener('click', function() {
-            this.disabled = true;
-            refreshAllCharts().finally(() => {
-                this.disabled = false;
-            });
-        });
-
-        // Show refresh indicator
-        function showRefreshIndicator() {
-            document.getElementById('refresh-indicator').style.display = 'block';
-        }
-
-        // Hide refresh indicator
-        function hideRefreshIndicator() {
-            document.getElementById('refresh-indicator').style.display = 'none';
-        }
-
-        // Initialize auto-refresh
-        function startAutoRefresh() {
-            // Clear any existing timer
-            if (refreshTimer) {
-                clearInterval(refreshTimer);
+      `;
             }
-
-            // Set up new timer
-            refreshTimer = setInterval(refreshAllCharts, refreshInterval);
         }
 
-        // Initialize Thang dropdown
-        async function initThangDropdown() {
-            const dropdownMenu = document.querySelector('#selectThang .dropdown-menu');
-            const dropdownToggle = document.querySelector('#selectThang .dropdown-toggle');
-            const selectedThangInput = document.getElementById('selected_thang');
-
-            // Clear dropdown menu
-            dropdownMenu.innerHTML = '';
+        async function refreshAllCharts() {
+            showLoader();
 
             try {
-                const response = await fetch(`${baseUrl}dashboard?q=rangeThang`);
-                if (!response.ok) throw new Error('Network response was not ok');
+                // Update the last update time first
+                await updateLastUpdateTime();
 
-                const years = await response.json();
+                // Get current selections
+                const sbmCode = elements.sbmSelect ? elements.sbmSelect.value : '127';
+
+                // Update charts with current selection
+                await loadBoxplotData(sbmCode);
+                await loadBarData(sbmCode);
+                await loadProvinceData();
+
+                // Update lastRefreshTime after successful refresh
+                lastRefreshTime = new Date();
+            } catch (error) {
+                console.error('Error refreshing charts:', error);
+            } finally {
+                hideLoader();
+            }
+        }
+
+        // Initialize Thang (year) dropdown
+        async function initYearDropdown() {
+            if (!elements.yearMenu || !elements.yearToggle || !elements.yearInput) return;
+
+            // Clear dropdown menu
+            elements.yearMenu.innerHTML = '';
+
+            try {
+                const years = await fetchYears();
 
                 // Add years to dropdown
                 years.forEach(year => {
@@ -792,45 +937,224 @@
                         this.classList.add('active');
 
                         // Update UI
-                        dropdownToggle.textContent = ` T.A. ${year}`;
-                        selectedThangInput.value = year;
+                        elements.yearToggle.textContent = ` T.A. ${year}`;
+                        elements.yearInput.value = year;
+
+                        // Update current year selection
+                        selections.year = year;
 
                         // Refresh data for the selected year
                         refreshAllCharts();
                     });
-                    dropdownMenu.appendChild(item);
+                    elements.yearMenu.appendChild(item);
                 });
 
-                // Set default value to current year
+                // Set default value to first available year
                 const defaultYear = years[0] || '2025';
-                dropdownToggle.textContent = ` T.A. ${defaultYear}`;
-                selectedThangInput.value = defaultYear;
+                elements.yearToggle.textContent = ` T.A. ${defaultYear}`;
+                elements.yearInput.value = defaultYear;
+                selections.year = defaultYear;
 
                 // Set active class on default item
                 const defaultItem = Array.from(document.querySelectorAll('#selectThang .dropdown-item'))
                     .find(item => item.textContent.includes(defaultYear));
+
                 if (defaultItem) {
                     defaultItem.classList.add('active');
                 }
+
             } catch (error) {
-                console.error('Error fetching years:', error);
-                // Set fallback years if fetch fails
-                const fallbackYears = ['2025'];
-                dropdownToggle.textContent = ` T.A. ${fallbackYears[0]}`;
-                selectedThangInput.value = fallbackYears[0];
+                console.error('Error loading years:', error);
+
+                // Add fallback year if no years found
+                const fallbackYear = '2025';
+                const item = document.createElement('a');
+                item.className = 'dropdown-item active';
+                item.href = '#';
+                item.textContent = `Tahun Anggaran ${fallbackYear}`;
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    elements.yearToggle.textContent = ` T.A. ${fallbackYear}`;
+                    elements.yearInput.value = fallbackYear;
+                    selections.year = fallbackYear;
+                    refreshAllCharts();
+                });
+                elements.yearMenu.appendChild(item);
+
+                // Set default value
+                elements.yearToggle.textContent = ` T.A. ${fallbackYear}`;
+                elements.yearInput.value = fallbackYear;
+                selections.year = fallbackYear;
             }
         }
 
-        // Initialize everything
-        async function init() {
-            await initThangDropdown();
+        // Event handlers
+        function handleTitleChange(titleCode) {
+            if (!titleCode) return;
 
-            updateBoxplotChart('127');
-            loadBarData('127');
-            startAutoRefresh();
+            // Update current selection
+            selections.title = titleCode;
+            selections.subtitle = null;
+            selections.subSubtitle = null;
+
+            // Reload data for the new selection
+            loadBoxplotData(titleCode);
+            loadBarData(titleCode);
         }
 
-        // Start the initialization
-        init();
+        function handleSubtitleChange(e) {
+            const subtitleValue = e.target.value;
+
+            // Update current selection
+            selections.subtitle = subtitleValue;
+            selections.subSubtitle = null;
+
+            // Filter existing bar data by subtitle
+            const filteredData = chartData.bar.filter(item =>
+                item.subtitle === subtitleValue || (!item.subtitle && !subtitleValue)
+            );
+
+            // Process sub-subtitles for the selected subtitle
+            processSubSubtitles(filteredData);
+
+            // Update boxplot chart with current subtitle
+            const boxplotData = chartData.boxplot.filter(item =>
+                item.subtitle === subtitleValue || (!item.subtitle && !subtitleValue)
+            );
+            renderBoxplotChart(boxplotData, subtitleValue);
+
+            // Update province data
+            loadProvinceData();
+        }
+
+        // Setup auto-refresh
+        function setupAutoRefresh() {
+            // Clear existing timer if any
+            if (refreshTimer) {
+                clearInterval(refreshTimer);
+            }
+
+            // Set up new timer for auto-refresh
+            refreshTimer = setInterval(() => {
+                // Only auto-refresh if the tab is visible
+                if (!document.hidden) {
+                    refreshAllCharts();
+                }
+            }, refreshInterval);
+        }
+
+        // Initialize event listeners
+        function initEventListeners() {
+            // Title (SBM) select change
+            if (elements.sbmSelect) {
+                elements.sbmSelect.addEventListener('change', function() {
+                    handleTitleChange(this.value);
+                });
+            }
+
+            // Subtitle select change
+            if (elements.subtitleSelect) {
+                elements.subtitleSelect.addEventListener('change', handleSubtitleChange);
+            }
+
+            // Refresh button click
+            if (elements.refreshButton) {
+                elements.refreshButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    refreshAllCharts();
+                });
+            }
+
+            // Handle visibility change for auto-refresh
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    // Tab became visible, check if refresh is needed
+                    const now = new Date();
+                    const timeSinceLastRefresh = now - lastRefreshTime;
+
+                    if (timeSinceLastRefresh > refreshInterval) {
+                        refreshAllCharts();
+                    }
+                }
+            });
+        }
+
+        // Export public API
+        return {
+            // Initialize the module
+            init: async function() {
+                try {
+                    // Set up event listeners
+                    initEventListeners();
+
+                    // Initialize year dropdown
+                    await initYearDropdown();
+
+                    // Initial data load
+                    const sbmCode = elements.sbmSelect ? elements.sbmSelect.value : '127';
+                    await loadBoxplotData(sbmCode);
+                    await loadBarData(sbmCode);
+                    await loadProvinceData();
+
+                    // Update last refresh time
+                    await updateLastUpdateTime();
+
+                    // Set up auto-refresh
+                    setupAutoRefresh();
+
+                    console.log('SBM Chart Module initialized successfully');
+                } catch (error) {
+                    console.error('Error initializing SBM Chart Module:', error);
+                }
+            },
+
+            // Manual refresh method
+            refresh: refreshAllCharts,
+
+            // Get current selections
+            getSelections: function() {
+                return {
+                    ...selections
+                };
+            },
+
+            // Update chart settings (for external use)
+            updateSettings: function(newSettings) {
+                // Merge new settings with current selections
+                Object.assign(selections, newSettings);
+
+                // Refresh charts with new settings
+                refreshAllCharts();
+            },
+
+            // Destroy charts and clean up resources
+            destroy: function() {
+                // Clear auto-refresh timer
+                if (refreshTimer) {
+                    clearInterval(refreshTimer);
+                    refreshTimer = null;
+                }
+
+                // Destroy chart instances
+                Object.keys(charts).forEach(key => {
+                    if (charts[key]) {
+                        charts[key].destroy();
+                        charts[key] = null;
+                    }
+                });
+
+                console.log('SBM Chart Module destroyed');
+            }
+        };
+    })();
+
+    // Initialize the module when the DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        SBMChartModule.init().catch(error => {
+            console.error('Error initializing SBM Chart Module:', error);
+        });
     });
+
+    // Expose module globally for external access
+    window.SBMChartModule = SBMChartModule;
 </script>
