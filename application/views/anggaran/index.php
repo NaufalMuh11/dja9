@@ -31,7 +31,7 @@
 			<div class="row mb-2">
 				<!-- Total Number of Users Card -->
 				<div class="col-sm-6 col-lg-4">
-					<div class="card rounded-3">
+					<div class="card rounded-3 h-100">
 						<div class="card-body d-flex align-items-center p-3">
 								<div class="p-3 rounded me-3" style="background-color: #6f42c1;">
 									<svg width=" 40" height="40" viewBox="0 0 71 71" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -66,7 +66,7 @@
 
 				<!-- Total Number of Reports Cards -->
 				<div class="col-sm-6 col-lg-4">
-					<div class="card rounded-3">
+					<div class="card rounded-3 h-100">
 						<div class="card-body d-flex align-items-center p-3">
 								<div class="bg-warning p-3 rounded me-3">
 									<svg width="40" height="40" viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -93,7 +93,7 @@
 
 				<!-- Total Number of Modules Card -->
 				<div class="col-sm-6 col-lg-4">
-					<div class="card rounded-3">
+					<div class="card rounded-3 h-100">
 						<div class="card-body d-flex align-items-center p-3">
 								<div class="bg-success p-3 rounded me-3">
 									<svg width="40" height="40" viewBox="0 0 67 66" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -119,9 +119,6 @@
 					</div>
 				</div>
 			</div>
-
-			<!-- Rest of the content -->
-
 
 			<!-- Average Website Access Chart -->
 			<div class="row mb-2">
