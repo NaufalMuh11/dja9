@@ -29,7 +29,7 @@
 		<div class="container-fluid">
 			<!-- Rows for Statistics Card -->
 			<div class="col-sm-12 mb-4">
-				<div class="row g-4 w-100">
+				<div class="row g-4">
 					<!-- Total Number of Users Card -->
 					<div class="col-sm-6 col-lg-4">
 						<div class="card rounded-3">
