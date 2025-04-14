@@ -6,6 +6,8 @@
         const refreshInterval = 5 * 60 * 1000; // 5 minutes
         let lastRefreshTime = new Date();
         let refreshTimer;
+        let isLoadingProvinceData = false;
+        let pendingProvinceDataRequest = false;
 
         // Chart instances
         let charts = {
@@ -153,6 +155,23 @@
             }
         }
 
+        async function fetchTitlesFromHierarchy() {
+            try {
+                const response = await fetch(`${baseUrl}perbandingan/get_titles_from_hierarchy?thang=${selections.year}`);
+
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data || [];
+            } catch (error) {
+                console.error('Error fetching titles from hierarchy:', error);
+                // Fallback to original titles if error
+                return null;
+            }
+        }
+
         async function fetchBoxplotData(titleCode) {
             try {
                 const data = await fetchData('perbandingan/get_boxplot_data', {
@@ -200,6 +219,29 @@
             } catch (error) {
                 console.error('Error fetching years:', error);
                 return ['2025'];
+            }
+        }
+
+        function updateTitleSelect(titles) {
+            if (!elements.sbmSelect) return;
+
+            // Remember current selection
+            const currentValue = elements.sbmSelect.value;
+
+            // Clear existing options
+            elements.sbmSelect.innerHTML = '';
+
+            // Add title options
+            titles.forEach(title => {
+                const option = document.createElement('option');
+                option.value = title.kdsbu.substring(0, 3);
+                option.textContent = title.nmsbu;
+                elements.sbmSelect.appendChild(option);
+            });
+
+            // Try to restore previous selection
+            if (currentValue) {
+                elements.sbmSelect.value = currentValue;
             }
         }
 
@@ -632,7 +674,7 @@
         }
 
         // Process sub-subtitles
-        function processSubSubtitles(data) {
+        function processSubSubtitles(data, shouldLoadProvinceData = true) {
             if (!data || data.length === 0) {
                 renderBarChart([]);
                 return;
@@ -643,12 +685,12 @@
 
             if (subSubtitles.length > 0) {
                 // Update sub-subtitle dropdown
-                updateSubSubtitleDropdown(subSubtitles);
+                updateSubSubtitleDropdown(subSubtitles, shouldLoadProvinceData);
 
                 // Auto-select first sub-subtitle
                 if (subSubtitles.length > 0 && elements.selectedSubSubtitle) {
                     elements.selectedSubSubtitle.textContent = subSubtitles[0];
-                    handleSubSubtitleChange(subSubtitles[0]);
+                    handleSubSubtitleChange(subSubtitles[0], shouldLoadProvinceData);
                 }
             } else {
                 // No sub-subtitles, hide dropdown
@@ -658,6 +700,11 @@
 
                 // Update chart with all data for this subtitle
                 renderBarChart(data);
+
+                // Only load province data if requested
+                if (shouldLoadProvinceData) {
+                    loadProvinceData();
+                }
             }
 
             // Always hide subtitle dropdown (legacy UI element)
@@ -667,7 +714,12 @@
         }
 
         // Handle sub-subtitle change
-        function handleSubSubtitleChange(subSubtitle) {
+        function handleSubSubtitleChange(subSubtitle, shouldLoadProvinceData = true) {
+            // Skip if sub-subtitle hasn't actually changed
+            if (selections.subSubtitle === subSubtitle) {
+                return;
+            }
+
             // Update selection
             selections.subSubtitle = subSubtitle;
 
@@ -680,8 +732,10 @@
             // Update chart with filtered data
             renderBarChart(filteredData);
 
-            // Update province data
-            loadProvinceData();
+            // Update province data only if requested
+            if (shouldLoadProvinceData) {
+                loadProvinceData();
+            }
         }
 
         // Data processing functions
@@ -757,10 +811,7 @@
             try {
                 showLoader();
 
-                // Fetch bar data
                 const data = await fetchBarData(titleCode);
-
-                // Store the data
                 chartData.bar = data;
 
                 // Reset selections
@@ -773,17 +824,17 @@
                         item.subtitle === selections.subtitle ||
                         (!item.subtitle && !selections.subtitle)
                     );
-                    processSubSubtitles(filteredData);
+                    processSubSubtitles(filteredData, false);
                 } else {
                     // Get first subtitle from data if available
                     const subtitles = [...new Set(data.map(item => item.subtitle).filter(Boolean))];
                     if (subtitles.length > 0) {
                         selections.subtitle = subtitles[0];
                         const filteredData = data.filter(item => item.subtitle === subtitles[0]);
-                        processSubSubtitles(filteredData);
+                        processSubSubtitles(filteredData, false);
                     } else {
                         // No subtitles, use all data
-                        processSubSubtitles(data);
+                        processSubSubtitles(data, false);
                     }
                 }
             } catch (error) {
@@ -805,7 +856,15 @@
         }
 
         async function loadProvinceData() {
+            // If a request is already in progress, mark as pending and return
+            if (isLoadingProvinceData) {
+                pendingProvinceDataRequest = true;
+                return;
+            }
+
             try {
+                isLoadingProvinceData = true;
+                pendingProvinceDataRequest = false;
                 showLoader();
 
                 // Add loading state to chart container
@@ -823,27 +882,7 @@
                 renderProvinceChart(data);
             } catch (error) {
                 console.error('Error loading province data:', error);
-
-                // Show error in chart
-                if (charts.province) {
-                    charts.province.updateOptions({
-                        series: [],
-                        noData: {
-                            text: 'Error memuat data perbandingan provinsi',
-                            align: 'center',
-                            verticalAlign: 'middle',
-                            style: {
-                                color: '#ff0000',
-                                fontSize: '14px'
-                            }
-                        }
-                    });
-                }
-
-                // Clear table
-                if (elements.provinceTableBody) {
-                    elements.provinceTableBody.innerHTML = '';
-                }
+                // Error handling code...
             } finally {
                 // Remove loading state
                 if (elements.provinceChartContainer) {
@@ -851,6 +890,12 @@
                 }
 
                 hideLoader();
+                isLoadingProvinceData = false;
+
+                // If a request came in while we were processing, handle it now
+                if (pendingProvinceDataRequest) {
+                    setTimeout(loadProvinceData, 100);
+                }
             }
         }
 
@@ -878,11 +923,11 @@
 
             if (elements.lastUpdateElement) {
                 elements.lastUpdateElement.innerHTML = `
-        <div class="text-end">${dateStr}</div>
-        <div class="mt-1 small text-muted text-end">
-          Update terakhir: <b>${timeStr}</b> WIB
-        </div>
-      `;
+                    <div class="text-end">${dateStr}</div>
+                    <div class="mt-1 small text-muted text-end">
+                    Update terakhir: <b>${timeStr}</b> WIB
+                    </div>
+                `;
             }
         }
 
@@ -895,6 +940,14 @@
 
                 // Get current selections
                 const sbmCode = elements.sbmSelect ? elements.sbmSelect.value : '127';
+
+                // Try to get titles from hierarchy table
+                const titles = await fetchTitlesFromHierarchy();
+
+                if (titles && titles.length > 0) {
+                    // Update SBM select with titles from hierarchy
+                    updateTitleSelect(titles);
+                }
 
                 // Update charts with current selection
                 await loadBoxplotData(sbmCode);
@@ -1005,6 +1058,11 @@
         function handleSubtitleChange(e) {
             const subtitleValue = e.target.value;
 
+            // Skip if subtitle hasn't actually changed
+            if (selections.subtitle === subtitleValue) {
+                return;
+            }
+
             // Update current selection
             selections.subtitle = subtitleValue;
             selections.subSubtitle = null;
@@ -1015,7 +1073,7 @@
             );
 
             // Process sub-subtitles for the selected subtitle
-            processSubSubtitles(filteredData);
+            processSubSubtitles(filteredData, false); // Pass false to avoid loading province data
 
             // Update boxplot chart with current subtitle
             const boxplotData = chartData.boxplot.filter(item =>
@@ -1023,7 +1081,7 @@
             );
             renderBoxplotChart(boxplotData, subtitleValue);
 
-            // Update province data
+            // Now update province data since all other UI changes are complete
             loadProvinceData();
         }
 
@@ -1084,25 +1142,25 @@
             // Initialize the module
             init: async function() {
                 try {
-                    // Set up event listeners
                     initEventListeners();
 
-                    // Initialize year dropdown
                     await initYearDropdown();
+
+                    const titles = await fetchTitlesFromHierarchy();
+
+                    if (titles && titles.length > 0) {
+                        // Update SBM select with titles from hierarchy
+                        updateTitleSelect(titles);
+                    }
 
                     // Initial data load
                     const sbmCode = elements.sbmSelect ? elements.sbmSelect.value : '127';
                     await loadBoxplotData(sbmCode);
                     await loadBarData(sbmCode);
                     await loadProvinceData();
-
-                    // Update last refresh time
                     await updateLastUpdateTime();
 
-                    // Set up auto-refresh
                     setupAutoRefresh();
-
-                    console.log('SBM Chart Module initialized successfully');
                 } catch (error) {
                     console.error('Error initializing SBM Chart Module:', error);
                 }

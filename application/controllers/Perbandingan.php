@@ -25,6 +25,20 @@ class Perbandingan extends CI_Controller
         $this->load->view('main/main', $data);
     }
 
+    public function get_titles_from_hierarchy()
+    {
+        if (!$this->session->userdata('isLoggedIn')) {
+            $this->output->set_status_header(401);
+            echo json_encode(['error' => 'Unauthorized']);
+            return;
+        }
+
+        $thang = $this->input->get('thang');
+
+        $data = $this->Perbandingan_model->get_titles_from_hierarchy($thang);
+        echo json_encode($data);
+    }
+
     public function get_boxplot_data()
     {
         if (!$this->session->userdata('isLoggedIn')) {

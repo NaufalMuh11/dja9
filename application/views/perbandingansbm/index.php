@@ -48,21 +48,20 @@
                            <div class="form-label">Pilih SBM</div>
                            <div class="d-flex gap-3">
                               <select class="form-select">
-                                 <option value="127">I.27. Honorarium Satpam, Pengemudi, Petugas Kebersihan, Dan Pramubakti</option>
-                                 <option value="128">I.28. Satuan Biaya Uang Harian dan Uang Representasi Perjalanan Dinas Dalam Negeri</option>
-                                 <option value="130">I.30. Satuan Biaya Penginapan Perjalanan Dinas Dalam Negeri</option>
-                                 <option value="134">I.34. Satuan Biaya Makanan Penambah Daya Tahan Tubuh</option>
-                                 <option value="135">I.35. Satuan Biaya Sewa Kendaraan</option>
-                                 <option value="136">I.36. Satuan Biaya Pengadaan Kendaraan Dinas</option>
-                                 <option value="137">I.37. Satuan Biaya Pengadaan Pakaian Dinas</option>
-                                 <option value="139">I.39. Satuan Biaya Konsumsi Kegiatan Pendidikan dan Pelatihan (Diklat)</option>
-                                 <option value="209">II.9. Satuan Biaya Pengadaan Bahan Makanan</option>
-                                 <option value="210">II.10. Satuan Biaya Konsumsi Tahanan/Deteni/ABK nonjustisia</option>
-                                 <option value="211">II.11. Satuan Biaya Kebutuhan Dasar Perkantoran di dalam Negeri</option>
-                                 <option value="212">II.12. Satuan Biaya Penggantian Inventaris Lama dan/atau Pembelian Inventaris Untuk Pegawai Baru</option>
-                                 <option value="214">II.14. Satuan Biaya Pemeliharaan Gedung/Bangunan dalam Negeri</option>
-                                 <option value="215">II.15. Satuan Biaya Sewa Gedung Pertemuan</option>
-                                 <option value="216">II.16. Satuan Biaya Transportasi dari dan/atau ke Terminal Bus/Stasiun/Bandara/Pelabuhan dalam Rangka Perjalanan Dinas Dalam Negeri</option>
+                                 <option value="127">Honorarium Satpam, Pengemudi, Petugas Kebersihan, Dan Pramubakti</option>
+                                 <option value="128">Satuan Biaya Uang Harian dan Uang Representasi Perjalanan Dinas Dalam Negeri</option>
+                                 <option value="130">Satuan Biaya Penginapan Perjalanan Dinas Dalam Negeri</option>
+                                 <option value="134">Satuan Biaya Makanan Penambah Daya Tahan Tubuh</option>
+                                 <option value="135">Satuan Biaya Sewa Kendaraan</option>
+                                 <option value="137">Satuan Biaya Pengadaan Pakaian Dinas</option>
+                                 <option value="139">Satuan Biaya Konsumsi Kegiatan Pendidikan dan Pelatihan (Diklat)</option>
+                                 <option value="209">Satuan Biaya Pengadaan Bahan Makanan</option>
+                                 <option value="210">Satuan Biaya Konsumsi Tahanan/Deteni/ABK nonjustisia</option>
+                                 <option value="211">Satuan Biaya Kebutuhan Dasar Perkantoran di dalam Negeri</option>
+                                 <option value="212">Satuan Biaya Penggantian Inventaris Lama dan/atau Pembelian Inventaris Untuk Pegawai Baru</option>
+                                 <option value="214">Satuan Biaya Pemeliharaan Gedung/Bangunan dalam Negeri</option>
+                                 <option value="215">Satuan Biaya Sewa Gedung Pertemuan</option>
+                                 <option value="216">Satuan Biaya Transportasi dari dan/atau ke Terminal Bus/Stasiun/Bandara/Pelabuhan dalam Rangka Perjalanan Dinas Dalam Negeri</option>
                               </select>
                               <select class="form-select" id="sbm-subtitle-select"></select>
                            </div>

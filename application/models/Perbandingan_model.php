@@ -1,7 +1,95 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 class Perbandingan_model extends CI_Model
 {
-    private function get_hierarchical_data($kode, $thang)
+    // Tambahkan fungsi ini ke Perbandingan_model.php
+    private function get_hierarchical_data_from_table($kode, $thang)
+    {
+        try {
+            $ref = $this->load->database('ref' . $thang, TRUE);
+
+            // Cek jika tabel hierarki ada
+            $table_exists = $ref->table_exists('t_sbu_hierarchy');
+
+            if ($table_exists) {
+                // Gunakan tabel hierarki baru
+                $query = $ref->query("
+                WITH RECURSIVE hierarchy AS (
+                    -- Anchor: ambil title (level 1) dengan kode yang sesuai
+                    SELECT 
+                        h.kdsbu,
+                        h.nmsbu,
+                        h.level,
+                        h.parent_kdsbu,
+                        s.biaya,
+                        s.biaya12,
+                        CAST(h.kdsbu AS CHAR(50)) as path
+                    FROM t_sbu_hierarchy h
+                    LEFT JOIN t_sbu s ON h.kdsbu = s.kdsbu
+                    WHERE h.level = 1 AND LEFT(h.kdsbu, 3) = ?
+                    
+                    UNION ALL
+                    
+                    -- Recursive: ambil semua anak dari setiap node di hierarki
+                    SELECT 
+                        c.kdsbu,
+                        c.nmsbu,
+                        c.level,
+                        c.parent_kdsbu,
+                        s.biaya,
+                        s.biaya12,
+                        CONCAT(h.path, ',', c.kdsbu) as path
+                    FROM t_sbu_hierarchy c
+                    JOIN hierarchy h ON c.parent_kdsbu = h.kdsbu
+                    LEFT JOIN t_sbu s ON c.kdsbu = s.kdsbu
+                )
+                SELECT * FROM hierarchy
+                ORDER BY path
+            ", array($kode));
+
+                if (!$query || $query->num_rows() == 0) {
+                    // Fallback ke metode lama jika tidak ada data
+                    return $this->get_hierarchical_data_old($kode, $thang);
+                }
+
+                $rows = $query->result_array();
+                $hierarchy = array();
+
+                foreach ($rows as $row) {
+                    // Jika data SBU tidak ada, gunakan nilai default
+                    $biaya = isset($row['biaya']) ? (float)$row['biaya'] : 0;
+                    $biaya12 = isset($row['biaya12']) ? (float)$row['biaya12'] : 0;
+
+                    $node = array(
+                        'kdsbu' => $row['kdsbu'],
+                        'nmsbu' => $row['nmsbu'],
+                        'biaya' => $biaya,
+                        'biaya12' => $biaya12,
+                        'level' => (int)$row['level'],
+                        'parent' => $row['parent_kdsbu'],
+                        'children' => array()
+                    );
+
+                    $hierarchy[$row['kdsbu']] = $node;
+
+                    // Tambahkan ke children array dari parent
+                    if ($row['parent_kdsbu'] && isset($hierarchy[$row['parent_kdsbu']])) {
+                        $hierarchy[$row['parent_kdsbu']]['children'][] = $row['kdsbu'];
+                    }
+                }
+
+                return $hierarchy;
+            } else {
+                // Gunakan metode lama jika tabel belum ada
+                return $this->get_hierarchical_data_old($kode, $thang);
+            }
+        } catch (Exception $e) {
+            log_message('error', 'Error in get_hierarchical_data_from_table: ' . $e->getMessage());
+            // Fallback ke metode lama jika terjadi error
+            return $this->get_hierarchical_data_old($kode, $thang);
+        }
+    }
+
+    private function get_hierarchical_data_old($kode, $thang)
     {
         try {
             $ref = $this->load->database('ref' . $thang, TRUE);
@@ -148,10 +236,43 @@ class Perbandingan_model extends CI_Model
         }
     }
 
+    public function get_titles_from_hierarchy($thang)
+    {
+        try {
+            $thang = $this->input->get('thang') ?: date('Y');
+
+            $ref = $this->load->database('ref' . $thang, TRUE);
+
+            // Cek jika tabel hierarki ada
+            $table_exists = $ref->table_exists('t_sbu_hierarchy');
+
+            if ($table_exists) {
+                // Ambil semua judul (level 1)
+                $query = $ref->query("
+                    SELECT kdsbu, nmsbu 
+                    FROM t_sbu_hierarchy 
+                    WHERE level = 1 
+                    ORDER BY kdsbu
+                ");
+
+                if ($query && $query->num_rows() > 0) {
+                    $result = $query->result_array();
+                    return $result;
+                }
+            }
+
+            $result = $query->result_array();
+            return $result;
+        } catch (Exception $e) {
+            log_message('error', 'Error in get_titles_from_hierarchy: ' . $e->getMessage());
+            return array();
+        }
+    }
+
     function get_bar_data($kode, $thang)
     {
         try {
-            $hierarchy = $this->get_hierarchical_data($kode, $thang);
+            $hierarchy = $this->get_hierarchical_data_from_table($kode, $thang);
             if (empty($hierarchy)) return array();
 
             $result = array();
@@ -223,7 +344,7 @@ class Perbandingan_model extends CI_Model
     function get_boxplot_data($kode, $thang)
     {
         try {
-            $hierarchy = $this->get_hierarchical_data($kode, $thang);
+            $hierarchy = $this->get_hierarchical_data_from_table($kode, $thang);
             if (empty($hierarchy)) return array();
 
             $groups = array();
@@ -304,7 +425,7 @@ class Perbandingan_model extends CI_Model
             $ref = $this->load->database('ref' . $thang_current, TRUE);
 
             // Get data from hierarchical function modified to include biaya12
-            $data_current = $this->get_hierarchical_data($kode, $thang_current);
+            $data_current = $this->get_hierarchical_data_from_table($kode, $thang_current);
 
             if (empty($data_current)) {
                 return array();
@@ -324,13 +445,13 @@ class Perbandingan_model extends CI_Model
                         if ($subtitle && isset($parent['parent']) && isset($data_current[$parent['parent']])) {
                             $grandparent = $data_current[$parent['parent']];
                             if ($grandparent['nmsbu'] != $subtitle) {
-                                continue; // Skip this node if it doesn't match the subtitle
+                                continue;
                             }
                         }
 
                         // For sub-subtitle filtering
                         if ($sub_subtitle && $parent['nmsbu'] != $sub_subtitle) {
-                            continue; // Skip this node if it doesn't match the sub-subtitle
+                            continue;
                         }
                     }
 
