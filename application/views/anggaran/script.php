@@ -4,16 +4,17 @@
 		document.getElementById('lastUpdate').innerHTML = `<?php echo get_last_update(); ?>`;
 
 		// Access Chart
+		var hourlyData = <?php echo $hourly_users; ?>;
 		var options = {
 			series: [{
-				name: 'Pengunjung',
-				data: [5, 10, 8, 12, 11, 14, 18, 16, 20, 22, 28, 25, 20, 18, 15, 12, 10, 8, 6, 5, 4, 3, 2, 1]
+				name: 'Tahun Ini',
+				data: hourlyData.current_year
 			}, {
-				name: 'Rata-rata',
-				data: [1, 2, 1, 3, 2, 4, 5, 6, 8, 10, 12, 15, 18, 14, 12, 10, 8, 6, 5, 4, 3, 2, 1, 1]
+				name: 'Tahun Lalu',
+				data: hourlyData.previous_year
 			}],
 			chart: {
-				height: 240,
+				height: 280,
 				type: 'line',
 				toolbar: {
 					show: false
@@ -28,60 +29,71 @@
 			},
 			stroke: {
 				curve: 'smooth',
-				width: 2
+				width: 3
 			},
 			grid: {
+				show: true,
 				borderColor: '#e0e0e0',
-				row: {
-					colors: ['transparent'],
-					opacity: 0.5
+				xaxis: {
+					lines: {
+						show: false
+					}
+				},
+				yaxis: {
+					lines: {
+						show: true
+					}
+				},
+				padding: {
+					top: 0,
+					right: 20,
+					bottom: 0,
+					left: 10
 				}
 			},
 			xaxis: {
 				categories: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12',
 					'13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'
 				],
+				axisBorder: {
+					show: true
+				},
+				axisTicks: {
+					show: true
+				},
 				title: {
 					text: 'Jam',
-					offsetY: 10,
+					offsetY: 0,  // Adjusted offsetY
+					offsetX: 0,
 					style: {
-						fontSize: '14px',
-						fontWeight: 500
+						fontSize: '12px'
 					}
+				},
+				labels: {
+					offsetY: 5  // Added space between labels and title
 				}
 			},
 			yaxis: {
+				min: 0,
+				max: 30,
+				tickAmount: 6,
+				labels: {
+					formatter: function(val) {
+						return val.toFixed(0);
+					}
+				},
 				title: {
 					text: 'Jumlah',
 					style: {
-						fontSize: '14px',
-						fontWeight: 500
+						fontSize: '12px'
 					}
-				},
-				min: 0,
-				max: 30,
-				tickAmount: 6
-			},
-			annotations: {
-				yaxis: [{
-					y: 25,
-					borderColor: '#4caf50',
-					label: {
-						borderColor: '#4caf50',
-						style: {
-							color: '#fff',
-							background: '#4caf50'
-						},
-						text: 'Rata-rata pertahun'
-					}
-				}]
+				}
 			},
 			legend: {
 				position: 'top',
-				horizontalAlign: 'right',
-				floating: true,
-				offsetY: -25,
-				offsetX: -5
+				horizontalAlign: 'left',
+				offsetX: 0,
+				offsetY: 0
 			}
 		};
 

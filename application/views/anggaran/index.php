@@ -123,13 +123,18 @@
 			</div>
 
 			<!-- Average Website Access Chart -->
-			<div class="row mb-4">
+			<div class="row mb-2">
 				<div class="col-xl-8 col-lg-7 mb-3">
 					<div class="card h-100">
 						<div class="card-body d-flex flex-column">
 							<div class="row mb-3">
 								<div class="col">
-									<h5 class="card-title">Jumlah pengguna yang mengakses website</h5>
+									<h5 class="card-title text-center">
+										Jumlah Informasi Aktivitas Mytask Pada Bulan 
+										<span class="text-primary"><?php echo $month_name; ?></span> 
+										tahun 
+										<span class="text-primary"><?php echo $year; ?></span>
+									</h5>
 								</div>
 							</div>
 							<!-- Website Access Chart -->
@@ -140,13 +145,12 @@
 
 				<!-- Table of Users with the Most Task Activity -->
 				<div class="col-xl-4 col-lg-5 mb-3">
-					<div class="card h-100 bg-transparent border-0">
-						<div class="mb-5" style="background-color: #6f42c1; border-radius: 5px;">
-							<!-- Filter Form -->
+					
+						<!-- Filter Section -->
+						<div class="p-3" style="background-color: #6f42c1; border-radius: 5px;">
 							<form id="filterForm" method="GET">
-								<!-- Preserve the q parameter -->
 								<input type="hidden" name="q" value="MyTask">
-								<div class="d-flex justify-content-around align-items-center p-2">
+								<div class="d-flex justify-content-around align-items-center">
 									<div class="d-flex align-items-center">
 										<span class="text-white me-2">Tahun</span>
 										<div class="dropdown me-2">
@@ -167,12 +171,14 @@
 							</form>
 						</div>
 
+						<!-- Gap -->
+						<div class="my-2"></div>
+
 						<!-- Table Section -->
-						<div class="card" style="height: 300px;">
-							<!-- Table -->
-							<div class="card-body d-flex flex-column">
-								<h5 class="card-title mb-3 d-flex justify-content-center">3 Pengguna Dengan Aktivitas Task Terbanyak</h5>
-								<div class="table-responsive flex-grow-1">
+						<div class="card flex-grow-1">
+							<div class="card-body">
+								<h5 class="card-title text-center mb-3">3 Pengguna Dengan Aktivitas Task Terbanyak</h5>
+								<div class="table-responsive">
 									<table class="table" id="userTable">
 										<thead>
 											<tr>
@@ -188,7 +194,7 @@
 								</div>
 							</div>
 						</div>
-					</div>
+					
 				</div>
 			</div>
 

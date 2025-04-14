@@ -107,4 +107,30 @@ class MyTask_model extends CI_Model
 		}
 		return array();
 	}
+
+    public function get_hourly_users($year, $month) {
+        $current_data = array();
+        $previous_data = array();
+        
+        for ($hour = 0; $hour < 24; $hour++) {
+            // Current year data
+            $this->db->select('COUNT(DISTINCT iduser) as total');
+            $this->db->where('YEAR(datetime)', $year);
+            $this->db->where('MONTH(datetime)', $month);
+            $this->db->where('HOUR(datetime)', $hour);
+            $current_data[] = $this->db->get('t_mytask_log')->row()->total ?? 0;
+            
+            // Previous year data
+            $this->db->select('COUNT(DISTINCT iduser) as total');
+            $this->db->where('YEAR(datetime)', $year - 1);
+            $this->db->where('MONTH(datetime)', $month);
+            $this->db->where('HOUR(datetime)', $hour);
+            $previous_data[] = $this->db->get('t_mytask_log')->row()->total ?? 0;
+        }
+        
+        return array(
+            'current_year' => $current_data,
+            'previous_year' => $previous_data
+        );
+    }
 }
