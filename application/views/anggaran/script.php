@@ -91,9 +91,17 @@
 			},
 			legend: {
 				position: 'top',
-				horizontalAlign: 'left',
+				horizontalAlign: 'center',
 				offsetX: 0,
-				offsetY: 0
+				offsetY: 0,
+				markers: {
+					width: 8,
+					height: 8,
+					radius: 12
+				},
+				itemMargin: {
+					horizontal: 15
+				}
 			}
 		};
 
