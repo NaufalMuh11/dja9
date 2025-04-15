@@ -80,7 +80,9 @@
                 enabled: true
             },
             tooltip: {
-                theme: "dark"
+                theme: "dark",
+                shared: true,
+                intersect: false
             },
             grid: {
                 padding: {
@@ -92,12 +94,7 @@
                 strokeDashArray: 4
             },
             zoom: {
-                zoomedArea: {
-                    fill: {
-                        color: '#17a2b8',
-                        opacity: 0.4
-                    }
-                }
+                enabled: false
             }
         };
 
@@ -369,9 +366,6 @@
                 return;
             }
 
-            // Apply sorting if needed
-            const sortedData = sortData(data, selections.sortOrder);
-
             // Prepare data for chart
             const categories = data.map(item => item.name);
             const values = data.map(item => parseFloat(item.data) / 1000);
@@ -569,9 +563,7 @@
                     }
                 ],
                 tooltip: {
-                    theme: "dark",
-                    shared: true,
-                    intersect: false,
+                    ...commonChartSettings.tooltip,
                     y: {
                         formatter: function(value, {
                             seriesIndex
@@ -583,19 +575,13 @@
                         }
                     }
                 },
-                colors: ['#4169E1', '#32CD32'],
+                colors: [
+                    chartColors.primary,
+                    chartColors.success,
+                    chartColors.dark
+                ],
                 legend: {
                     position: 'top'
-                },
-                grid: {
-                    borderColor: '#e7e7e7',
-                    padding: {
-                        top: -20,
-                        right: 0,
-                        left: -4,
-                        bottom: -4
-                    },
-                    strokeDashArray: 4
                 },
                 dataLabels: {
                     enabled: true,
@@ -605,7 +591,7 @@
                     },
                     style: {
                         fontSize: '10px',
-                        colors: ['#333']
+                        colors: [chartColors.dark]
                     },
                     offsetY: -5
                 },
@@ -659,7 +645,7 @@
 
             // Update pagination UI
             updatePagination(data.length);
-            
+
             // Update showing entries text
             const showingElement = document.getElementById('showing-entries');
             const totalElement = document.getElementById('total-entries');
@@ -1047,7 +1033,7 @@
         async function loadProvinceData() {
             // Reset pagination to first page when loading new data
             currentPage = 1;
-            
+
             // If a request is already in progress, mark as pending and return
             if (isLoadingProvinceData) {
                 pendingProvinceDataRequest = true;
