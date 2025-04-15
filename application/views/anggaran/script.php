@@ -104,185 +104,283 @@
 		const moduleDistribution = <?php echo $module_distribution ?? '[]'; ?>;
 const totalModules = moduleDistribution.reduce((sum, item) => sum + parseInt(item.access_count), 0);
 
-var chartModul = new ApexCharts(
-    document.getElementById("chart-akses-modul"), {
-        chart: {
-            type: "donut",
-            height: 350,
-            background: 'transparent',
-            offsetY: 30,
-            offsetX: -10,
-            events: {
-                // Add this event handler to reset colors when clicking elsewhere
-                dataPointSelection: function(event, chartContext, config) {
-                    // Force the center label colors back to default after a short delay
-                    setTimeout(() => {
-                        const totalLabel = document.querySelector('.apexcharts-datalabels-group .apexcharts-datalabel-label');
-                        const totalValue = document.querySelector('.apexcharts-datalabels-group .apexcharts-datalabel-value');
-                        
-                        if (totalLabel) {
-                            totalLabel.style.fill = '#333333'; // Default color for the label
-                        }
-                        
-                        if (totalValue) {
-                            totalValue.style.fill = '#333333'; // Default color for the value
-                        }
-                    }, 50);
-                }
-            }
-        },
-        series: moduleDistribution.map(item => parseInt(item.access_count)),
-        labels: moduleDistribution.map(item => item.keterangan),
-        colors: ['#5D3FD3', '#dc3545', '#ffc107', '#198754', '#ff9800'],
-        plotOptions: {
-            pie: {
-                offsetY: 10,
-                startAngle: 0,
-                endAngle: 360,
-                donut: {
-                    size: '75%',
-                    labels: {
-                        show: true,
-                        name: {
-                            offsetY: -10
-                        },
-                        value: {
-                            offsetY: 0
-                        },
-                        total: {
-                            show: true,
-                            showAlways: true,
-                            label: 'Jumlah Modul Yang Diakses',
-                            fontSize: '12px',
-                            fontWeight: 400,
-                            color: '#333333',
-                            offsetY: -10,
-                            formatter: function() {
-                                return totalModules.toLocaleString('id-ID') + ' Modul';
+var chartModul;
+
+// Check if data exists
+if (!moduleDistribution || moduleDistribution.length === 0 || !totalModules) {
+    // Create a div to replace the chart with a message
+    const chartContainer = document.getElementById("chart-akses-modul");
+    
+    // Clear any existing content
+    chartContainer.innerHTML = '';
+    
+    // Create and style the no data message container
+    const noDataDiv = document.createElement('div');
+    noDataDiv.style.display = 'flex';
+    noDataDiv.style.flexDirection = 'column';
+    noDataDiv.style.alignItems = 'center';
+    noDataDiv.style.justifyContent = 'center';
+    noDataDiv.style.height = '350px';
+    noDataDiv.style.width = '100%';
+    
+    // Add an icon (using a simple SVG)
+    const iconDiv = document.createElement('div');
+    iconDiv.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cccccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+    `;
+    
+    // Add text message
+    const messageDiv = document.createElement('div');
+    messageDiv.textContent = 'Tidak ada aktivitas';
+    messageDiv.style.marginTop = '16px';
+    messageDiv.style.fontSize = '16px';
+    messageDiv.style.color = '#666666';
+    messageDiv.style.fontWeight = '500';
+    
+    // Append elements to container
+    noDataDiv.appendChild(iconDiv);
+    noDataDiv.appendChild(messageDiv);
+    chartContainer.appendChild(noDataDiv);
+} else {
+    // Initialize chart with data
+    chartModul = new ApexCharts(
+        document.getElementById("chart-akses-modul"), {
+            chart: {
+                type: "donut",
+                height: 350,
+                background: 'transparent',
+                offsetY: 30,
+                offsetX: -10,
+                events: {
+                    dataPointSelection: function(event, chartContext, config) {
+                        setTimeout(() => {
+                            const totalLabel = document.querySelector('.apexcharts-datalabels-group .apexcharts-datalabel-label');
+                            const totalValue = document.querySelector('.apexcharts-datalabels-group .apexcharts-datalabel-value');
+                            
+                            if (totalLabel) {
+                                totalLabel.style.fill = '#333333';
                             }
-                        },
-                        value: {
+                            
+                            if (totalValue) {
+                                totalValue.style.fill = '#333333';
+                            }
+                        }, 50);
+                    }
+                },
+                noData: {
+                    text: 'Tidak ada aktivitas',
+                    align: 'center',
+                    verticalAlign: 'middle',
+                    offsetX: 0,
+                    offsetY: 0,
+                    style: {
+                        color: '#666666',
+                        fontSize: '16px',
+                        fontFamily: undefined
+                    }
+                }
+            },
+            series: moduleDistribution.map(item => parseInt(item.access_count)),
+            labels: moduleDistribution.map(item => item.keterangan),
+            colors: ['#5D3FD3', '#dc3545', '#ffc107', '#198754', '#ff9800'],
+            plotOptions: {
+                pie: {
+                    offsetY: 10,
+                    startAngle: 0,
+                    endAngle: 360,
+                    donut: {
+                        size: '75%',
+                        labels: {
                             show: true,
-                            fontSize: '24px',
-                            fontWeight: 700,
-                            color: '#333333',
-                            offsetY: 5,
-                            formatter: function(val) {
-                                return parseInt(val).toLocaleString('id-ID') + ' Aktivitas';
+                            name: {
+                                offsetY: -10
+                            },
+                            value: {
+                                offsetY: 0
+                            },
+                            total: {
+                                show: true,
+                                showAlways: true,
+                                label: 'Jumlah Modul Yang Diakses',
+                                fontSize: '12px',
+                                fontWeight: 400,
+                                color: '#333333',
+                                offsetY: -10,
+                                formatter: function() {
+                                    return totalModules.toLocaleString('id-ID') + ' Modul';
+                                }
+                            },
+                            value: {
+                                show: true,
+                                fontSize: '24px',
+                                fontWeight: 700,
+                                color: '#333333',
+                                offsetY: 5,
+                                formatter: function(val) {
+                                    return parseInt(val).toLocaleString('id-ID') + ' Aktivitas';
+                                }
                             }
                         }
                     }
                 }
+            },
+            stroke: {
+                width: 0
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: function(val, opts) {
+                    return Math.round(val) + '%';
+                },
+                dropShadow: {
+                    enabled: false
+                }
+            },
+            tooltip: {
+                custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                    const label = w.config.labels[seriesIndex];
+                    const value = series[seriesIndex];
+                    return `<div style="background: ${w.config.colors[seriesIndex]}; color: white; padding: 6px 12px; border-radius: 4px;">
+                        <span>${label}: ${value} Aktivitas</span>
+                    </div>`;
+                },
+                style: {
+                    fontSize: '14px',
+                    fontFamily: undefined
+                },
+                theme: 'dark',
+                fillSeriesColor: true
+            },
+            legend: {
+                show: true,
+                position: "right",
+                offsetY: 40,
+                height: 230,
+                markers: {
+                    width: 12,
+                    height: 12,
+                    radius: 2
+                },
+                itemMargin: {
+                    horizontal: 0,
+                    vertical: 8
+                }
             }
-        },
-        stroke: {
-            width: 0
-        },
-        dataLabels: {
-            enabled: true,
-            formatter: function(val, opts) {
-                return Math.round(val) + '%';
-            },
-            dropShadow: {
-                enabled: false
-            }
-        },
-        tooltip: {
-            custom: function({ series, seriesIndex, dataPointIndex, w }) {
-                const label = w.config.labels[seriesIndex];
-                const value = series[seriesIndex];
-                return `<div style="background: ${w.config.colors[seriesIndex]}; color: white; padding: 6px 12px; border-radius: 4px;">
-                    <span>${label}: ${value} Aktivitas</span>
-                </div>`;
-            },
-            style: {
-                fontSize: '14px',
-                fontFamily: undefined
-            },
-            theme: 'dark',
-            fillSeriesColor: true
-        },
-        legend: {
-            show: true,
-            position: "right",
-            offsetY: 40,
-            height: 230,
-            markers: {
-                width: 12,
-                height: 12,
-                radius: 2
-            },
-            itemMargin: {
-                horizontal: 0,
-                vertical: 8
-            }
-        }
-    });
-chartModul.render();
+        });
+    
+    // Render the chart
+    chartModul.render();
+}
 
 		// Module Activity Chart
+		// Module Activity Chart
 		const moduleActivityData = <?php echo $module_activity_data ?? '[]'; ?>;
-
-		var moduleActivityOptions = {
-			series: moduleActivityData,
-			chart: {
-				height: 350,
-				type: 'line',
-				toolbar: {
-					show: false
-				}
-			},
-			colors: ['#5D3FD3', '#dc3545', '#ffc107', '#198754', '#ff9800'],
-			dataLabels: {
-				enabled: false
-			},
-			stroke: {
-				curve: 'smooth',
-				width: 2
-			},
-			grid: {
-				borderColor: '#e0e0e0',
-				padding: {
-					top: 10,
-					right: 10,
-					bottom: 10,
-					left: 10
-				}
-			},
-			xaxis: {
-				categories: Array.from({length: 31}, (_, i) => {
-					return (i + 1).toString().padStart(2, '0');
-				}),
-				labels: {
-					rotate: -45,
-					rotateAlways: false
-				},
-				title: {
-					text: 'Tanggal'
-				}
-			},
-			yaxis: {
-				title: {
-					text: 'Jumlah Aktivitas'
-				}
-			},
-			legend: {
-				position: 'top',
-				horizontalAlign: 'right'
-			},
-			tooltip: {
-				shared: true,
-				intersect: false,
-				y: {
-					formatter: function(val) {
-						return val + ' Aktivitas';
-					}
-				}
-			}
-		};
-
-		var moduleActivityChart = new ApexCharts(document.querySelector("#chart-aktivitas-modul"), moduleActivityOptions);
-		moduleActivityChart.render();
+		
+		// Check if data exists
+		if (!moduleActivityData || moduleActivityData.length === 0) {
+		    // Create a div to replace the chart with a message
+		    const chartContainer = document.querySelector("#chart-aktivitas-modul");
+		    
+		    // Clear any existing content
+		    chartContainer.innerHTML = '';
+		    
+		    // Create and style the no data message container
+		    const noDataDiv = document.createElement('div');
+		    noDataDiv.style.display = 'flex';
+		    noDataDiv.style.flexDirection = 'column';
+		    noDataDiv.style.alignItems = 'center';
+		    noDataDiv.style.justifyContent = 'center';
+		    noDataDiv.style.height = '350px';
+		    noDataDiv.style.width = '100%';
+		    
+		    // Add an icon (using a simple SVG)
+		    const iconDiv = document.createElement('div');
+		    iconDiv.innerHTML = `
+		        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cccccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+		            <circle cx="12" cy="12" r="10"></circle>
+		            <line x1="12" y1="8" x2="12" y2="12"></line>
+		            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+		        </svg>
+		    `;
+		    
+		    // Add text message
+		    const messageDiv = document.createElement('div');
+		    messageDiv.textContent = 'Tidak ada aktivitas';
+		    messageDiv.style.marginTop = '16px';
+		    messageDiv.style.fontSize = '16px';
+		    messageDiv.style.color = '#666666';
+		    messageDiv.style.fontWeight = '500';
+		    
+		    // Append elements to container
+		    noDataDiv.appendChild(iconDiv);
+		    noDataDiv.appendChild(messageDiv);
+		    chartContainer.appendChild(noDataDiv);
+		} else {
+		    var moduleActivityOptions = {
+		        series: moduleActivityData,
+		        chart: {
+		            height: 350,
+		            type: 'line',
+		            toolbar: {
+		                show: false
+		            }
+		        },
+		        colors: ['#5D3FD3', '#dc3545', '#ffc107', '#198754', '#ff9800'],
+		        dataLabels: {
+		            enabled: false
+		        },
+		        stroke: {
+		            curve: 'smooth',
+		            width: 2
+		        },
+		        grid: {
+		            borderColor: '#e0e0e0',
+		            padding: {
+		                top: 10,
+		                right: 10,
+		                bottom: 10,
+		                left: 10
+		            }
+		        },
+		        xaxis: {
+		            categories: Array.from({length: 31}, (_, i) => {
+		                return (i + 1).toString().padStart(2, '0');
+		            }),
+		            labels: {
+		                rotate: -45,
+		                rotateAlways: false
+		            },
+		            title: {
+		                text: 'Tanggal'
+		            }
+		        },
+		        yaxis: {
+		            title: {
+		                text: 'Jumlah Aktivitas'
+		            }
+		        },
+		        legend: {
+		            position: 'top',
+		            horizontalAlign: 'right'
+		        },
+		        tooltip: {
+		            shared: true,
+		            intersect: false,
+		            y: {
+		                formatter: function(val) {
+		                    return val + ' Aktivitas';
+		                }
+		            }
+		        }
+		    };
+		
+		    var moduleActivityChart = new ApexCharts(document.querySelector("#chart-aktivitas-modul"), moduleActivityOptions);
+		    moduleActivityChart.render();
+		}
 	});
 
 	document.addEventListener('DOMContentLoaded', function() {
@@ -527,7 +625,7 @@ chartModul.render();
 								<path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L6.707 7l4.647 4.646a.5.5 0 0 1-.708.708l-5-5a.5.5 0 0 1 0-.708l5-5a.5.5 0 0 1 .708 0z"/>
 								</svg>`,
 						next: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
-									<path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l5 5a.5.5 0 0 1 0 .708l-5 5a.5.5 0 1 1-.708-.708L9.293 7 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+									<path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l5 5a.5.5 0 0 1 0 .708l-5 5a.5.5 0 0 1 .708 0z"/>
 								</svg>`,
 						last: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-chevron-bar-right" viewBox="0 0 16 16">
 							<path fill-rule="evenodd" d="M3.146 1.646a.5.5 0 0 1 .708 0l5 5a.5.5 0 0 1 0 .708l-5 5a.5.5 0 0 1-.708-.708L8.293 7 3.146 2.354a.5.5 0 0 1 0-.708z"/>
