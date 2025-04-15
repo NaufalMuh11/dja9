@@ -252,13 +252,9 @@ if (!moduleDistribution || moduleDistribution.length === 0 || !totalModules) {
                 custom: function({ series, seriesIndex, dataPointIndex, w }) {
                     const label = w.config.labels[seriesIndex];
                     const value = series[seriesIndex];
-                    return `<div style="background: ${w.config.colors[seriesIndex]}; color: white; padding: 6px 12px; border-radius: 4px;">
+                    return `<div style="background: ${w.config.colors[seriesIndex]}; font-size: 12px;font-weight: 600;color: white; padding: 6px 12px; border-radius: 4px;">
                         <span>${label}: ${value} Aktivitas</span>
                     </div>`;
-                },
-                style: {
-                    fontSize: '14px',
-                    fontFamily: undefined
                 },
                 theme: 'dark',
                 fillSeriesColor: true
