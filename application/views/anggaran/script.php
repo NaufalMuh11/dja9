@@ -75,7 +75,7 @@
 			},
 			yaxis: {
 				min: 0,
-				max: 30,
+				max: Math.max(...hourlyData.current_year, ...hourlyData.previous_year) + 5, // Dynamic max + padding
 				tickAmount: 6,
 				labels: {
 					formatter: function(val) {
