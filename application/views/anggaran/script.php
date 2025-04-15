@@ -374,6 +374,12 @@ if (!moduleDistribution || moduleDistribution.length === 0 || !totalModules) {
 		        tooltip: {
 		            shared: true,
 		            intersect: false,
+					x: {
+		                show: true,
+		                formatter: function(val) {
+		                    return 'Aktivitas Tanggal ' + val;
+		                }
+		            },
 		            y: {
 		                formatter: function(val) {
 		                    return val + ' Aktivitas';
