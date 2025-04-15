@@ -283,7 +283,7 @@
                 chart: {
                     ...commonChartSettings,
                     type: 'boxPlot',
-                    height: 350
+                    height: 500
                 },
                 plotOptions: {
                     boxPlot: {
@@ -294,10 +294,23 @@
                     }
                 },
                 xaxis: {
+                    title: {
+                        text: 'SBM'
+                    },
                     labels: {
                         rotate: -90,
                         trim: false,
                         maxHeight: 120
+                    }
+                },
+                yaxis: {
+                    title: {
+                        text: 'Biaya (Ribu Rupiah)'
+                    },
+                    labels: {
+                        formatter: function(value) {
+                            return new Intl.NumberFormat('id-ID').format(value);
+                        }
                     }
                 },
                 tooltip: {
@@ -409,6 +422,9 @@
                 },
                 xaxis: {
                     categories: categories,
+                    title: {
+                        text: 'Provinsi'
+                    },
                     labels: {
                         rotate: -90,
                         trim: false,
@@ -416,6 +432,9 @@
                     }
                 },
                 yaxis: {
+                    title: {
+                        text: 'Biaya (Ribu Rupiah)'
+                    },
                     labels: {
                         formatter: function(value) {
                             return new Intl.NumberFormat('id-ID').format(value);
