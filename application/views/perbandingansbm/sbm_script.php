@@ -952,7 +952,6 @@
                 // Update charts with current selection
                 await loadBoxplotData(sbmCode);
                 await loadBarData(sbmCode);
-                await loadProvinceData();
 
                 // Update lastRefreshTime after successful refresh
                 lastRefreshTime = new Date();
@@ -1157,7 +1156,6 @@
                     const sbmCode = elements.sbmSelect ? elements.sbmSelect.value : '127';
                     await loadBoxplotData(sbmCode);
                     await loadBarData(sbmCode);
-                    await loadProvinceData();
                     await updateLastUpdateTime();
 
                     setupAutoRefresh();
