@@ -46,23 +46,23 @@ class MyTask_model extends CI_Model
     }
 
 
-    #-- Card --#
-    public function get_total_users()
-    {
-        $this->dbsatu->select('COUNT(DISTINCT t_mytask_log.iduser) as total_users, t_user.nmuser, t_user.idusergroup, t_user_group_satu.nmusergroup');
-        $this->dbsatu->from('t_mytask_log');
-        $this->dbsatu->join('t_user', 't_mytask_log.iduser = t_user.iduser', 'left');
-        $this->dbsatu->join('t_user_group_satu', 't_user.idusergroup = t_user_group_satu.idusergroup', 'left');
-        $this->dbsatu->group_by('t_user.nmuser, t_user.idusergroup, t_user_group_satu.nmusergroup');
-        $query = $this->dbsatu->get();
+	#-- Card --#
+	public function get_total_users()
+	{
+		$this->dbsatu->select('t_user.nmuser, t_user.profilepic, t_user_group_satu.nmusergroup');
+		$this->dbsatu->from('t_user');
+		$this->dbsatu->join('t_user_group_satu', 't_user.idusergroup = t_user_group_satu.idusergroup', 'left');
+		$this->dbsatu->order_by('t_user.nmuser', 'ASC');
 
-        if ($query && $query->num_rows() > 0) {
-            return $query->result();
-        }
-        return array();
-    }
+		$query = $this->dbsatu->get();
 
-    public function get_active_users()
+		if ($query && $query->num_rows() > 0) {
+			return $query->result();
+		}
+		return array();
+	}
+
+	public function get_active_users()
     {
         $this->dbsatu->select('t_mytask_log.iduser, t_user.nmuser, t_user.idusergroup, t_user_group_satu.nmusergroup, MAX(t_mytask_log.datetime) as last_activity');
         $this->dbsatu->from('t_mytask_log');
@@ -111,15 +111,15 @@ class MyTask_model extends CI_Model
     // Dari branch views-mytask-modul
     public function get_top_module_distribution($year, $month) 
     {
-        $this->db->select('t_mytask_link.keterangan, COUNT(t_mytask_log.id) as access_count');
-        $this->db->from('t_mytask_log');
-        $this->db->join('t_mytask_link', 't_mytask_log.buttonid = t_mytask_link.buttonid', 'left');
-        $this->db->where('YEAR(t_mytask_log.datetime)', $year);
-        $this->db->where('MONTH(t_mytask_log.datetime)', $month);
-        $this->db->group_by('t_mytask_link.buttonid, t_mytask_link.keterangan');
-        $this->db->order_by('access_count', 'DESC');
-        $this->db->limit(5);
-        return $this->db->get()->result();
+        $this->dbsatu->select('t_mytask_link.keterangan, COUNT(t_mytask_log.id) as access_count');
+        $this->dbsatu->from('t_mytask_log');
+        $this->dbsatu->join('t_mytask_link', 't_mytask_log.buttonid = t_mytask_link.buttonid', 'left');
+        $this->dbsatu->where('YEAR(t_mytask_log.datetime)', $year);
+        $this->dbsatu->where('MONTH(t_mytask_log.datetime)', $month);
+        $this->dbsatu->group_by('t_mytask_link.buttonid, t_mytask_link.keterangan');
+        $this->dbsatu->order_by('access_count', 'DESC');
+        $this->dbsatu->limit(5);
+        return $this->dbsatu->get()->result();
     }
 
     public function get_daily_distribution_from_top_modules($year, $month, $top_modules)
@@ -131,16 +131,16 @@ class MyTask_model extends CI_Model
         $start_date = date("{$year}-{$month}-01");
         $end_date   = date("Y-m-t", strtotime($start_date));
 
-        $this->db->select("DATE(l.datetime) AS Tanggal, link.keterangan AS Nama_Modul, COUNT(*) AS Jumlah_Aktivitas");
-        $this->db->from("t_mytask_log l");
-        $this->db->join("t_mytask_link link", "l.buttonid = link.buttonid", "inner");
-        $this->db->where("l.datetime >=", $start_date);
-        $this->db->where("l.datetime <=", $end_date);
-        $this->db->where_in("link.keterangan", array_column($top_modules, 'keterangan'));
-        $this->db->group_by("DATE(l.datetime), link.keterangan");
-        $this->db->order_by("Tanggal, Nama_Modul");
+        $this->dbsatu->select("DATE(l.datetime) AS Tanggal, link.keterangan AS Nama_Modul, COUNT(*) AS Jumlah_Aktivitas");
+        $this->dbsatu->from("t_mytask_log l");
+        $this->dbsatu->join("t_mytask_link link", "l.buttonid = link.buttonid", "inner");
+        $this->dbsatu->where("l.datetime >=", $start_date);
+        $this->dbsatu->where("l.datetime <=", $end_date);
+        $this->dbsatu->where_in("link.keterangan", array_column($top_modules, 'keterangan'));
+        $this->dbsatu->group_by("DATE(l.datetime), link.keterangan");
+        $this->dbsatu->order_by("Tanggal, Nama_Modul");
 
-        return $this->db->get()->result();
+        return $this->dbsatu->get()->result();
     }
 
     // Dari branch views-mytask
@@ -150,18 +150,18 @@ class MyTask_model extends CI_Model
         
         for ($hour = 0; $hour < 24; $hour++) {
             // Current year data
-            $this->db->select('COUNT(DISTINCT iduser) as total');
-            $this->db->where('YEAR(datetime)', $year);
-            $this->db->where('MONTH(datetime)', $month);
-            $this->db->where('HOUR(datetime)', $hour);
-            $current_data[] = $this->db->get('t_mytask_log')->row()->total ?? 0;
+            $this->dbsatu->select('COUNT(DISTINCT iduser) as total');
+            $this->dbsatu->where('YEAR(datetime)', $year);
+            $this->dbsatu->where('MONTH(datetime)', $month);
+            $this->dbsatu->where('HOUR(datetime)', $hour);
+            $current_data[] = $this->dbsatu->get('t_mytask_log')->row()->total ?? 0;
             
             // Previous year data
-            $this->db->select('COUNT(DISTINCT iduser) as total');
-            $this->db->where('YEAR(datetime)', $year - 1);
-            $this->db->where('MONTH(datetime)', $month);
-            $this->db->where('HOUR(datetime)', $hour);
-            $previous_data[] = $this->db->get('t_mytask_log')->row()->total ?? 0;
+            $this->dbsatu->select('COUNT(DISTINCT iduser) as total');
+            $this->dbsatu->where('YEAR(datetime)', $year - 1);
+            $this->dbsatu->where('MONTH(datetime)', $month);
+            $this->dbsatu->where('HOUR(datetime)', $hour);
+            $previous_data[] = $this->dbsatu->get('t_mytask_log')->row()->total ?? 0;
         }
         
         return array(

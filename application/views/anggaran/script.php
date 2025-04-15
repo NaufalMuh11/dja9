@@ -63,14 +63,14 @@
 				},
 				title: {
 					text: 'Jam',
-					offsetY: 0,  // Adjusted offsetY
+					offsetY: 0, // Adjusted offsetY
 					offsetX: 0,
 					style: {
 						fontSize: '12px'
 					}
 				},
 				labels: {
-					offsetY: 5  // Added space between labels and title
+					offsetY: 5 // Added space between labels and title
 				}
 			},
 			yaxis: {
@@ -110,177 +110,176 @@
 
 		// Module Access Chart
 		const moduleDistribution = <?php echo $module_distribution ?? '[]'; ?>;
-const totalModules = moduleDistribution.reduce((sum, item) => sum + parseInt(item.access_count), 0);
+  const totalModules = moduleDistribution.reduce((sum, item) => sum + parseInt(item.access_count), 0);
 
-var chartModul;
+  var chartModul;
 
-// Check if data exists
-if (!moduleDistribution || moduleDistribution.length === 0 || !totalModules) {
-    // Create a div to replace the chart with a message
-    const chartContainer = document.getElementById("chart-akses-modul");
-    
-    // Clear any existing content
-    chartContainer.innerHTML = '';
-    
-    // Create and style the no data message container
-    const noDataDiv = document.createElement('div');
-    noDataDiv.style.display = 'flex';
-    noDataDiv.style.flexDirection = 'column';
-    noDataDiv.style.alignItems = 'center';
-    noDataDiv.style.justifyContent = 'center';
-    noDataDiv.style.height = '350px';
-    noDataDiv.style.width = '100%';
-    
-    // Add an icon (using a simple SVG)
-    const iconDiv = document.createElement('div');
-    iconDiv.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cccccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="12"></line>
-            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
-    `;
-    
-    // Add text message
-    const messageDiv = document.createElement('div');
-    messageDiv.textContent = 'Tidak ada aktivitas';
-    messageDiv.style.marginTop = '16px';
-    messageDiv.style.fontSize = '16px';
-    messageDiv.style.color = '#666666';
-    messageDiv.style.fontWeight = '500';
-    
-    // Append elements to container
-    noDataDiv.appendChild(iconDiv);
-    noDataDiv.appendChild(messageDiv);
-    chartContainer.appendChild(noDataDiv);
-} else {
-    // Initialize chart with data
-    chartModul = new ApexCharts(
-        document.getElementById("chart-akses-modul"), {
-            chart: {
-                type: "donut",
-                height: 350,
-                background: 'transparent',
-                offsetY: 30,
-                offsetX: -10,
-                events: {
-                    dataPointSelection: function(event, chartContext, config) {
-                        setTimeout(() => {
-                            const totalLabel = document.querySelector('.apexcharts-datalabels-group .apexcharts-datalabel-label');
-                            const totalValue = document.querySelector('.apexcharts-datalabels-group .apexcharts-datalabel-value');
-                            
-                            if (totalLabel) {
-                                totalLabel.style.fill = '#333333';
-                            }
-                            
-                            if (totalValue) {
-                                totalValue.style.fill = '#333333';
-                            }
-                        }, 50);
-                    }
-                },
-                noData: {
-                    text: 'Tidak ada aktivitas',
-                    align: 'center',
-                    verticalAlign: 'middle',
-                    offsetX: 0,
-                    offsetY: 0,
-                    style: {
-                        color: '#666666',
-                        fontSize: '16px',
-                        fontFamily: undefined
-                    }
-                }
-            },
-            series: moduleDistribution.map(item => parseInt(item.access_count)),
-            labels: moduleDistribution.map(item => item.keterangan),
-            colors: ['#5D3FD3', '#dc3545', '#ffc107', '#198754', '#ff9800'],
-            plotOptions: {
-                pie: {
-                    offsetY: 10,
-                    startAngle: 0,
-                    endAngle: 360,
-                    donut: {
-                        size: '75%',
-                        labels: {
-                            show: true,
-                            name: {
-                                offsetY: -10
-                            },
-                            value: {
-                                offsetY: 0
-                            },
-                            total: {
-                                show: true,
-                                showAlways: true,
-                                label: 'Jumlah Modul Yang Diakses',
-                                fontSize: '12px',
-                                fontWeight: 400,
-                                color: '#333333',
-                                offsetY: -10,
-                                formatter: function() {
-                                    return totalModules.toLocaleString('id-ID') + ' Modul';
-                                }
-                            },
-                            value: {
-                                show: true,
-                                fontSize: '24px',
-                                fontWeight: 700,
-                                color: '#333333',
-                                offsetY: 5,
-                                formatter: function(val) {
-                                    return parseInt(val).toLocaleString('id-ID') + ' Aktivitas';
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            stroke: {
-                width: 0
-            },
-            dataLabels: {
-                enabled: true,
-                formatter: function(val, opts) {
-                    return Math.round(val) + '%';
-                },
-                dropShadow: {
-                    enabled: false
-                }
-            },
-            tooltip: {
-                custom: function({ series, seriesIndex, dataPointIndex, w }) {
-                    const label = w.config.labels[seriesIndex];
-                    const value = series[seriesIndex];
-                    return `<div style="background: ${w.config.colors[seriesIndex]}; font-size: 12px;font-weight: 600;color: white; padding: 6px 12px; border-radius: 4px;">
-                        <span>${label}: ${value} Aktivitas</span>
-                    </div>`;
-                },
-                theme: 'dark',
-                fillSeriesColor: true
-            },
-            legend: {
-                show: true,
-                position: "right",
-                offsetY: 40,
-                height: 230,
-                markers: {
-                    width: 12,
-                    height: 12,
-                    radius: 2
-                },
-                itemMargin: {
-                    horizontal: 0,
-                    vertical: 8
-                }
-            }
-        });
-    
-    // Render the chart
-    chartModul.render();
-}
+  // Check if data exists
+  if (!moduleDistribution || moduleDistribution.length === 0 || !totalModules) {
+      // Create a div to replace the chart with a message
+      const chartContainer = document.getElementById("chart-akses-modul");
 
-		// Module Activity Chart
+      // Clear any existing content
+      chartContainer.innerHTML = '';
+
+      // Create and style the no data message container
+      const noDataDiv = document.createElement('div');
+      noDataDiv.style.display = 'flex';
+      noDataDiv.style.flexDirection = 'column';
+      noDataDiv.style.alignItems = 'center';
+      noDataDiv.style.justifyContent = 'center';
+      noDataDiv.style.height = '350px';
+      noDataDiv.style.width = '100%';
+
+      // Add an icon (using a simple SVG)
+      const iconDiv = document.createElement('div');
+      iconDiv.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cccccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+      `;
+
+      // Add text message
+      const messageDiv = document.createElement('div');
+      messageDiv.textContent = 'Tidak ada aktivitas';
+      messageDiv.style.marginTop = '16px';
+      messageDiv.style.fontSize = '16px';
+      messageDiv.style.color = '#666666';
+      messageDiv.style.fontWeight = '500';
+
+      // Append elements to container
+      noDataDiv.appendChild(iconDiv);
+      noDataDiv.appendChild(messageDiv);
+      chartContainer.appendChild(noDataDiv);
+  } else {
+      // Initialize chart with data
+      chartModul = new ApexCharts(
+          document.getElementById("chart-akses-modul"), {
+              chart: {
+                  type: "donut",
+                  height: 350,
+                  background: 'transparent',
+                  offsetY: 30,
+                  offsetX: -10,
+                  events: {
+                      dataPointSelection: function(event, chartContext, config) {
+                          setTimeout(() => {
+                              const totalLabel = document.querySelector('.apexcharts-datalabels-group .apexcharts-datalabel-label');
+                              const totalValue = document.querySelector('.apexcharts-datalabels-group .apexcharts-datalabel-value');
+
+                              if (totalLabel) {
+                                  totalLabel.style.fill = '#333333';
+                              }
+
+                              if (totalValue) {
+                                  totalValue.style.fill = '#333333';
+                              }
+                          }, 50);
+                      }
+                  },
+                  noData: {
+                      text: 'Tidak ada aktivitas',
+                      align: 'center',
+                      verticalAlign: 'middle',
+                      offsetX: 0,
+                      offsetY: 0,
+                      style: {
+                          color: '#666666',
+                          fontSize: '16px',
+                          fontFamily: undefined
+                      }
+                  }
+              },
+              series: moduleDistribution.map(item => parseInt(item.access_count)),
+              labels: moduleDistribution.map(item => item.keterangan),
+              colors: ['#5D3FD3', '#dc3545', '#ffc107', '#198754', '#ff9800'],
+              plotOptions: {
+                  pie: {
+                      offsetY: 10,
+                      startAngle: 0,
+                      endAngle: 360,
+                      donut: {
+                          size: '75%',
+                          labels: {
+                              show: true,
+                              name: {
+                                  offsetY: -10
+                              },
+                              value: {
+                                  offsetY: 0
+                              },
+                              total: {
+                                  show: true,
+                                  showAlways: true,
+                                  label: 'Jumlah Modul Yang Diakses',
+                                  fontSize: '12px',
+                                  fontWeight: 400,
+                                  color: '#333333',
+                                  offsetY: -10,
+                                  formatter: function() {
+                                      return totalModules.toLocaleString('id-ID') + ' Modul';
+                                  }
+                              },
+                              value: {
+                                  show: true,
+                                  fontSize: '24px',
+                                  fontWeight: 700,
+                                  color: '#333333',
+                                  offsetY: 5,
+                                  formatter: function(val) {
+                                      return parseInt(val).toLocaleString('id-ID') + ' Aktivitas';
+                                  }
+                              }
+                          }
+                      }
+                  }
+              },
+              stroke: {
+                  width: 0
+              },
+              dataLabels: {
+                  enabled: true,
+                  formatter: function(val, opts) {
+                      return Math.round(val) + '%';
+                  },
+                  dropShadow: {
+                      enabled: false
+                  }
+              },
+              tooltip: {
+                  custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                      const label = w.config.labels[seriesIndex];
+                      const value = series[seriesIndex];
+                      return `<div style="background: ${w.config.colors[seriesIndex]}; font-size: 12px;font-weight: 600;color: white; padding: 6px 12px; border-radius: 4px;">
+                          <span>${label}: ${value} Aktivitas</span>
+                      </div>`;
+                  },
+                  theme: 'dark',
+                  fillSeriesColor: true
+              },
+              legend: {
+                  show: true,
+                  position: "right",
+                  offsetY: 40,
+                  height: 230,
+                  markers: {
+                      width: 12,
+                      height: 12,
+                      radius: 2
+                  },
+                  itemMargin: {
+                      horizontal: 0,
+                      vertical: 8
+                  }
+              }
+          });
+
+      // Render the chart
+      chartModul.render();
+  }
+
 		// Module Activity Chart
 		const moduleActivityData = <?php echo $module_activity_data ?? '[]'; ?>;
 		
@@ -455,23 +454,26 @@ if (!moduleDistribution || moduleDistribution.length === 0 || !totalModules) {
 			return;
 		}
 
-		// Display the data
-		users.forEach(user => {
+		// Filter data yang lengkap saja
+		const filteredUsers = users.filter(user => user.nmuser && user.nmusergroup);
+
+		// Display valid data
+		filteredUsers.forEach(user => {
 			const profilePath = `files/profiles/${user.profilepic}`;
 			const row = `<tr class="fs-6">
-						<td class="py-3 align-middle">
-							<div class="d-flex align-items-center">
-							<img src="${profilePath}" onerror="this.onerror=null; this.src='files/profiles/000.png';" class="rounded-circle me-2" width="40" height="40" alt="${user.nmuser}">
-							<span>${user.nmuser ?? 'Unknown'}</span>
-							</div>
-						</td>
-						<td class="py-3 align-middle">${user.nmusergroup ?? 'Unknown'}</td>
-						<td class="py-3 align-middle text-end">${user.click_count}</td>
-						</tr>
-						`;
+			<td class="py-3 align-middle">
+				<div class="d-flex align-items-center">
+					<img src="${profilePath}" onerror="this.onerror=null; this.src='files/profiles/000.png';" class="rounded-circle me-2" width="40" height="40" alt="${user.nmuser}">
+					<span>${user.nmuser}</span>
+				</div>
+			</td>
+			<td class="py-3 align-middle">${user.nmusergroup}</td>
+			<td class="py-3 align-middle text-end">${user.click_count}</td>
+		</tr>`;
 			tableBody.innerHTML += row;
 		});
 	}
+
 
 	// Submit form when filter changes
 	function submitFilterForm() {
@@ -481,63 +483,88 @@ if (!moduleDistribution || moduleDistribution.length === 0 || !totalModules) {
 	// Card
 	document.getElementById('totalUsers').textContent = usersData.total_users.length || 0;
 	document.getElementById('activeUsers').innerHTML = `
-    <span class="badge py-2 px-3 text-white fs-6 cursor-pointer"
-		style="background-color: #6f42c1; cursor: pointer; transition: background-color 0.2s ease-in-out;"
-		onmouseover="this.style.backgroundColor='#996bed'"
-		onmouseout="this.style.backgroundColor='#6f42c1'"
-		data-bs-toggle="modal" 
-		data-bs-target="#dataModal" 
-		data-title="Pengguna Aktif" 
-		data-type="active_users">
-		<strong>${usersData.active_users.length || ''}</strong>
+<span class="badge py-2 px-3 text-white fs-6 cursor-pointer"
+    style="background-color: #6f42c1; cursor: pointer; transition: background-color 0.2s ease-in-out;"
+    onmouseover="this.style.backgroundColor='#996bed'"
+    onmouseout="this.style.backgroundColor='#6f42c1'"
+    data-bs-toggle="modal" 
+    data-bs-target="#dataModal" 
+    data-title="Pengguna Aktif" 
+    data-type="active_users">
+    <strong>${usersData.active_users.length || ''}</strong>
     Pengguna Aktif        
-	</span>`;
+</span>`;
 	document.getElementById('totalModules').textContent = usersData.total_modules.length || 0;
 	document.getElementById('totalServices').textContent = usersData.total_services.length || 0;
 
-	// Table configurations for each data type
 	const tableConfigs = {
 		total_users: {
 			columns: [{
+					title: "No",
+					data: null,
+					width: "50px",
+					class: "text-center",
+					render: function(data, type, row, meta) {
+						return meta.row + meta.settings._iDisplayStart + 1;
+					}
+				},
+				{
+					title: "Profil",
+					data: "profilepic",
+					width: "80px",
+					class: "text-center",
+					render: function(data, type, row) {
+						const profilePath = `files/profiles/${data || '000.png'}`;
+						return `<img src="${profilePath}" class="avatar avatar-sm float-left" 
+								onerror="this.onerror=null; this.src='files/profiles/000.png';" 
+								alt="${row.nmuser || 'User'}" width="40" height="40">`;
+					}
+				},
+				{
 					title: "Nama User",
-					data: "nmuser"
+					data: "nmuser",
+					render: function(data) {
+						return data || "Unknown";
+					}
 				},
 				{
-					title: "ID User Group",
-					data: "idusergroup"
-				},
-				{
-					title: "Nama User Group",
-					data: "nmusergroup"
-				},
-				{
-					title: "Total",
-					data: "total_users"
+					title: "Unit Kerja",
+					data: "nmusergroup",
+					render: function(data) {
+						return data || "Unknown";
+					}
 				}
 			]
 		},
 		active_users: {
 			columns: [{
-					title: "ID User",
-					data: "iduser"
+					title: "No",
+					data: null,
+					width: "50px",
+					class: "text-center",
+					render: function(data, type, row, meta) {
+						return meta.row + meta.settings._iDisplayStart + 1;
+					}
 				},
 				{
 					title: "Nama User",
-					data: "nmuser"
+					data: "nmuser",
+					render: function(data) {
+						return data || "Unknown";
+					}
 				},
 				{
-					title: "ID User Group",
-					data: "idusergroup"
-				},
-				{
-					title: "Nama User Group",
-					data: "nmusergroup"
+					title: "Unit Kerja",
+					data: "nmusergroup",
+					render: function(data) {
+						return data || "Unknown";
+					}
 				},
 				{
 					title: "Aktivitas Terakhir",
 					data: "last_activity",
 					render: function(data) {
-						if (!data) return '';
+						if (!data) return "Unknown";
 						return new Date(data).toLocaleString();
 					}
 				}
@@ -545,35 +572,46 @@ if (!moduleDistribution || moduleDistribution.length === 0 || !totalModules) {
 		},
 		total_modules: {
 			columns: [{
-					title: "Button ID",
-					data: "buttonid"
+					title: "No",
+					data: null,
+					width: "50px",
+					class: "text-center",
+					render: function(data, type, row, meta) {
+						return meta.row + meta.settings._iDisplayStart + 1;
+					}
 				},
 				{
-					title: "Keterangan",
-					data: "keterangan"
-				},
-				{
-					title: "Nama Produk",
-					data: "namaproduk"
-				},
-				{
-					title: "Jumlah Penggunaan",
-					data: "usage_count"
+					title: "Nama Modul",
+					data: "keterangan",
+					render: function(data) {
+						return data || "Unknown";
+					}
 				}
 			]
 		},
 		total_services: {
 			columns: [{
-					title: "ID Produk",
-					data: "idproduk"
+					title: "No",
+					data: null,
+					width: "50px",
+					class: "text-center",
+					render: function(data, type, row, meta) {
+						return meta.row + meta.settings._iDisplayStart + 1;
+					}
+				}, {
+					title: "Nama Layanan",
+					data: "namaproduk",
+					render: function(data) {
+						return data || "Unknown";
+					}
 				},
 				{
-					title: "Nama Produk",
-					data: "namaproduk"
-				},
-				{
-					title: "Jumlah Modul",
-					data: "module_count"
+					title: "Jumlah Modul Pada Layanan",
+					class: "text-left",
+					data: "module_count",
+					render: function(data) {
+						return data || "Unknown";
+					}
 				}
 			]
 		}
@@ -602,8 +640,11 @@ if (!moduleDistribution || moduleDistribution.length === 0 || !totalModules) {
 			// Destroy existing DataTable if it exists
 			if (dataTable) {
 				dataTable.destroy();
-				document.querySelector('#dataTable thead tr').innerHTML = '';
 			}
+
+			// Clear the table header and body
+			document.querySelector('#dataTable thead').innerHTML = '<tr></tr>';
+			document.querySelector('#dataTable tbody').innerHTML = '';
 
 			// Create table headers
 			const headerRow = document.querySelector('#dataTable thead tr');
@@ -611,12 +652,29 @@ if (!moduleDistribution || moduleDistribution.length === 0 || !totalModules) {
 			tableConfigs[dataType].columns.forEach(column => {
 				const th = document.createElement('th');
 				th.textContent = column.title;
+				if (column.width) {
+					th.style.width = column.width;
+				}
 				headerRow.appendChild(th);
+			});
+
+			// Filter out rows where all data fields are empty
+			const filteredData = usersData[dataType].filter(row => {
+				let hasData = false;
+				// Check each column that's not the "No" column (index 0)
+				for (let i = 1; i < tableConfigs[dataType].columns.length; i++) {
+					const column = tableConfigs[dataType].columns[i];
+					if (row[column.data]) {
+						hasData = true;
+						break;
+					}
+				}
+				return hasData;
 			});
 
 			// Initialize DataTable with the current data type
 			dataTable = new DataTable('#dataTable', {
-				data: usersData[dataType],
+				data: filteredData,
 				columns: tableConfigs[dataType].columns,
 				pageLength: 10,
 				language: {
@@ -628,24 +686,23 @@ if (!moduleDistribution || moduleDistribution.length === 0 || !totalModules) {
 					infoFiltered: "(difilter dari _MAX_ total data)",
 					paginate: {
 						first: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-chevron-bar-left" viewBox="0 0 16 16">
-								<path fill-rule="evenodd" d="M12.854 1.646a.5.5 0 0 1 0 .708L8.207 7l4.647 4.646a.5.5 0 0 1-.708.708l-5-5a.5.5 0 0 1 0-.708l5-5a.5.5 0 0 1 .708 0z"/>
-								<path fill-rule="evenodd" d="M4 2.5a.5.5 0 0 1 .5.5v10a.5.5 0 0 1-1 0v-10a.5.5 0 0 1 .5-.5z"/>
-								</svg>`,
+                            <path fill-rule="evenodd" d="M12.854 1.646a.5.5 0 0 1 0 .708L8.207 7l4.647 4.646a.5.5 0 0 1-.708.708l-5-5a.5.5 0 0 1 0-.708l5-5a.5.5 0 0 1 .708 0z"/>
+                            <path fill-rule="evenodd" d="M4 2.5a.5.5 0 0 1 .5.5v10a.5.5 0 0 1-1 0v-10a.5.5 0 0 1 .5-.5z"/>
+                            </svg>`,
 						previous: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
-								<path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L6.707 7l4.647 4.646a.5.5 0 0 1-.708.708l-5-5a.5.5 0 0 1 0-.708l5-5a.5.5 0 0 1 .708 0z"/>
-								</svg>`,
+                            <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L6.707 7l4.647 4.646a.5.5 0 0 1-.708.708l-5-5a.5.5 0 0 1 0-.708l5-5a.5.5 0 0 1 .708 0z"/>
+                            </svg>`,
 						next: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
 									<path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l5 5a.5.5 0 0 1 0 .708l-5 5a.5.5 0 0 1 .708 0z"/>
 								</svg>`,
 						last: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-chevron-bar-right" viewBox="0 0 16 16">
-							<path fill-rule="evenodd" d="M3.146 1.646a.5.5 0 0 1 .708 0l5 5a.5.5 0 0 1 0 .708l-5 5a.5.5 0 0 1-.708-.708L8.293 7 3.146 2.354a.5.5 0 0 1 0-.708z"/>
-							<path fill-rule="evenodd" d="M12 2.5a.5.5 0 0 1 .5.5v10a.5.5 0 0 1-1 0v-10a.5.5 0 0 1 .5-.5z"/>
-							</svg>`
+                        <path fill-rule="evenodd" d="M3.146 1.646a.5.5 0 0 1 .708 0l5 5a.5.5 0 0 1 0 .708l-5 5a.5.5 0 0 1-.708-.708L8.293 7 3.146 2.354a.5.5 0 0 1 0-.708z"/>
+                        <path fill-rule="evenodd" d="M12 2.5a.5.5 0 0 1 .5.5v10a.5.5 0 0 1-1 0v-10a.5.5 0 0 1 .5-.5z"/>
+                        </svg>`
 					}
 				}
 			});
 		});
-
 		// Setup search functionality
 		document.getElementById('table-search').addEventListener('keyup', function() {
 			if (dataTable) {
@@ -685,19 +742,24 @@ if (!moduleDistribution || moduleDistribution.length === 0 || !totalModules) {
 		if (!dataTable) return '';
 
 		const config = tableConfigs[currentDataType];
-		const data = usersData[currentDataType];
+		const data = dataTable.data().toArray(); // Use the filtered data from DataTable
 
 		// Create header row
 		let csvContent = config.columns.map(col => col.title).join(',') + '\n';
 
 		// Add data rows
-		data.forEach(row => {
-			const rowValues = config.columns.map(col => {
-				let value = row[col.data] || '';
+		data.forEach((row, index) => {
+			const rowValues = config.columns.map((col, colIndex) => {
+				// For the No column, use the current index + 1
+				if (colIndex === 0) {
+					return index + 1;
+				}
+
+				let value = row[col.data] || 'Unknown';
 
 				// Format date if needed
-				if (col.data === 'last_activity' && value) {
-					value = new Date(value).toLocaleString();
+				if (col.data === 'last_activity' && row[col.data]) {
+					value = new Date(row[col.data]).toLocaleString();
 				}
 
 				// Escape commas in values
@@ -782,6 +844,11 @@ if (!moduleDistribution || moduleDistribution.length === 0 || !totalModules) {
 			headStyles: {
 				fillColor: [66, 139, 202],
 				textColor: 255
+			},
+			columnStyles: {
+				0: {
+					cellWidth: 30
+				} // Set width for the No column in PDF
 			}
 		});
 
@@ -793,59 +860,71 @@ if (!moduleDistribution || moduleDistribution.length === 0 || !totalModules) {
 	function printTable() {
 		const printWindow = window.open('', '_blank');
 		const title = document.getElementById('dataModalLabel').textContent;
+		const data = dataTable.data().toArray(); // Use the filtered data from DataTable
+		const columns = tableConfigs[currentDataType].columns;
 
 		let printContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>${title}</title>
-        <style>
-          table { border-collapse: collapse; width: 100%; }
-          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-          th { background-color: #f2f2f2; }
-          tr:nth-child(even) { background-color: #f9f9f9; }
-        </style>
-      </head>
-      <body>
-        <h1>${title}</h1>
-        <table>
-          <thead>
-            <tr>
-    `;
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <title>${title}</title>
+    <style>
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+      th { background-color: #f2f2f2; }
+      tr:nth-child(even) { background-color: #f9f9f9; }
+      .number-column { width: 50px; }
+    </style>
+  </head>
+  <body>
+    <h1>${title}</h1>
+    <table>
+      <thead>
+        <tr>
+`;
 
 		// Add headers
-		tableConfigs[currentDataType].columns.forEach(col => {
-			printContent += `<th>${col.title}</th>`;
+		columns.forEach((col, index) => {
+			const className = index === 0 ? ' class="number-column"' : '';
+			printContent += `<th${className}>${col.title}</th>`;
 		});
 
 		printContent += `
-            </tr>
-          </thead>
-          <tbody>
-    `;
+        </tr>
+      </thead>
+      <tbody>
+`;
 
 		// Add data rows
-		usersData[currentDataType].forEach(row => {
+		data.forEach((row, rowIndex) => {
 			printContent += '<tr>';
-			tableConfigs[currentDataType].columns.forEach(col => {
-				let value = row[col.data] || '';
+			columns.forEach((col, colIndex) => {
+				let value;
 
-				// Format date if needed
-				if (col.data === 'last_activity' && value) {
-					value = new Date(value).toLocaleString();
+				// For the No column, use the current index + 1
+				if (colIndex === 0) {
+					value = rowIndex + 1;
+				} else {
+					value = row[col.data] || 'Unknown';
+
+					// Format date if needed
+					if (col.data === 'last_activity' && row[col.data]) {
+						value = new Date(row[col.data]).toLocaleString();
+					}
 				}
 
-				printContent += `<td>${value}</td>`;
+				const className = colIndex === 0 ? ' class="number-column"' : '';
+				printContent += `<td${className}>${value}</td>`;
 			});
 			printContent += '</tr>';
 		});
 
 		printContent += `
-          </tbody>
-        </table>
-      </body>
-      </html>
-    `;
+      </tbody>
+    </table>
+  </body>
+  </html>
+`;
 
 		printWindow.document.open();
 		printWindow.document.write(printContent);
