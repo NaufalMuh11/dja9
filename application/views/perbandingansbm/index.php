@@ -139,6 +139,16 @@
                            </thead>
                            <tbody id="province-table-body"></tbody>
                         </table>
+                        
+                        <!-- Pagination container -->
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                           <div class="text-muted small">
+                              Menampilkan <span id="showing-entries"></span> dari <span id="total-entries"></span> provinsi
+                           </div>
+                           <div class="pagination-container">
+                              <ul class="pagination" id="province-pagination"></ul>
+                           </div>
+                        </div>
                      </div>
                   </div>
                </div>
@@ -160,3 +170,25 @@
 
 <!-- Scripts -->
 <?php $this->load->view('perbandingansbm/sbm_script'); ?>
+
+<style>
+.pagination-container {
+    margin-top: 1rem;
+}
+
+.pagination .page-link {
+    color: #206bc4;
+    cursor: pointer;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #206bc4;
+    border-color: #206bc4;
+    color:rgb(249, 249, 249);
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+}
+</style>

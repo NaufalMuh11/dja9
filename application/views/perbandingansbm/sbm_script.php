@@ -578,18 +578,28 @@
             updateProvinceTable(data);
         }
 
+        // Pagination variables
+        let currentPage = 1;
+        const itemsPerPage = 5;
+        let totalPages = 0;
+
         function updateProvinceTable(data) {
             if (!elements.provinceTableBody) return;
 
+            // Calculate pagination
+            totalPages = Math.ceil(data.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const currentData = data.slice(startIndex, endIndex);
+
+            // Clear existing table content
             elements.provinceTableBody.innerHTML = '';
 
-            data.forEach(item => {
+            // Add data for current page
+            currentData.forEach(item => {
                 const row = document.createElement('tr');
-
-                // Add CSS class for positive/negative values
                 const changeClass = item.percentage_change > 0 ?
-                    'text-success' :
-                    (item.percentage_change < 0 ? 'text-danger' : '');
+                    'text-success' : (item.percentage_change < 0 ? 'text-danger' : '');
 
                 row.innerHTML = `
                     <td>${item.province}</td>
@@ -601,6 +611,71 @@
 
                 elements.provinceTableBody.appendChild(row);
             });
+
+            // Update pagination UI
+            updatePagination(data.length);
+            
+            // Update showing entries text
+            const showingElement = document.getElementById('showing-entries');
+            const totalElement = document.getElementById('total-entries');
+            if (showingElement && totalElement) {
+                showingElement.textContent = `${startIndex + 1}-${Math.min(endIndex, data.length)}`;
+                totalElement.textContent = data.length;
+            }
+        }
+
+        function updatePagination(totalItems) {
+            const paginationElement = document.getElementById('province-pagination');
+            if (!paginationElement) return;
+
+            paginationElement.innerHTML = '';
+
+            // Previous button
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `
+                <a class="page-link" href="#" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            `;
+            prevLi.onclick = (e) => {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    currentPage--;
+                    updateProvinceTable(chartData.province);
+                }
+            };
+            paginationElement.appendChild(prevLi);
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${currentPage === i ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                li.onclick = (e) => {
+                    e.preventDefault();
+                    currentPage = i;
+                    updateProvinceTable(chartData.province);
+                };
+                paginationElement.appendChild(li);
+            }
+
+            // Next button
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `
+                <a class="page-link" href="#" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            `;
+            nextLi.onclick = (e) => {
+                e.preventDefault();
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    updateProvinceTable(chartData.province);
+                }
+            };
+            paginationElement.appendChild(nextLi);
         }
 
         // Helper function for populating subtitle select
@@ -856,6 +931,9 @@
         }
 
         async function loadProvinceData() {
+            // Reset pagination to first page when loading new data
+            currentPage = 1;
+            
             // If a request is already in progress, mark as pending and return
             if (isLoadingProvinceData) {
                 pendingProvinceDataRequest = true;
