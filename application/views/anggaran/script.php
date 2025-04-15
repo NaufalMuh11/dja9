@@ -100,75 +100,131 @@
 		var chart = new ApexCharts(document.querySelector("#accessChart"), options);
 		chart.render();
 
-		var chartModul = new ApexCharts(
-			document.getElementById("chart-akses-modul"), {
-				chart: {
-					type: "donut",
-					height: 240,
-					sparkline: {
-						enabled: true
-					}
-				},
-				series: [35, 25, 22, 18],
-				labels: ['Anggaran', 'Kepegawaian', 'Keuangan', 'Perencanaan'],
-				colors: ['#5D3FD3', '#dc3545', '#ffc107', '#198754'],
-				plotOptions: {
-					pie: {
-						donut: {
-							size: '70%',
-							labels: {
-								show: true,
-								name: {
-									show: true
-								},
-								value: {
-									show: true,
-									formatter: function(val) {
-										return val + '%';
-									}
-								}
-							}
-						}
-					}
-				},
-				tooltip: {
-					y: {
-						formatter: function(val) {
-							return val + '%';
-						}
-					}
-				},
-				legend: {
-					show: true,
-					position: "right",
-					offsetY: 16,
-					markers: {
-						width: 10,
-						height: 10,
-						radius: 100
-					},
-					formatter: function(seriesName, opts) {
-						return seriesName;
-					}
-				}
-			});
-		chartModul.render();
+		// Module Access Chart
+		const moduleDistribution = <?php echo $module_distribution ?? '[]'; ?>;
+const totalModules = moduleDistribution.reduce((sum, item) => sum + parseInt(item.access_count), 0);
+
+var chartModul = new ApexCharts(
+    document.getElementById("chart-akses-modul"), {
+        chart: {
+            type: "donut",
+            height: 700,
+            background: 'transparent',
+            offsetY: 30,
+            offsetX: -10,
+            events: {
+                // Add this event handler to reset colors when clicking elsewhere
+                dataPointSelection: function(event, chartContext, config) {
+                    // Force the center label colors back to default after a short delay
+                    setTimeout(() => {
+                        const totalLabel = document.querySelector('.apexcharts-datalabels-group .apexcharts-datalabel-label');
+                        const totalValue = document.querySelector('.apexcharts-datalabels-group .apexcharts-datalabel-value');
+                        
+                        if (totalLabel) {
+                            totalLabel.style.fill = '#333333'; // Default color for the label
+                        }
+                        
+                        if (totalValue) {
+                            totalValue.style.fill = '#333333'; // Default color for the value
+                        }
+                    }, 50);
+                }
+            }
+        },
+        series: moduleDistribution.map(item => parseInt(item.access_count)),
+        labels: moduleDistribution.map(item => item.keterangan),
+        colors: ['#5D3FD3', '#dc3545', '#ffc107', '#198754', '#ff9800'],
+        plotOptions: {
+            pie: {
+                offsetY: 10,
+                startAngle: 0,
+                endAngle: 360,
+                donut: {
+                    size: '75%',
+                    labels: {
+                        show: true,
+                        name: {
+                            offsetY: -10
+                        },
+                        value: {
+                            offsetY: 0
+                        },
+                        total: {
+                            show: true,
+                            showAlways: true,
+                            label: 'Jumlah Modul Yang Diakses',
+                            fontSize: '12px',
+                            fontWeight: 400,
+                            color: '#333333',
+                            offsetY: -10,
+                            formatter: function() {
+                                return totalModules.toLocaleString('id-ID') + ' Modul';
+                            }
+                        },
+                        value: {
+                            show: true,
+                            fontSize: '24px',
+                            fontWeight: 700,
+                            color: '#333333',
+                            offsetY: 5,
+                            formatter: function(val) {
+                                return parseInt(val).toLocaleString('id-ID') + ' Aktivitas';
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        stroke: {
+            width: 0
+        },
+        dataLabels: {
+            enabled: true,
+            formatter: function(val, opts) {
+                return Math.round(val) + '%';
+            },
+            dropShadow: {
+                enabled: false
+            }
+        },
+        tooltip: {
+            custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                const label = w.config.labels[seriesIndex];
+                const value = series[seriesIndex];
+                return `<div style="background: ${w.config.colors[seriesIndex]}; color: white; padding: 6px 12px; border-radius: 4px;">
+                    <span>${label}: ${value} Aktivitas</span>
+                </div>`;
+            },
+            style: {
+                fontSize: '14px',
+                fontFamily: undefined
+            },
+            theme: 'dark',
+            fillSeriesColor: true
+        },
+        legend: {
+            show: true,
+            position: "right",
+            offsetY: 40,
+            height: 230,
+            markers: {
+                width: 12,
+                height: 12,
+                radius: 2
+            },
+            itemMargin: {
+                horizontal: 0,
+                vertical: 8
+            }
+        }
+    });
+chartModul.render();
 
 		// Module Activity Chart
+		const moduleActivityData = <?php echo $module_activity_data ?? '[]'; ?>;
+
 		var moduleActivityOptions = {
-			series: [{
-				name: 'SIPKD',
-				data: [10, 15, 12, 18, 20, 22, 15, 17, 21, 23, 19, 14, 16, 18, 20, 15, 13, 17, 19, 21, 16, 14, 18, 20, 22, 19, 17, 15, 18, 20]
-			}, {
-				name: 'SIMDA',
-				data: [5, 7, 6, 8, 9, 11, 8, 7, 10, 12, 9, 7, 8, 9, 11, 8, 6, 9, 10, 12, 8, 7, 9, 11, 13, 10, 8, 7, 9, 11]
-			}, {
-				name: 'E-Planning',
-				data: [3, 4, 5, 6, 7, 8, 6, 5, 7, 8, 6, 4, 5, 6, 7, 5, 4, 6, 7, 8, 6, 5, 7, 8, 9, 7, 6, 5, 7, 8]
-			}, {
-				name: 'SIMPEG',
-				data: [2, 3, 4, 5, 6, 7, 5, 4, 6, 7, 5, 3, 4, 5, 6, 4, 3, 5, 6, 7, 5, 4, 6, 7, 8, 6, 5, 4, 6, 7]
-			}],
+			series: moduleActivityData,
 			chart: {
 				height: 350,
 				type: 'line',
@@ -176,7 +232,7 @@
 					show: false
 				}
 			},
-			colors: ['#7a36b1', '#dc3545', '#ffc107', '#198754'],
+			colors: ['#5D3FD3', '#dc3545', '#ffc107', '#198754', '#ff9800'],
 			dataLabels: {
 				enabled: false
 			},
@@ -194,19 +250,15 @@
 				}
 			},
 			xaxis: {
-				categories: Array.from({
-					length: 30
-				}, (_, i) => {
-					const d = new Date();
-					d.setDate(d.getDate() - (29 - i));
-					return d.toLocaleDateString('id-ID', {
-						day: '2-digit',
-						month: 'short'
-					});
+				categories: Array.from({length: 31}, (_, i) => {
+					return (i + 1).toString().padStart(2, '0');
 				}),
 				labels: {
 					rotate: -45,
 					rotateAlways: false
+				},
+				title: {
+					text: 'Tanggal'
 				}
 			},
 			yaxis: {
@@ -216,34 +268,18 @@
 			},
 			legend: {
 				position: 'top',
-				horizontalAlign: 'right',
-				onItemClick: {
-					toggleDataSeries: true
-				},
-				onItemHover: {
-					highlightDataSeries: true
-				}
+				horizontalAlign: 'right'
 			},
 			tooltip: {
 				shared: true,
-				intersect: false
-			},
-			markers: {
-				size: false,
-				hover: {
-					size: 7
+				intersect: false,
+				y: {
+					formatter: function(val) {
+						return val + ' Aktivitas';
+					}
 				}
 			}
 		};
-
-		// Add one more series (instead of two)
-		moduleActivityOptions.series.push({
-			name: 'E-Budgeting',
-			data: [4, 6, 5, 7, 8, 9, 7, 6, 8, 9, 7, 5, 6, 7, 8, 6, 5, 7, 8, 9, 7, 6, 8, 9, 10, 8, 7, 6, 8, 9]
-		});
-
-		// Update colors array for 5 series
-		moduleActivityOptions.colors = ['#7a36b1', '#dc3545', '#ffc107', '#198754', '#ff9800'];
 
 		var moduleActivityChart = new ApexCharts(document.querySelector("#chart-aktivitas-modul"), moduleActivityOptions);
 		moduleActivityChart.render();

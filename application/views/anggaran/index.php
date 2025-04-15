@@ -200,7 +200,7 @@
 			<div class="row mb-4">
 				<!-- Module Access Distribution (Pie Chart) -->
 				<div class="col-xl-4 col-lg-5 mb-3">
-					<div class="card">
+					<div class="card h-100 rounded-3">
 						<div class="card-body">
 							<h5 class="card-title">Distribusi Akses Modul</h5>
 							<div id="chart-akses-modul"></div>
@@ -210,7 +210,7 @@
 
 				<!-- Module User Activity (Line Chart) -->
 				<div class="col-xl-8 col-lg-7 mb-3">
-					<div class="card">
+					<div class="card h-100 rounded-3">
 						<div class="card-body">
 							<h5 class="card-title">Aktivitas Pengguna Modul</h5>
 							<div id="chart-aktivitas-modul"></div>
