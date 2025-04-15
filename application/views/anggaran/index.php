@@ -136,7 +136,7 @@
 							<div class="row mb-3">
 								<div class="col">
 									<h5 class="card-title text-center">
-										Jumlah Informasi Aktivitas Mytask Pada Bulan 
+										Jumlah Informasi Aktivitas Pengguna MyTask Pada Bulan 
 										<span class="text-primary fw-bold"><?php echo $month_name; ?></span> 
 										tahun 
 										<span class="text-primary fw-bold"><?php echo $year; ?></span>
