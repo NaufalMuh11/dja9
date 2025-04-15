@@ -108,7 +108,7 @@ var chartModul = new ApexCharts(
     document.getElementById("chart-akses-modul"), {
         chart: {
             type: "donut",
-            height: 700,
+            height: 350,
             background: 'transparent',
             offsetY: 30,
             offsetX: -10,
