@@ -64,8 +64,9 @@ class Perbandingan extends CI_Controller
 
         $kode = $this->input->get('kode');
         $thang = $this->input->get('thang');
+        $sortOrder = $this->input->get('sortOrder') ?: 'normal';
 
-        $data = $this->Perbandingan_model->get_bar_data($kode, $thang);
+        $data = $this->Perbandingan_model->get_bar_data($kode, $thang, $sortOrder);
         echo json_encode($data);
     }
 
@@ -81,8 +82,9 @@ class Perbandingan extends CI_Controller
         $kode = $this->input->get('kode');
         $subtitle = $this->input->get('subtitle');
         $sub_subtitle = $this->input->get('sub_subtitle');
+        $sortOrder = $this->input->get('sortOrder') ?: 'normal';
 
-        $data = $this->Perbandingan_model->get_comparison_data($kode, $thang, $subtitle, $sub_subtitle);
+        $data = $this->Perbandingan_model->get_comparison_data($kode, $thang, $subtitle, $sub_subtitle, $sortOrder);
         echo json_encode($data);
     }
 }

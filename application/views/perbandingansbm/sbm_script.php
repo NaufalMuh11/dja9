@@ -3,7 +3,7 @@
     const SBMChartModule = (function() {
         // Private variables
         const baseUrl = document.querySelector('meta[name="base_url"]')?.content || '';
-        const refreshInterval = 5 * 60 * 1000; // 5 minutes
+        const refreshInterval = 5 * 60 * 1000;
         let lastRefreshTime = new Date();
         let refreshTimer;
         let isLoadingProvinceData = false;
@@ -20,7 +20,13 @@
         let chartData = {
             bar: [],
             boxplot: [],
-            province: []
+            province: [],
+            // Store original data for sorting purposes
+            original: {
+                bar: [],
+                boxplot: [],
+                province: []
+            }
         };
 
         // DOM element selectors
@@ -41,7 +47,10 @@
             provinceChartContainer: document.getElementById('province-chart-container'),
             provinceTableBody: document.getElementById('province-table-body'),
             barChartSubtitle: document.getElementById('bar-chart-subtitle'),
-            subtitleDropdown: document.getElementById('subtitle-dropdown')
+            subtitleDropdown: document.getElementById('subtitle-dropdown'),
+            sortOrderDropdown: document.getElementById('sort-order-dropdown'),
+            selectedSortOrder: document.getElementById('selected-sort-order'),
+            sortOrderMenu: document.querySelector('#sort-order-dropdown .dropdown-menu')
         };
 
         // Chart colors
@@ -111,7 +120,8 @@
             title: '127',
             subtitle: null,
             subSubtitle: null,
-            year: getCurrentYear()
+            year: getCurrentYear(),
+            sortOrder: 'normal'
         };
 
         // Utility functions
@@ -187,7 +197,9 @@
         async function fetchBarData(titleCode) {
             try {
                 const data = await fetchData('perbandingan/get_bar_data', {
-                    kode: titleCode
+                    kode: titleCode,
+                    thang: selections.year,
+                    sortOrder: getCurrentSortOrder()
                 });
                 return Array.isArray(data) ? data : [];
             } catch (error) {
@@ -202,7 +214,8 @@
                     kode: selections.title,
                     thang: selections.year,
                     subtitle: selections.subtitle,
-                    sub_subtitle: selections.subSubtitle
+                    sub_subtitle: selections.subSubtitle,
+                    sortOrder: getCurrentSortOrder()
                 });
                 return data || [];
             } catch (error) {
@@ -356,6 +369,9 @@
                 return;
             }
 
+            // Apply sorting if needed
+            const sortedData = sortData(data, selections.sortOrder);
+
             // Prepare data for chart
             const categories = data.map(item => item.name);
             const values = data.map(item => parseFloat(item.data) / 1000);
@@ -421,6 +437,35 @@
             } else {
                 charts.barDetail = new ApexCharts(elements.barChartContainer, options);
                 charts.barDetail.render();
+            }
+        }
+
+        // Call this function to completely refresh the UI with the current sort preference
+        function refreshSortUI() {
+            if (!elements.selectedSortOrder) return;
+
+            // Get display text for current sort order
+            const sortOrderDisplayTexts = {
+                'normal': 'Urutan Normal',
+                'asc': 'Nilai Terendah',
+                'desc': 'Nilai Tertinggi'
+            };
+
+            // Update the UI element
+            elements.selectedSortOrder.textContent =
+                sortOrderDisplayTexts[selections.sortOrder] || 'Urutan Normal';
+
+            // Update the active class on menu items
+            if (elements.sortOrderMenu) {
+                const items = elements.sortOrderMenu.querySelectorAll('.dropdown-item');
+                items.forEach(item => {
+                    const itemValue = item.getAttribute('data-value');
+                    if (itemValue === selections.sortOrder) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
             }
         }
 
@@ -671,6 +716,75 @@
             return [...new Set(data
                 .filter(item => item.hasOwnProperty('sub_subtitle') && item.sub_subtitle)
                 .map(item => item.sub_subtitle))];
+        }
+
+        // Initialize sort order dropdown
+        function initSortOrderDropdown() {
+            if (!elements.sortOrderDropdown || !elements.selectedSortOrder || !elements.sortOrderMenu) return;
+
+            // Add event listeners to dropdown items
+            const sortItems = elements.sortOrderMenu.querySelectorAll('.dropdown-item');
+
+            sortItems.forEach(item => {
+                item.addEventListener('click', async function(e) {
+                    e.preventDefault();
+
+                    // Get the selected sort order
+                    const sortOrder = this.getAttribute('data-value');
+                    console.log(`Sort order selected: ${sortOrder}`);
+
+                    // Update UI
+                    elements.selectedSortOrder.textContent = this.textContent;
+
+                    // Apply new sort order and fetch fresh data
+                    await applySortOrder(sortOrder);
+
+                    // Save preference
+                    try {
+                        localStorage.setItem('sbm_chart_sort_order', sortOrder);
+                    } catch (e) {
+                        console.warn('Could not save sort order preference', e);
+                    }
+                });
+            });
+        }
+
+        // Get current sort order selection
+        function getCurrentSortOrder() {
+            return selections.sortOrder || 'normal';
+        }
+
+        // Apply sort order to all charts with fresh data fetch
+        async function applySortOrder(sortOrder) {
+            try {
+                showLoader();
+
+                // Update selection
+                selections.sortOrder = sortOrder;
+
+                // Fetch fresh bar data with new sort order
+                const barData = await fetchBarData(selections.title);
+                chartData.bar = barData;
+
+                // Apply current subtitle/sub-subtitle filtering
+                if (selections.subtitle) {
+                    const filteredData = barData.filter(item =>
+                        item.subtitle === selections.subtitle ||
+                        (!item.subtitle && !selections.subtitle)
+                    );
+                    processSubSubtitles(filteredData, false);
+                } else {
+                    processSubSubtitles(barData, false);
+                }
+
+                // Update UI for sort order
+                refreshSortUI();
+
+            } catch (error) {
+                console.error('Error applying sort order:', error);
+            } finally {
+                hideLoader();
+            }
         }
 
         // Process sub-subtitles
@@ -1136,12 +1250,43 @@
             });
         }
 
+        // Handle sort order change
+        async function handleSortOrderChange(sortOrder) {
+            await applySortOrder(sortOrder);
+        }
+
+
+        // Restore saved preference during initialization
+        function restoreSavedPreferences() {
+            try {
+                const savedSortOrder = localStorage.getItem('sbm_chart_sort_order');
+                if (savedSortOrder && ['normal', 'asc', 'desc'].includes(savedSortOrder)) {
+                    selections.sortOrder = savedSortOrder;
+                    applySortOrder(savedSortOrder);
+
+                    // Update UI
+                    if (elements.selectedSortOrder) {
+                        const sortText = {
+                            'normal': 'Urutan Normal',
+                            'asc': 'Nilai Terendah',
+                            'desc': 'Nilai Tertinggi'
+                        } [savedSortOrder] || 'Urutan Normal';
+
+                        elements.selectedSortOrder.textContent = sortText;
+                    }
+                }
+            } catch (e) {
+                console.warn('Could not restore sort order preference', e);
+            }
+        }
+
         // Export public API
         return {
             // Initialize the module
             init: async function() {
                 try {
                     initEventListeners();
+                    initSortOrderDropdown();
 
                     await initYearDropdown();
 

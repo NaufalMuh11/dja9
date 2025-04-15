@@ -91,7 +91,19 @@
 
                   <div class="card-body">
                      <div class="d-flex flex-column align-items-center">
-                        <h3 class="mb-1 text-center">Rincian Standar Biaya</h3>
+                        <div class="position-relative w-full">
+                           <h3 class="text-center">Rincian Standar Biaya</h3>
+                           <div class="dropdown position-absolute top-0 end-0" id="sort-order-dropdown">
+                              <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                 Urutkan: <span id="selected-sort-order">Urutan Normal</span>
+                              </button>
+                              <ul class="dropdown-menu dropdown-menu-end">
+                                 <li><a class="dropdown-item" href="#" data-value="normal">Urutan Normal</a></li>
+                                 <li><a class="dropdown-item" href="#" data-value="asc">Nilai Terendah</a></li>
+                                 <li><a class="dropdown-item" href="#" data-value="desc">Nilai Tertinggi</a></li>
+                              </ul>
+                           </div>
+                        </div>
 
                         <div id="bar-chart-dropdowns" class="d-flex gap-3 align-items-center mt-2">
                            <div class="dropdown" id="subtitle-dropdown" style="display: none;">

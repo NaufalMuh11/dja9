@@ -18,6 +18,7 @@ class Perbandingan_model extends CI_Model
                     SELECT 
                         h.kdsbu,
                         h.nmsbu,
+                        h.prov,
                         h.level,
                         h.parent_kdsbu,
                         s.biaya,
@@ -33,6 +34,7 @@ class Perbandingan_model extends CI_Model
                     SELECT 
                         c.kdsbu,
                         c.nmsbu,
+                        c.prov,
                         c.level,
                         c.parent_kdsbu,
                         s.biaya,
@@ -62,6 +64,7 @@ class Perbandingan_model extends CI_Model
                     $node = array(
                         'kdsbu' => $row['kdsbu'],
                         'nmsbu' => $row['nmsbu'],
+                        'prov' => $row['prov'],
                         'biaya' => $biaya,
                         'biaya12' => $biaya12,
                         'level' => (int)$row['level'],
@@ -269,7 +272,7 @@ class Perbandingan_model extends CI_Model
         }
     }
 
-    function get_bar_data($kode, $thang)
+    function get_bar_data($kode, $thang, $sortOrder = 'normal')
     {
         try {
             $hierarchy = $this->get_hierarchical_data_from_table($kode, $thang);
@@ -290,7 +293,7 @@ class Perbandingan_model extends CI_Model
                 // Only process data nodes
                 if ($node['level'] == 9 && $node['biaya'] > 0) {
                     $bar_data = array(
-                        'name' => $node['nmsbu'],
+                        'name' => $node['prov'],
                         'data' => $node['biaya']
                     );
 
@@ -332,6 +335,17 @@ class Perbandingan_model extends CI_Model
 
                     $result[] = $bar_data;
                 }
+            }
+
+            // Apply sorting
+            if ($sortOrder === 'asc') {
+                usort($result, function ($a, $b) {
+                    return $a['data'] - $b['data'];
+                });
+            } else if ($sortOrder === 'desc') {
+                usort($result, function ($a, $b) {
+                    return $b['data'] - $a['data'];
+                });
             }
 
             return $result;
@@ -418,12 +432,9 @@ class Perbandingan_model extends CI_Model
         return $result;
     }
 
-    function get_comparison_data($kode, $thang_current, $subtitle = null, $sub_subtitle = null)
+    function get_comparison_data($kode, $thang_current, $subtitle = null, $sub_subtitle = null, $sortOrder = 'normal')
     {
         try {
-            // Use only the current year's database
-            $ref = $this->load->database('ref' . $thang_current, TRUE);
-
             // Get data from hierarchical function modified to include biaya12
             $data_current = $this->get_hierarchical_data_from_table($kode, $thang_current);
 
@@ -455,7 +466,7 @@ class Perbandingan_model extends CI_Model
                         }
                     }
 
-                    $provinces_current[$node['nmsbu']] = $node;
+                    $provinces_current[$node['prov']] = $node;
                 }
             }
 
@@ -482,6 +493,17 @@ class Perbandingan_model extends CI_Model
                     'difference' => $difference,
                     'percentage_change' => $percentage_change
                 );
+            }
+
+            // Apply sorting
+            if ($sortOrder === 'asc') {
+                usort($result, function ($a, $b) use ($thang_current) {
+                    return $a['biaya_' . $thang_current] - $b['biaya_' . $thang_current];
+                });
+            } else if ($sortOrder === 'desc') {
+                usort($result, function ($a, $b) use ($thang_current) {
+                    return $b['biaya_' . $thang_current] - $a['biaya_' . $thang_current];
+                });
             }
 
             return $result;
