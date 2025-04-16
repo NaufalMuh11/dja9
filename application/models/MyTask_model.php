@@ -127,20 +127,20 @@ class MyTask_model extends CI_Model
     }
 
     // Dari branch views-mytask
-    public function get_hourly_users($year, $month) {
+    public function get_hourly_modules($year, $month) {
         $current_data = array();
         $previous_data = array();
         
         for ($hour = 0; $hour < 24; $hour++) {
             // Current year data
-            $this->dbsatu->select('COUNT(DISTINCT iduser) as total');
+            $this->dbsatu->select('COUNT(buttonid) as total');
             $this->dbsatu->where('YEAR(datetime)', $year);
             $this->dbsatu->where('MONTH(datetime)', $month);
             $this->dbsatu->where('HOUR(datetime)', $hour);
             $current_data[] = $this->dbsatu->get('t_mytask_log')->row()->total ?? 0;
             
             // Previous year data
-            $this->dbsatu->select('COUNT(DISTINCT iduser) as total');
+            $this->dbsatu->select('COUNT(buttonid) as total');
             $this->dbsatu->where('YEAR(datetime)', $year - 1);
             $this->dbsatu->where('MONTH(datetime)', $month);
             $this->dbsatu->where('HOUR(datetime)', $hour);
