@@ -65,7 +65,7 @@ class Anggaran extends CI_Controller
 		);
 
 		// Data dari views-mytask (hourly data dan cards)
-		$hourly_data = $this->MyTask_model->get_hourly_users($year, $month);
+		$hourly_data = $this->MyTask_model->get_hourly_modules($year, $month);
 		$data['hourly_users'] = json_encode($hourly_data);
 		$data['top_users_by_month'] = json_encode($this->MyTask_model->get_top_users_by_month($year, $month));
 		$data['current_year'] = $year;
