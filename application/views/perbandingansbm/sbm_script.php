@@ -70,6 +70,77 @@
             pink: "#DC267F"
         };
 
+        // Color generation functions
+        const colorGradientGenerator = {
+            // Generate colors in a gradient for a single base color
+            generateColorGradient: function(baseColor, count) {
+                // If no items or only one, return the base color
+                if (!count || count <= 1) {
+                    return [baseColor];
+                }
+
+                // Convert hex to RGB
+                const hexToRgb = (hex) => {
+                    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                    return result ? {
+                        r: parseInt(result[1], 16),
+                        g: parseInt(result[2], 16),
+                        b: parseInt(result[3], 16)
+                    } : null;
+                };
+
+                // Convert RGB to hex
+                const rgbToHex = (r, g, b) => {
+                    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+                };
+
+                // Get base color in RGB
+                const baseRgb = hexToRgb(baseColor);
+                if (!baseRgb) return Array(count).fill(baseColor);
+
+                // Calculate step size for darkening/lightening
+                const step = 0.8 / (count - 1);
+
+                // Generate gradient colors
+                const colors = [];
+                for (let i = 0; i < count; i++) {
+                    // Adjust darkness from -40% to +40% of the base color
+                    const factor = 0.6 + (i * step);
+
+                    const r = Math.min(255, Math.max(0, Math.round(baseRgb.r * factor)));
+                    const g = Math.min(255, Math.max(0, Math.round(baseRgb.g * factor)));
+                    const b = Math.min(255, Math.max(0, Math.round(baseRgb.b * factor)));
+
+                    colors.push(rgbToHex(r, g, b));
+                }
+
+                return colors;
+            },
+
+            // Get color for specific SBM code
+            getColorForSBM: function(sbmCode) {
+                // Map SBM codes to base colors
+                const sbmColorMap = {
+                    '127': chartColors.primary, // Blue
+                    '128': chartColors.success, // Green
+                    '130': chartColors.warning, // Yellow/Orange
+                    '134': chartColors.teal, // Teal
+                    '135': chartColors.purple, // Purple
+                    '137': chartColors.pink, // Pink
+                    '139': chartColors.orange, // Orange
+                    '209': chartColors.lime, // Lime
+                    '210': chartColors.info, // Cyan
+                    '211': chartColors.indigo, // Indigo
+                    '214': chartColors.secondary, // Gray
+                    '215': chartColors.dark, // Dark
+                    '216': chartColors.danger // Red
+                };
+
+                // Return the mapped color or default to primary if not found
+                return sbmColorMap[sbmCode] || chartColors.primary;
+            }
+        };
+
         // Common chart settings
         const commonChartSettings = {
             fontFamily: "inherit",
@@ -275,6 +346,21 @@
                 y: item.y.map(val => val / 1000)
             }));
 
+            // Get base color for selected SBM
+            const baseColor = colorGradientGenerator.getColorForSBM(selections.title);
+
+            // Generate a darker color for the upper part of boxplot
+            const darkenColor = function(hex, percent) {
+                const num = parseInt(hex.slice(1), 16);
+                const amt = Math.round(2.55 * percent);
+                const R = (num >> 16) - amt;
+                const G = (num >> 8 & 0x00FF) - amt;
+                const B = (num & 0x0000FF) - amt;
+                return '#' + (0x1000000 + (R < 0 ? 0 : R) * 0x10000 + (G < 0 ? 0 : G) * 0x100 + (B < 0 ? 0 : B)).toString(16).slice(1);
+            };
+
+            const upperColor = darkenColor(baseColor, 20); // 20% darker for upper part
+
             const options = {
                 series: [{
                     type: 'boxPlot',
@@ -283,21 +369,34 @@
                 chart: {
                     ...commonChartSettings,
                     type: 'boxPlot',
-                    height: 350
+                    height: 500
                 },
                 plotOptions: {
                     boxPlot: {
                         colors: {
-                            upper: chartColors.pink,
-                            lower: chartColors.primary
+                            upper: upperColor,
+                            lower: baseColor
                         }
                     }
                 },
                 xaxis: {
+                    title: {
+                        text: 'SBM'
+                    },
                     labels: {
                         rotate: -90,
                         trim: false,
                         maxHeight: 120
+                    }
+                },
+                yaxis: {
+                    title: {
+                        text: 'Biaya (Ribu Rupiah)'
+                    },
+                    labels: {
+                        formatter: function(value) {
+                            return new Intl.NumberFormat('id-ID').format(value);
+                        }
                     }
                 },
                 tooltip: {
@@ -370,6 +469,10 @@
             const categories = data.map(item => item.name);
             const values = data.map(item => parseFloat(item.data) / 1000);
 
+            // Generate color gradient based on the selected SBM
+            const baseColor = colorGradientGenerator.getColorForSBM(selections.title);
+            const colorGradient = colorGradientGenerator.generateColorGradient(baseColor, values.length);
+
             // Get chart title (from sub-subtitle if selected)
             let chartTitle = "";
             if (selections.subSubtitle) {
@@ -401,7 +504,8 @@
                     bar: {
                         horizontal: false,
                         columnWidth: '55%',
-                        endingShape: 'rounded'
+                        endingShape: 'rounded',
+                        distributed: true // This enables different colors for each bar
                     },
                 },
                 dataLabels: {
@@ -409,6 +513,9 @@
                 },
                 xaxis: {
                     categories: categories,
+                    title: {
+                        text: 'Provinsi'
+                    },
                     labels: {
                         rotate: -90,
                         trim: false,
@@ -416,13 +523,27 @@
                     }
                 },
                 yaxis: {
+                    title: {
+                        text: 'Biaya (Ribu Rupiah)'
+                    },
                     labels: {
                         formatter: function(value) {
                             return new Intl.NumberFormat('id-ID').format(value);
                         }
                     }
                 },
-                colors: [chartColors.primary],
+                colors: colorGradient, // Use the generated color gradient
+                legend: {
+                    show: false // Hide legend since we're using distributed colors
+                },
+                tooltip: {
+                    ...commonChartSettings.tooltip,
+                    y: {
+                        formatter: function(value) {
+                            return 'Rp ' + new Intl.NumberFormat('id-ID').format(value * 1000);
+                        }
+                    }
+                },
                 noData: noDataSettings
             };
 
@@ -486,6 +607,23 @@
             const values2025 = data.map(item => item.biaya_2025 / 1000);
             const values2026 = data.map(item => item.biaya_2026 / 1000);
             const percentageChanges = data.map(item => item.percentage_change);
+
+            // Get base color for selected SBM
+            const baseColor = colorGradientGenerator.getColorForSBM(selections.title);
+            // Get a complementary color for the second line
+            const complementaryColor = function(hex) {
+                // Convert hex to RGB
+                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                if (!result) return chartColors.success;
+
+                // Simple complementary: lighten and shift hue slightly
+                const r = parseInt(result[1], 16);
+                const g = parseInt(result[2], 16);
+                const b = parseInt(result[3], 16);
+
+                // Make it lighter and greener
+                return `#${Math.min(255, Math.floor(r * 0.8)).toString(16).padStart(2, '0')}${Math.min(255, Math.floor(g * 1.2)).toString(16).padStart(2, '0')}${Math.min(255, Math.floor(b * 0.8)).toString(16).padStart(2, '0')}`;
+            };
 
             const options = {
                 series: [{
@@ -554,12 +692,11 @@
                         },
                         labels: {
                             formatter: function(value) {
-                                return value.toFixed(2) + '%';
+                                return (value / 1000).toFixed(2) + '%';
                             }
                         },
-                        min: function(min) {
-                            return Math.min(0, min);
-                        }
+                        min: 0,
+                        tickAmount: 5
                     }
                 ],
                 tooltip: {
@@ -571,13 +708,19 @@
                             if (seriesIndex === 2) {
                                 return value.toFixed(2) + '%';
                             }
-                            return 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
+                            return 'Rp ' + new Intl.NumberFormat('id-ID').format(value * 1000);
                         }
                     }
                 },
                 colors: [
-                    chartColors.primary,
-                    chartColors.success,
+                    //before
+                    // chartColors.primary,
+                    // chartColors.success,
+                    // chartColors.dark
+
+                    //after
+                    baseColor,
+                    complementaryColor(baseColor),
                     chartColors.dark
                 ],
                 legend: {
