@@ -47,6 +47,8 @@ class MyTask_model extends CI_Model
 
 
 	#-- Card --#
+
+	// Data untuk tabel total_users
 	public function get_total_users()
 	{
 		$this->dbsatu->select('t_user.nmuser, t_user.profilepic, t_user_group_satu.nmusergroup');
@@ -54,62 +56,43 @@ class MyTask_model extends CI_Model
 		$this->dbsatu->join('t_user_group_satu', 't_user.idusergroup = t_user_group_satu.idusergroup', 'left');
 		$this->dbsatu->order_by('t_user.nmuser', 'ASC');
 
-		$query = $this->dbsatu->get();
-
-		if ($query && $query->num_rows() > 0) {
-			return $query->result();
-		}
-		return array();
+		return $this->dbsatu->get()->result();
 	}
 
 	public function get_active_users()
-    {
-        $this->dbsatu->select('t_mytask_log.iduser, t_user.nmuser, t_user.idusergroup, t_user_group_satu.nmusergroup, MAX(t_mytask_log.datetime) as last_activity');
-        $this->dbsatu->from('t_mytask_log');
-        $this->dbsatu->join('t_user', 't_mytask_log.iduser = t_user.iduser', 'left');
-        $this->dbsatu->join('t_user_group_satu', 't_user.idusergroup = t_user_group_satu.idusergroup', 'left');
-        $this->dbsatu->where('t_mytask_log.datetime >=', date('Y-m-d H:i:s', strtotime('-24 hours')));
-        $this->dbsatu->group_by('t_mytask_log.iduser, t_user.nmuser, t_user.idusergroup, t_user_group_satu.nmusergroup');
-        $query = $this->dbsatu->get();
+	{
+		$this->dbsatu->select('t_user.nmuser, t_user_group_satu.nmusergroup, MAX(t_mytask_log.datetime) as last_activity');
+		$this->dbsatu->from('t_mytask_log');
+		$this->dbsatu->join('t_user', 't_mytask_log.iduser = t_user.iduser', 'left');
+		$this->dbsatu->join('t_user_group_satu', 't_user.idusergroup = t_user_group_satu.idusergroup', 'left');
+		$this->dbsatu->where('t_mytask_log.datetime >=', date('Y-m-d H:i:s', strtotime('-24 hours')));
+		$this->dbsatu->group_by('t_user.nmuser, t_user_group_satu.nmusergroup');
 
-        if ($query && $query->num_rows() > 0) {
-            return $query->result();
-        }
-        return array();
-    }
+		return $this->dbsatu->get()->result();
+	}
 
-    public function get_total_modules()
-    {
-        $this->dbsatu->select('t_mytask_link.buttonid, t_mytask_link.keterangan, t_mytask.namaproduk, COUNT(t_mytask_log.id) as usage_count');
-        $this->dbsatu->from('t_mytask_link');
-        $this->dbsatu->join('t_mytask', 't_mytask_link.produkid = t_mytask.idproduk', 'left');
-        $this->dbsatu->join('t_mytask_log', 't_mytask_link.buttonid = t_mytask_log.buttonid', 'left');
-        $this->dbsatu->group_by('t_mytask_link.buttonid, t_mytask_link.keterangan, t_mytask.namaproduk');
-        $this->dbsatu->order_by('usage_count', 'DESC');
-        $query = $this->dbsatu->get();
+	public function get_total_modules()
+	{
+		$this->dbsatu->select('t_mytask_link.keterangan');
+		$this->dbsatu->from('t_mytask_link');
+		$this->dbsatu->group_by('t_mytask_link.keterangan');
 
-        if ($query && $query->num_rows() > 0) {
-            return $query->result();
-        }
-        return array();
-    }
+		return $this->dbsatu->get()->result();
+	}
 
-    public function get_total_services()
-    {
-        $this->dbsatu->select('t_mytask.idproduk, t_mytask.namaproduk, COUNT(DISTINCT t_mytask_link.buttonid) as module_count');
-        $this->dbsatu->from('t_mytask');
-        $this->dbsatu->join('t_mytask_link', 't_mytask.idproduk = t_mytask_link.produkid', 'left');
-        $this->dbsatu->group_by('t_mytask.idproduk, t_mytask.namaproduk');
-        $query = $this->dbsatu->get();
+	// Data untuk tabel total_services
+	public function get_total_services()
+	{
+		$this->dbsatu->select('t_mytask.namaproduk, COUNT(DISTINCT t_mytask_link.buttonid) as module_count, GROUP_CONCAT(DISTINCT t_mytask_link.keterangan) as unique_keterangan');
+		$this->dbsatu->from('t_mytask');
+		$this->dbsatu->join('t_mytask_link', 't_mytask.idproduk = t_mytask_link.produkid', 'left');
+		$this->dbsatu->group_by('t_mytask.namaproduk');
 
-        if ($query && $query->num_rows() > 0) {
-            return $query->result();
-        }
-        return array();
-    }
+		return $this->dbsatu->get()->result();
+	}
 
-    // Dari branch views-mytask-modul
-    public function get_top_module_distribution($year, $month) 
+	// Dari branch views-mytask-modul
+	public function get_top_module_distribution($year, $month) 
     {
         $this->dbsatu->select('t_mytask_link.keterangan, COUNT(t_mytask_log.id) as access_count');
         $this->dbsatu->from('t_mytask_log');
