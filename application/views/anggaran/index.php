@@ -12,20 +12,20 @@
 					</h2>
 				</div>
 
-				 <!-- last update  -->
+				<!-- last update  -->
 				<div class="col-auto ms-auto d-print-none">
-				<div class="btn-list">
-					<button id="refreshButton" class="btn btn-icon" title="Refresh data">
-						<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-refresh" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-							<path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-							<path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"></path>
-							<path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"></path>
-						</svg>
-					</button>
-					<div class="d-none d-sm-block ps-2">
-						<div id="lastUpdate"></div>
+					<div class="btn-list">
+						<button id="refreshButton" class="btn btn-icon" title="Refresh data">
+							<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-refresh" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+								<path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+								<path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"></path>
+								<path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"></path>
+							</svg>
+						</button>
+						<div class="d-none d-sm-block ps-2">
+							<div id="lastUpdate"></div>
+						</div>
 					</div>
-				</div>
 				</div>
 
 
@@ -60,10 +60,12 @@
 								</div>
 								<div class="d-flex justify-content-between align-items-center mt-auto pt-2">
 									<div id="activeUsers">
-										<span>
-											<strong class="ms-1">0</strong>
-											Pengguna Aktif
-										</span>
+										<button type="button">
+											<span>
+												<strong class="ms-1">0</strong>
+												Pengguna Aktif
+											</span>
+										</button>
 									</div>
 									<div id="totalUsers" class="fw-bold" style="font-size: 35px;"></div>
 								</div>
@@ -136,9 +138,9 @@
 							<div class="row mb-3">
 								<div class="col">
 									<h5 class="card-title text-center">
-										Jumlah Informasi Aktivitas Pengguna MyTask Pada Bulan 
-										<span class="text-primary fw-bold"><?php echo $month_name; ?></span> 
-										tahun 
+										Jumlah Informasi Aktivitas Pengguna MyTask Pada Bulan
+										<span class="text-primary fw-bold"><?php echo $month_name; ?></span>
+										tahun
 										<span class="text-primary fw-bold"><?php echo $year; ?></span>
 									</h5>
 								</div>
@@ -278,9 +280,9 @@
 	};
 
 	console.log(usersData.total_users);
-	// console.log(usersData.active_users);
-	// console.log(usersData.total_modules)
-	// console.log(usersData.total_services)
+	console.log(usersData.active_users);
+	console.log(usersData.total_modules)
+	console.log(usersData.total_services)
 
 	// console.log(usersData.top_users);
 </script>
