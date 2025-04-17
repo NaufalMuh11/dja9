@@ -5,10 +5,10 @@ $active_group = 'default';
 $query_builder = TRUE;
 
 // setting db connection s
-$db_host = 'localhost';
-$db_username = 'root';
-$db_password = '';
-$db_port = '3306';
+$db_host = getenv('DB_HOST');
+$db_username = getenv('DB_USERNAME');
+$db_password = getenv('DB_PASSWORD');
+$db_port = getenv('DB_PORT');
 
 $db['default'] = array(
 	'dsn'	=> '',
@@ -106,6 +106,29 @@ $db['revisi2025'] = array(
 
 // 2026
 $db['dbref2026'] = array(
+	'dsn'	=> '',
+	'hostname' => $db_host,
+	'username' => $db_username,
+	'password' => $db_password,
+	'port' 	   => $db_port,
+	'database' => 'dbref2026',
+	'dbdriver' => 'mysqli',
+	'dbprefix' => '',
+	'pconnect' => FALSE,
+	'db_debug' => FALSE,
+	'cache_on' => FALSE,
+	'cachedir' => '',
+	'char_set' => 'utf8',
+	'dbcollat' => 'utf8_general_ci',
+	'swap_pre' => '',
+	'encrypt' => FALSE,
+	'compress' => FALSE,
+	'stricton' => FALSE,
+	'failover' => array(),
+	'save_queries' => TRUE
+);
+
+$db['ref2026'] = array(
 	'dsn'	=> '',
 	'hostname' => $db_host,
 	'username' => $db_username,
