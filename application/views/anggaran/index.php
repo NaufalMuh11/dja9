@@ -138,10 +138,10 @@
 							<div class="row mb-3">
 								<div class="col">
 									<h5 class="card-title text-center">
-										Jumlah Informasi Aktivitas Pengguna MyTask Pada Bulan
-										<span class="text-primary fw-bold"><?php echo $month_name; ?></span>
+										Pola Penggunaan Modul <span class="fw-bold" style="color: #8979FF;">MyTask</span> Per Jam Pada Bulan
+										<span class="fw-bold" style="color: #8979FF;"><?php echo $month_name; ?></span>
 										tahun
-										<span class="text-primary fw-bold"><?php echo $year; ?></span>
+										<span class="fw-bold" style="color: #8979FF;"><?php echo $year; ?></span>
 									</h5>
 								</div>
 							</div>
@@ -185,7 +185,7 @@
 					<!-- Table Section -->
 					<div class="card flex-grow-1">
 						<div class="card-body">
-							<h5 class="card-title text-center mb-3">3 Pengguna Dengan Aktivitas Task Terbanyak</h5>
+							<h5 class="card-title text-center mb-3">3 Pengguna Dengan Aktivitas <span class="fw-bold" style="color:#8979FF;">MyTask</span> Terbanyak</h5>
 							<div class="table-responsive">
 								<table class="table" id="userTable">
 									<thead>
@@ -212,7 +212,7 @@
 				<div class="col-xl-4 col-lg-5 mb-3">
 					<div class="card h-100 rounded-3">
 						<div class="card-body">
-							<h5 class="card-title">Distribusi Akses Modul</h5>
+							<h5 class="card-title">Distribusi Penggunaan Modul <span class="fw-bold" style="color: #8979FF;">MyTask</span></h5>
 							<div id="chart-akses-modul"></div>
 						</div>
 					</div>
@@ -222,7 +222,7 @@
 				<div class="col-xl-8 col-lg-7 mb-3">
 					<div class="card h-100 rounded-3">
 						<div class="card-body">
-							<h5 class="card-title">Aktivitas Pengguna Modul</h5>
+							<h5 class="card-title">Aktivitas Harian Per Modul <span class="fw-bold" style="color: #8979FF;">MyTask</span></h5>
 							<div id="chart-aktivitas-modul"></div>
 						</div>
 					</div>
@@ -289,3 +289,4 @@
 
 <!-- Event Listener -->
 <?php $this->load->view('anggaran/script'); ?>
+
