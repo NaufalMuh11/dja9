@@ -8,7 +8,22 @@
                         Referensi
                     </div>
                     <h2 class="page-title">
-                        <span class="text-cyan">SBM&nbsp;</span>2026
+                        <span class="text-cyan">SBM&nbsp;</span>
+                        <div class="dropdown" id="selectThang">
+                            <a class="dropdown-toggle text-muted text-decoration-none" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                T.A. <?php echo $tahun_aktif; ?>
+                            </a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item <?php echo $tahun_aktif == '2025' ? 'active' : ''; ?>" 
+                                   href="<?php echo base_url('referensi?q=RefSBM&tahun=2025'); ?>">
+                                   T.A. 2025
+                                </a>
+                                <a class="dropdown-item <?php echo $tahun_aktif == '2026' ? 'active' : ''; ?>" 
+                                   href="<?php echo base_url('referensi?q=RefSBM&tahun=2026'); ?>">
+                                   T.A. 2026
+                                </a>
+                            </div>
+                        </div>
                     </h2>
                 </div>
 
@@ -58,7 +73,7 @@
     </div>
 </div>
 
-<script>
+<>
 const searchInput = document.getElementById('searchInput');
 const clearSearch = document.getElementById('clearSearch');
 
@@ -81,4 +96,5 @@ clearSearch.addEventListener('click', function() {
     searchInput.dispatchEvent(new Event('keyup'));
     this.style.display = 'none';
 });
-</script>
+</
+scpt>
