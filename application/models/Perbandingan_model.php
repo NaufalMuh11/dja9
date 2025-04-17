@@ -272,89 +272,6 @@ class Perbandingan_model extends CI_Model
         }
     }
 
-    function get_bar_data($kode, $thang, $sortOrder = 'normal')
-    {
-        try {
-            $hierarchy = $this->get_hierarchical_data_from_table($kode, $thang);
-            if (empty($hierarchy)) return array();
-
-            $result = array();
-
-            // First, check if we have any level 3 nodes
-            $hasLevel3 = false;
-            foreach ($hierarchy as $key => $node) {
-                if ($node['level'] == 3) {
-                    $hasLevel3 = true;
-                    break;
-                }
-            }
-
-            foreach ($hierarchy as $key => $node) {
-                // Only process data nodes
-                if ($node['level'] == 9 && $node['biaya'] > 0) {
-                    $bar_data = array(
-                        'name' => $node['prov'],
-                        'data' => $node['biaya']
-                    );
-
-                    // Find the immediate parent
-                    if (isset($node['parent']) && isset($hierarchy[$node['parent']])) {
-                        $parent = $hierarchy[$node['parent']];
-
-                        // Check parent level
-                        if ($parent['level'] == 2) {
-                            // Parent is subtitle
-                            if ($hasLevel3) {
-                                // If we have level 3 nodes in hierarchy, treat level 2 as subtitle
-                                $bar_data['subtitle'] = $parent['nmsbu'];
-                            } else {
-                                // If no level 3 nodes, treat level 2 as sub-subtitle
-                                $bar_data['sub_subtitle'] = $parent['nmsbu'];
-
-                                // Find level 1 parent and use as subtitle
-                                if (isset($parent['parent']) && isset($hierarchy[$parent['parent']])) {
-                                    $grandparent = $hierarchy[$parent['parent']];
-                                    if ($grandparent['level'] == 1) {
-                                        $bar_data['subtitle'] = $grandparent['nmsbu'];
-                                    }
-                                }
-                            }
-                        } else if ($parent['level'] == 3) {
-                            // Parent is sub-subtitle
-                            $bar_data['sub_subtitle'] = $parent['nmsbu'];
-
-                            // Find subtitle parent (level 2)
-                            if (isset($parent['parent']) && isset($hierarchy[$parent['parent']])) {
-                                $grandparent = $hierarchy[$parent['parent']];
-                                if ($grandparent['level'] == 2) {
-                                    $bar_data['subtitle'] = $grandparent['nmsbu'];
-                                }
-                            }
-                        }
-                    }
-
-                    $result[] = $bar_data;
-                }
-            }
-
-            // Apply sorting
-            if ($sortOrder === 'asc') {
-                usort($result, function ($a, $b) {
-                    return $a['data'] - $b['data'];
-                });
-            } else if ($sortOrder === 'desc') {
-                usort($result, function ($a, $b) {
-                    return $b['data'] - $a['data'];
-                });
-            }
-
-            return $result;
-        } catch (Exception $e) {
-            log_message('error', 'Error in get_bar_data: ' . $e->getMessage());
-            return array();
-        }
-    }
-
     function get_boxplot_data($kode, $thang)
     {
         try {
@@ -432,77 +349,110 @@ class Perbandingan_model extends CI_Model
         return $result;
     }
 
-    function get_comparison_data($kode, $thang_current, $subtitle = null, $sub_subtitle = null, $sortOrder = 'normal')
+    function get_comparison_data($kode, $thang, $sortOrder)
     {
         try {
-            // Get data from hierarchical function modified to include biaya12
-            $data_current = $this->get_hierarchical_data_from_table($kode, $thang_current);
-
-            if (empty($data_current)) {
-                return array();
-            }
+            $hierarchy = $this->get_hierarchical_data_from_table($kode, $thang);
+            if (empty($hierarchy)) return array();
 
             $result = array();
 
-            // Filter by subtitle and sub-subtitle if provided
-            $provinces_current = array();
-            foreach ($data_current as $key => $node) {
-                if ($node['level'] == 9 && $node['biaya'] > 0) {
-                    // Check if we need to filter by parent relationships
-                    if (($subtitle || $sub_subtitle) && isset($node['parent']) && isset($data_current[$node['parent']])) {
-                        $parent = $data_current[$node['parent']];
-
-                        // For subtitle filtering
-                        if ($subtitle && isset($parent['parent']) && isset($data_current[$parent['parent']])) {
-                            $grandparent = $data_current[$parent['parent']];
-                            if ($grandparent['nmsbu'] != $subtitle) {
-                                continue;
-                            }
-                        }
-
-                        // For sub-subtitle filtering
-                        if ($sub_subtitle && $parent['nmsbu'] != $sub_subtitle) {
-                            continue;
-                        }
-                    }
-
-                    $provinces_current[$node['prov']] = $node;
+            // First, check if we have any level 3 nodes
+            $hasLevel3 = false;
+            foreach ($hierarchy as $key => $node) {
+                if ($node['level'] == 3) {
+                    $hasLevel3 = true;
+                    break;
                 }
             }
 
-            // Untuk setiap provinsi yang ada di data tahun ini
-            foreach ($provinces_current as $province_name => $current_data) {
-                $biaya_current = (float)$current_data['biaya'];
+            foreach ($hierarchy as $key => $node) {
+                // Only process data nodes
+                if ($node['level'] == 9 && $node['biaya'] > 0) {
+                    $biaya_current = $node['biaya'];
+                    $biaya_previous = $node['biaya12'] ?? 0;
+                    $difference = $biaya_current - $biaya_previous;
 
-                // Get biaya12 (previous year's data) from the same node
-                $biaya_previous = isset($current_data['biaya12']) ? (float)$current_data['biaya12'] : 0;
+                    // Calculate percentage change, handle division by zero
+                    $percentage_change = 0;
+                    if ($biaya_previous > 0) {
+                        $percentage_change = round(($difference / $biaya_previous) * 100, 2);
+                    } elseif ($biaya_current > 0) {
+                        $percentage_change = 100;
+                    }
 
-                // Hitung perbedaan dan persentase perubahan
-                $difference = $biaya_current - $biaya_previous;
-                $percentage_change = 0;
+                    $comparison_data = array(
+                        'name' => $node['prov'],
+                        'biaya_current' => $biaya_current,
+                        'biaya_previous' => $biaya_previous,
+                        'difference' => $difference,
+                        'percentage_change' => $percentage_change
+                    );
 
-                if ($biaya_previous > 0) {
-                    $percentage_change = ($difference / $biaya_previous) * 100;
+                    // Find the immediate parent
+                    if (isset($node['parent']) && isset($hierarchy[$node['parent']])) {
+                        $parent = $hierarchy[$node['parent']];
+
+                        // Check parent level
+                        if ($parent['level'] == 2) {
+                            // Parent is subtitle
+                            if ($hasLevel3) {
+                                // If we have level 3 nodes in hierarchy, treat level 2 as subtitle
+                                $comparison_data['subtitle'] = $parent['nmsbu'];
+                            } else {
+                                // If no level 3 nodes, treat level 2 as sub-subtitle
+                                $comparison_data['sub_subtitle'] = $parent['nmsbu'];
+
+                                // Find level 1 parent and use as subtitle
+                                if (isset($parent['parent']) && isset($hierarchy[$parent['parent']])) {
+                                    $grandparent = $hierarchy[$parent['parent']];
+                                    if ($grandparent['level'] == 1) {
+                                        $comparison_data['subtitle'] = $grandparent['nmsbu'];
+                                    }
+                                }
+                            }
+                        } else if ($parent['level'] == 3) {
+                            // Parent is sub-subtitle
+                            $comparison_data['sub_subtitle'] = $parent['nmsbu'];
+
+                            // Find subtitle parent (level 2)
+                            if (isset($parent['parent']) && isset($hierarchy[$parent['parent']])) {
+                                $grandparent = $hierarchy[$parent['parent']];
+                                if ($grandparent['level'] == 2) {
+                                    $comparison_data['subtitle'] = $grandparent['nmsbu'];
+                                }
+                            }
+                        }
+                    }
+
+                    $result[] = $comparison_data;
                 }
-
-                // Tambahkan ke hasil
-                $result[] = array(
-                    'province' => $province_name,
-                    'biaya_' . ($thang_current - 1) => $biaya_previous,
-                    'biaya_' . $thang_current => $biaya_current,
-                    'difference' => $difference,
-                    'percentage_change' => $percentage_change
-                );
             }
 
             // Apply sorting
             if ($sortOrder === 'asc') {
-                usort($result, function ($a, $b) use ($thang_current) {
-                    return $a['biaya_' . $thang_current] - $b['biaya_' . $thang_current];
+                usort($result, function ($a, $b) {
+                    return $a['biaya_current'] - $b['biaya_current'];
                 });
             } else if ($sortOrder === 'desc') {
-                usort($result, function ($a, $b) use ($thang_current) {
-                    return $b['biaya_' . $thang_current] - $a['biaya_' . $thang_current];
+                usort($result, function ($a, $b) {
+                    return $b['biaya_current'] - $a['biaya_current'];
+                });
+            } else if ($sortOrder === 'diff_asc') {
+                usort($result, function ($a, $b) {
+                    return $a['difference'] - $b['difference'];
+                });
+            } else if ($sortOrder === 'diff_desc') {
+                usort($result, function ($a, $b) {
+                    return $b['difference'] - $a['difference'];
+                });
+            } else if ($sortOrder === 'percent_asc') {
+                usort($result, function ($a, $b) {
+                    return $a['percentage_change'] - $b['percentage_change'];
+                });
+            } else if ($sortOrder === 'percent_desc') {
+                usort($result, function ($a, $b) {
+                    return $b['percentage_change'] - $a['percentage_change'];
                 });
             }
 
