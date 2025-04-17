@@ -670,138 +670,172 @@
 	let dataTable;
 	let currentDataType = '';
 
-	// Initialize DataTables when the modal is shown
+
 	document.addEventListener('DOMContentLoaded', function() {
 		const dataModal = document.getElementById('dataModal');
 
-		// Set up modal event handlers
-		dataModal.addEventListener('show.bs.modal', function(event) {
-			const button = event.relatedTarget;
-			const title = button.getAttribute('data-title');
-			const dataType = button.getAttribute('data-type');
+		// Only proceed if the dataModal exists
+		if (dataModal) {
+			// Set up modal event handlers
+			dataModal.addEventListener('show.bs.modal', function(event) {
+				const button = event.relatedTarget;
+				const title = button.getAttribute('data-title');
+				const dataType = button.getAttribute('data-type');
 
-			// Update modal title
-			document.getElementById('dataModalLabel').textContent = title;
+				// Update modal title
+				document.getElementById('dataModalLabel').textContent = title;
 
-			// Store the current data type
-			currentDataType = dataType;
+				// Store the current data type
+				currentDataType = dataType;
 
-			// Destroy existing DataTable if it exists
-			if (dataTable) {
-				dataTable.destroy();
-			}
-
-			// Clear the table header and body
-			document.querySelector('#dataTable thead').innerHTML = '<tr></tr>';
-			document.querySelector('#dataTable tbody').innerHTML = '';
-
-			// Create table headers
-			const headerRow = document.querySelector('#dataTable thead tr');
-			headerRow.innerHTML = '';
-			tableConfigs[dataType].columns.forEach(column => {
-				const th = document.createElement('th');
-				th.textContent = column.title;
-				if (column.width) {
-					th.style.width = column.width;
+				// Destroy existing DataTable if it exists
+				if (dataTable) {
+					dataTable.destroy();
 				}
-				headerRow.appendChild(th);
-			});
 
-			// Filter out rows where all data fields are empty
-			const filteredData = usersData[dataType].filter(row => {
-				let hasData = false;
-				// Check each column that's not the "No" column (index 0)
-				for (let i = 1; i < tableConfigs[dataType].columns.length; i++) {
-					const column = tableConfigs[dataType].columns[i];
-					if (row[column.data]) {
-						hasData = true;
-						break;
+				// Clear the table header and body
+				document.querySelector('#dataTable thead').innerHTML = '<tr></tr>';
+				document.querySelector('#dataTable tbody').innerHTML = '';
+
+				// Create table headers
+				const headerRow = document.querySelector('#dataTable thead tr');
+				headerRow.innerHTML = '';
+				tableConfigs[dataType].columns.forEach(column => {
+					const th = document.createElement('th');
+					th.textContent = column.title;
+					if (column.width) {
+						th.style.width = column.width;
 					}
-				}
-				return hasData;
-			});
+					headerRow.appendChild(th);
+				});
 
-			// Initialize DataTable with the current data type
-			dataTable = new DataTable('#dataTable', {
-				data: filteredData,
-				columns: tableConfigs[dataType].columns,
-				pageLength: 10,
-				language: {
-					search: "Pencarian:",
-					lengthMenu: "Tampilkan _MENU_ data per halaman",
-					zeroRecords: "Tidak ada data yang ditemukan",
-					info: "Menampilkan halaman _PAGE_ dari _PAGES_",
-					infoEmpty: "Tidak ada data tersedia",
-					infoFiltered: "(difilter dari _MAX_ total data)",
-					paginate: {
-						first: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-chevron-bar-left" viewBox="0 0 16 16">
+				// Filter out rows where all data fields are empty
+				const filteredData = usersData[dataType].filter(row => {
+					let hasData = false;
+					// Check each column that's not the "No" column (index 0)
+					for (let i = 1; i < tableConfigs[dataType].columns.length; i++) {
+						const column = tableConfigs[dataType].columns[i];
+						if (row[column.data]) {
+							hasData = true;
+							break;
+						}
+					}
+					return hasData;
+				});
+
+				// Initialize DataTable with the current data type
+				dataTable = new DataTable('#dataTable', {
+					data: filteredData,
+					columns: tableConfigs[dataType].columns,
+					pageLength: 10,
+					language: {
+						search: "Pencarian:",
+						lengthMenu: "Tampilkan _MENU_ data per halaman",
+						zeroRecords: "Tidak ada data yang ditemukan",
+						info: "Menampilkan halaman _PAGE_ dari _PAGES_",
+						infoEmpty: "Tidak ada data tersedia",
+						infoFiltered: "(difilter dari _MAX_ total data)",
+						paginate: {
+							first: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-chevron-bar-left" viewBox="0 0 16 16">
                             <path fill-rule="evenodd" d="M12.854 1.646a.5.5 0 0 1 0 .708L8.207 7l4.647 4.646a.5.5 0 0 1-.708.708l-5-5a.5.5 0 0 1 0-.708l5-5a.5.5 0 0 1 .708 0z"/>
                             <path fill-rule="evenodd" d="M4 2.5a.5.5 0 0 1 .5.5v10a.5.5 0 0 1-1 0v-10a.5.5 0 0 1 .5-.5z"/>
                             </svg>`,
-						previous: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+							previous: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
                             <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L6.707 7l4.647 4.646a.5.5 0 0 1-.708.708l-5-5a.5.5 0 0 1 0-.708l5-5a.5.5 0 0 1 .708 0z"/>
                             </svg>`,
-						next: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
-									<path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l5 5a.5.5 0 0 1 0 .708l-5 5a.5.5 0 0 1 .708 0z"/>
-								</svg>`,
-						last: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-chevron-bar-right" viewBox="0 0 16 16">
+							next: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l5 5a.5.5 0 0 1 0 .708l-5 5a.5.5 0 0 1 .708 0z"/>
+                            </svg>`,
+							last: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-chevron-bar-right" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M3.146 1.646a.5.5 0 0 1 .708 0l5 5a.5.5 0 0 1 0 .708l-5 5a.5.5 0 0 1-.708-.708L8.293 7 3.146 2.354a.5.5 0 0 1 0-.708z"/>
                         <path fill-rule="evenodd" d="M12 2.5a.5.5 0 0 1 .5.5v10a.5.5 0 0 1-1 0v-10a.5.5 0 0 1 .5-.5z"/>
                         </svg>`
+						}
 					}
+				});
+			});
+		}
+
+		// Setup search functionality - only add if element exists
+		const searchInput = document.getElementById('table-search');
+		if (searchInput) {
+			searchInput.addEventListener('keyup', function() {
+				if (dataTable) {
+					dataTable.search(this.value).draw();
 				}
 			});
-		});
-		// Setup search functionality
-		document.getElementById('table-search').addEventListener('keyup', function() {
-			if (dataTable) {
-				dataTable.search(this.value).draw();
-			}
-		});
+		}
 
-		// Export button handlers
-		document.getElementById('btn-copy').addEventListener('click', function() {
-			if (dataTable) {
-				navigator.clipboard.writeText(getTableData());
-				alert('Data telah disalin ke clipboard');
-			}
-		});
+		// Export button handlers - check if each button exists before adding listeners
+		const btnCopy = document.getElementById('btn-copy');
+		if (btnCopy) {
+			btnCopy.addEventListener('click', function() {
+				if (dataTable) {
+					navigator.clipboard.writeText(getTableData());
+					alert('Data telah disalin ke clipboard');
+				}
+			});
+		}
 
-		document.getElementById('btn-csv').addEventListener('click', function() {
-			if (dataTable) {
-				downloadCSV(getTableData());
-			}
-		});
+		const btnCSV = document.getElementById('btn-csv');
+		if (btnCSV) {
+			btnCSV.addEventListener('click', function() {
+				if (dataTable) {
+					downloadCSV(getTableData());
+				}
+			});
+		}
 
-		document.getElementById('btn-pdf').addEventListener('click', function() {
-			if (dataTable) {
-				downloadPDF(getTableData());
-			}
-		});
+		const btnPDF = document.getElementById('btn-pdf');
+		if (btnPDF) {
+			btnPDF.addEventListener('click', function() {
+				if (dataTable) {
+					downloadPDF(getTableData());
+				}
+			});
+		}
 
-		document.getElementById('btn-print').addEventListener('click', function() {
-			if (dataTable) {
-				printTable();
-			}
-		});
+		const btnPrint = document.getElementById('btn-print');
+		if (btnPrint) {
+			btnPrint.addEventListener('click', function() {
+				if (dataTable) {
+					printTable();
+				}
+			});
+		}
 	});
 
-	// Helper function to get formatted table data
+	// Helper function to get formatted table data (without profilepic column)
 	function getTableData() {
 		if (!dataTable) return '';
 
 		const config = tableConfigs[currentDataType];
 		const data = dataTable.data().toArray(); // Use the filtered data from DataTable
 
-		// Create header row
-		let csvContent = config.columns.map(col => col.title).join(',') + '\n';
+		// Create header row - exclude profilepic column
+		let headers = [];
+		config.columns.forEach(col => {
+			// Skip profilepic column
+			if (col.data !== 'profilepic') {
+				headers.push(col.title);
+			}
+		});
+		let csvContent = headers.join(',') + '\n';
 
 		// Add data rows
 		data.forEach((row, index) => {
-			const rowValues = config.columns.map((col, colIndex) => {
+			let rowValues = [];
+
+			config.columns.forEach((col, colIndex) => {
+				// Skip profilepic column
+				if (col.data === 'profilepic') {
+					return;
+				}
+
 				// For the No column, use the current index + 1
 				if (colIndex === 0) {
-					return index + 1;
+					rowValues.push(index + 1);
+					return;
 				}
 
 				let value = row[col.data] || 'Unknown';
@@ -813,10 +847,10 @@
 
 				// Escape commas in values
 				if (typeof value === 'string' && value.includes(',')) {
-					return `"${value}"`;
+					rowValues.push(`"${value}"`);
+				} else {
+					rowValues.push(value);
 				}
-
-				return value;
 			});
 
 			csvContent += rowValues.join(',') + '\n';
@@ -854,7 +888,7 @@
 			keywords: 'datatable, export, pdf'
 		});
 
-		// Get table data
+		// Get table data (already filtered without profilepic)
 		const tableData = getTableData();
 
 		// Parse CSV data to create an array for the PDF
@@ -896,8 +930,8 @@
 			},
 			columnStyles: {
 				0: {
-					cellWidth: 30
-				} // Set width for the No column in PDF
+					cellWidth: 20
+				} // Set smaller width (20) for the No column in PDF
 			}
 		});
 
@@ -905,46 +939,46 @@
 		pdf.save(`${currentDataType}.pdf`);
 	}
 
-	// Helper function to print table
+	// Helper function to print table - exclude profilepic column
 	function printTable() {
 		const printWindow = window.open('', '_blank');
 		const title = document.getElementById('dataModalLabel').textContent;
 		const data = dataTable.data().toArray(); // Use the filtered data from DataTable
-		const columns = tableConfigs[currentDataType].columns;
+		const columns = tableConfigs[currentDataType].columns.filter(col => col.data !== 'profilepic');
 
 		let printContent = `
-  <!DOCTYPE html>
-  <html>
-  <head>
-    <title>${title}</title>
-    <style>
-      table { border-collapse: collapse; width: 100%; }
-      th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-      th { background-color: #f2f2f2; }
-      tr:nth-child(even) { background-color: #f9f9f9; }
-      .number-column { width: 50px; }
-    </style>
-  </head>
-  <body>
-    <h1>${title}</h1>
-    <table>
-      <thead>
-        <tr>
-`;
+							<!DOCTYPE html>
+							<html>
+							<head>
+							<title>${title}</title>
+							<style>
+								table { border-collapse: collapse; width: 100%; }
+								th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+								th { background-color: #f2f2f2; }
+								tr:nth-child(even) { background-color: #f9f9f9; }
+								.number-column { width: 30px; } /* Smaller width for No column */
+							</style>
+							</head>
+							<body>
+							<h1>${title}</h1>
+							<table>
+								<thead>
+								<tr>
+							`;
 
-		// Add headers
+		// Add headers (excluding profilepic)
 		columns.forEach((col, index) => {
 			const className = index === 0 ? ' class="number-column"' : '';
 			printContent += `<th${className}>${col.title}</th>`;
 		});
 
 		printContent += `
-        </tr>
-      </thead>
-      <tbody>
-`;
+							</tr>
+							</thead>
+							<tbody>
+						`;
 
-		// Add data rows
+		// Add data rows (excluding profilepic)
 		data.forEach((row, rowIndex) => {
 			printContent += '<tr>';
 			columns.forEach((col, colIndex) => {
@@ -969,11 +1003,11 @@
 		});
 
 		printContent += `
-      </tbody>
-    </table>
-  </body>
-  </html>
-`;
+							</tbody>
+						</table>
+						</body>
+						</html>
+						`;
 
 		printWindow.document.open();
 		printWindow.document.write(printContent);
