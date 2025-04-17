@@ -258,8 +258,8 @@
 							const label = w.config.labels[seriesIndex];
 							const value = series[seriesIndex];
 							return `<div style="background: ${w.config.colors[seriesIndex]}; font-size: 12px;font-weight: 600;color: white; padding: 6px 12px; border-radius: 4px;">
-                          <span>${label}: ${value} Aktivitas</span>
-                      </div>`;
+								<span>${label}: ${new Intl.NumberFormat('id-ID').format(value)} Aktivitas</span>
+							</div>`;
 						},
 						theme: 'dark',
 						fillSeriesColor: true
@@ -378,20 +378,20 @@
 					horizontalAlign: 'right'
 				},
 				tooltip: {
-					shared: true,
-					intersect: false,
-					x: {
-						show: true,
-						formatter: function(val) {
-							return 'Aktivitas Tanggal ' + val;
-						}
-					},
-					y: {
-						formatter: function(val) {
-							return val + ' Aktivitas';
-						}
+				shared: true,
+				intersect: false,
+				x: {
+					show: true,
+					formatter: function(val) {
+						return 'Aktivitas Tanggal ' + val;
+					}
+				},
+				y: {
+					formatter: function(val) {
+						return new Intl.NumberFormat('id-ID').format(val) + ' Aktivitas';
 					}
 				}
+			}
 			};
 
 			var moduleActivityChart = new ApexCharts(document.querySelector("#chart-aktivitas-modul"), moduleActivityOptions);
