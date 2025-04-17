@@ -54,22 +54,6 @@ class Perbandingan extends CI_Controller
         echo json_encode($data);
     }
 
-    public function get_bar_data()
-    {
-        if (!$this->session->userdata('isLoggedIn')) {
-            $this->output->set_status_header(401);
-            echo json_encode(['error' => 'Unauthorized']);
-            return;
-        }
-
-        $kode = $this->input->get('kode');
-        $thang = $this->input->get('thang');
-        $sortOrder = $this->input->get('sortOrder') ?: 'normal';
-
-        $data = $this->Perbandingan_model->get_bar_data($kode, $thang, $sortOrder);
-        echo json_encode($data);
-    }
-
     public function get_comparison_data()
     {
         if (!$this->session->userdata('isLoggedIn')) {
@@ -80,11 +64,9 @@ class Perbandingan extends CI_Controller
 
         $thang = $this->input->get('thang');
         $kode = $this->input->get('kode');
-        $subtitle = $this->input->get('subtitle');
-        $sub_subtitle = $this->input->get('sub_subtitle');
-        $sortOrder = $this->input->get('sortOrder') ?: 'normal';
+        $sortOrder = $this->input->get('sortOrder');
 
-        $data = $this->Perbandingan_model->get_comparison_data($kode, $thang, $subtitle, $sub_subtitle, $sortOrder);
+        $data = $this->Perbandingan_model->get_comparison_data($kode, $thang, $sortOrder);
         echo json_encode($data);
     }
 }
