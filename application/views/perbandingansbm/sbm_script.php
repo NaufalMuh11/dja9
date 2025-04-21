@@ -66,6 +66,7 @@
         // Common chart settings
         const commonChartSettings = {
             fontFamily: "inherit",
+            width: '100%',
             toolbar: {
                 show: false
             },
@@ -117,6 +118,7 @@
         // Utility functions
         function showLoader() {
             if (elements.refreshIndicator) {
+                updateRefreshIndicator();
                 elements.refreshIndicator.style.display = 'block';
             }
         }
@@ -129,6 +131,142 @@
 
         function getCurrentYear() {
             return elements.yearInput ? elements.yearInput.value : '2025';
+        }
+
+        // Theme detection function
+        function isDarkMode() {
+            return document.body.classList.contains('theme-dark') ||
+                document.body.getAttribute('data-bs-theme') === 'dark';
+        }
+
+        // Update chart theme settings
+        function updateChartTheme() {
+            const isDark = isDarkMode();
+            const themeColors = {
+                textColor: isDark ? '#e9ecef' : '#495057',
+                gridColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                tooltipBackground: isDark ? '#1a2234' : '#ffffff',
+                tooltipText: isDark ? '#ffffff' : '#212529',
+                legendColor: isDark ? '#e9ecef' : '#495057',
+                backgroundColor: isDark ? '#1a2234' : '#ffffff',
+                boxplotMedian: isDark ? '#ffffff' : '#212121',
+                strokeColor: isDark ? '#ffffff' : '#000000'
+            };
+
+            // Update common chart settings for theme
+            commonChartSettings.tooltip.theme = isDark ? 'dark' : 'light';
+
+            // Additional theme-specific settings
+            return {
+                chart: {
+                    background: 'transparent',
+                    foreColor: themeColors.textColor
+                },
+                xaxis: {
+                    labels: {
+                        style: {
+                            colors: themeColors.textColor
+                        },
+                        rotate: -90
+                    },
+                    title: {
+                        style: {
+                            color: themeColors.textColor
+                        }
+                    },
+                    axisBorder: {
+                        color: themeColors.gridColor
+                    },
+                    axisTicks: {
+                        color: themeColors.gridColor
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        style: {
+                            colors: themeColors.textColor
+                        }
+                    },
+                    title: {
+                        style: {
+                            color: themeColors.textColor
+                        }
+                    }
+                },
+                grid: {
+                    borderColor: themeColors.gridColor,
+                    strokeDashArray: 4
+                },
+                legend: {
+                    labels: {
+                        colors: themeColors.textColor
+                    }
+                },
+                tooltip: {
+                    style: {
+                        fontSize: '12px',
+                        fontFamily: 'inherit'
+                    }
+                },
+                plotOptions: {
+                    boxPlot: {
+                        colors: {
+                            upper: themeColors.boxplotUpper,
+                            lower: themeColors.boxplotLower
+                        },
+                        medianColor: themeColors.boxplotMedian
+                    }
+                },
+                stroke: {
+                    colors: [themeColors.strokeColor]
+                },
+                markers: {
+                    strokeColors: themeColors.strokeColor,
+                    strokeWidth: isDark ? 1.5 : 1
+                },
+                theme: {
+                    mode: isDark ? 'dark' : 'light'
+                }
+            };
+        }
+
+        // Update refresh indicator for current theme
+        function updateRefreshIndicator() {
+            if (!elements.refreshIndicator) return;
+
+            const isDark = isDarkMode();
+
+            // Update background class
+            elements.refreshIndicator.classList.remove('bg-light', 'bg-dark');
+            elements.refreshIndicator.classList.add(isDark ? 'bg-dark' : 'bg-light');
+
+            // Update text color
+            const textElement = elements.refreshIndicator.querySelector('small');
+            if (textElement) {
+                textElement.classList.remove('text-dark', 'text-light');
+                textElement.classList.add(isDark ? 'text-light' : 'text-dark');
+            }
+
+            // Update border color if needed
+            elements.refreshIndicator.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+        }
+
+        // Set up theme change listener
+        function initThemeListener() {
+            // Watch for theme changes
+            const themeObserver = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === 'class' || mutation.attributeName === 'data-bs-theme') {
+                        // Update refresh indicator and chart themes
+                        SBMChartModule.updateTheme();
+                    }
+                });
+            });
+
+            // Start observing the document body for theme changes
+            themeObserver.observe(document.body, {
+                attributes: true
+            });
         }
 
         // Fetch data functions
@@ -250,6 +388,10 @@
                 y: item.y.map(val => val / 1000)
             }));
 
+            // Get theme-specific settings
+            const themeSettings = updateChartTheme();
+            const isDark = isDarkMode();
+
             const options = {
                 series: [{
                     type: 'boxPlot',
@@ -257,32 +399,47 @@
                 }],
                 chart: {
                     ...commonChartSettings,
+                    ...themeSettings.chart,
                     type: 'boxPlot',
-                    height: 500
+                    height: 500,
+                    width: '100%'
                 },
                 plotOptions: {
                     boxPlot: {
                         colors: {
                             upper: chartColors.purple,
                             lower: chartColors.warning
-                        }
+                        },
+                        medianColor: isDark ? '#ffffff' : chartColors.dark
                     }
                 },
+                stroke: {
+                    colors: [isDark ? '#ffffff' : '#000000']
+                },
+                markers: {
+                    ...themeSettings.markers
+                },
                 xaxis: {
+                    ...themeSettings.xaxis,
                     title: {
+                        ...themeSettings.xaxis.title,
                         text: 'SBM'
                     },
                     labels: {
+                        ...themeSettings.xaxis.labels,
                         rotate: -90,
                         trim: false,
                         maxHeight: 120
                     }
                 },
                 yaxis: {
+                    ...themeSettings.yaxis,
                     title: {
+                        ...themeSettings.yaxis.title,
                         text: 'Biaya (Ribu Rupiah)'
                     },
                     labels: {
+                        ...themeSettings.yaxis.labels,
                         formatter: function(value) {
                             return new Intl.NumberFormat('id-ID').format(value);
                         }
@@ -290,17 +447,19 @@
                 },
                 tooltip: {
                     ...commonChartSettings.tooltip,
+                    theme: themeSettings.theme.mode,
                     y: {
                         formatter: function(value) {
                             return new Intl.NumberFormat('id-ID').format(value);
                         }
                     }
                 },
+                theme: themeSettings.theme,
                 noData: noDataSettings
             };
 
             if (charts.boxplot) {
-                charts.boxplot.updateOptions(options);
+                charts.boxplot.updateOptions(options, false, true);
             } else {
                 charts.boxplot = new ApexCharts(elements.boxplotContainer, options);
                 charts.boxplot.render();
@@ -334,6 +493,9 @@
             const valuesCurrent = data.map(item => item.biaya_current / 1000);
             const percentageChanges = data.map(item => item.percentage_change);
 
+            // Get theme-specific settings
+            const themeSettings = updateChartTheme();
+
             const options = {
                 series: [{
                     name: `Biaya ${selections.year}`,
@@ -350,8 +512,10 @@
                 }],
                 chart: {
                     ...commonChartSettings,
+                    ...themeSettings.chart,
                     type: 'line',
                     height: 500,
+                    width: '100%',
                     stacked: false
                 },
                 stroke: {
@@ -362,23 +526,29 @@
                     size: [5, 5, 0],
                     hover: {
                         size: 7
-                    }
+                    },
+                    ...themeSettings.markers
                 },
                 xaxis: {
+                    ...themeSettings.xaxis,
                     categories: provinces,
                     labels: {
+                        ...themeSettings.xaxis.labels,
                         rotate: -90
                     },
                     title: {
+                        ...themeSettings.xaxis.title,
                         text: 'Provinsi'
                     }
                 },
                 yaxis: [{
                         seriesName: `Biaya ${selections.year}`,
                         title: {
-                            text: 'Biaya (Rupiah)'
+                            ...themeSettings.yaxis.title,
+                            text: 'Biaya (Ribu Rupiah)'
                         },
                         labels: {
+                            ...themeSettings.yaxis.labels,
                             formatter: function(value) {
                                 return new Intl.NumberFormat('id-ID').format(value);
                             }
@@ -393,9 +563,11 @@
                     {
                         opposite: true,
                         title: {
+                            ...themeSettings.yaxis.title,
                             text: 'Persentase Perubahan (%)'
                         },
                         labels: {
+                            ...themeSettings.yaxis.labels,
                             formatter: function(value) {
                                 return value + '%';
                             }
@@ -404,6 +576,7 @@
                 ],
                 tooltip: {
                     ...commonChartSettings.tooltip,
+                    theme: themeSettings.theme.mode,
                     y: {
                         formatter: function(value, {
                             seriesIndex
@@ -421,6 +594,7 @@
                     chartColors.dark
                 ],
                 legend: {
+                    ...themeSettings.legend,
                     position: 'top'
                 },
                 dataLabels: {
@@ -430,11 +604,11 @@
                         return val.toFixed(2) + '%';
                     },
                     style: {
-                        fontSize: '10px',
-                        colors: [chartColors.dark]
+                        fontSize: '10px'
                     },
                     offsetY: -5
                 },
+                theme: themeSettings.theme,
                 noData: noDataSettings
             };
 
@@ -455,14 +629,14 @@
 
             // Get display text for current sort order
             const sortOrderDisplayTexts = {
-                'normal': 'Urutan Normal',
+                'normal': 'Nilai Normal',
                 'asc': 'Nilai Terendah',
                 'desc': 'Nilai Tertinggi'
             };
 
             // Update the UI element
             elements.selectedSortOrder.textContent =
-                sortOrderDisplayTexts[selections.sortOrder] || 'Urutan Normal';
+                sortOrderDisplayTexts[selections.sortOrder] || 'Nilai Normal';
 
             // Update the active class on menu items
             if (elements.sortOrderMenu) {
@@ -615,6 +789,14 @@
             if (!elements.subtitleSelect) return;
 
             elements.subtitleSelect.innerHTML = '';
+
+            if (!subtitles || subtitles.length === 0) {
+                elements.subtitleSelect.classList.add('d-none');
+                return;
+            }
+
+            // Show the select element
+            elements.subtitleSelect.classList.remove('d-none');
 
             // Add subtitle options
             subtitles.forEach(subtitle => {
@@ -846,6 +1028,7 @@
                     if (elements.subtitleSelect) {
                         elements.subtitleSelect.disabled = true;
                         elements.subtitleSelect.innerHTML = '<option disabled selected>Subjudul</option>';
+                        elements.subtitleSelect.classList.add('d-none');
                     }
                     renderBoxplotChart([], null);
                     return;
@@ -857,6 +1040,11 @@
                 if (hasSubtitles) {
                     // Get unique subtitles
                     const subtitles = [...new Set(data.map(item => item.subtitle))];
+
+                    // Show subtitle select
+                    if (elements.subtitleSelect) {
+                        elements.subtitleSelect.classList.remove('d-none');
+                    }
 
                     // Populate subtitle select
                     populateSubtitleSelect(subtitles);
@@ -881,6 +1069,7 @@
                     if (elements.subtitleSelect) {
                         elements.subtitleSelect.disabled = true;
                         elements.subtitleSelect.innerHTML = '<option disabled selected>Subjudul</option>';
+                        elements.subtitleSelect.classList.add('d-none');
                     }
                     selections.subtitle = null;
                     renderBoxplotChart(data, null);
@@ -893,6 +1082,7 @@
                 if (elements.subtitleSelect) {
                     elements.subtitleSelect.disabled = true;
                     elements.subtitleSelect.innerHTML = '<option disabled selected>Subjudul</option>';
+                    elements.subtitleSelect.classList.add('d-none');
                 }
             } finally {
                 hideLoader();
@@ -1194,6 +1384,8 @@
                 try {
                     initEventListeners();
                     initSortOrderDropdown();
+                    initThemeListener();
+                    updateRefreshIndicator();
 
                     await initYearDropdown();
 
@@ -1262,7 +1454,36 @@
                     }
                 });
 
+                if (window.themeObserver) {
+                    window.themeObserver.disconnect();
+                    window.themeObserver = null;
+                }
+
                 console.log('SBM Chart Module destroyed');
+            },
+            updateTheme: function() {
+                updateRefreshIndicator();
+
+                // Update charts with new theme
+                if (charts.boxplot) {
+                    const boxplotData = chartData.boxplot.filter(item =>
+                        item.subtitle === selections.subtitle || (!item.subtitle && !selections.subtitle)
+                    );
+                    if (boxplotData.length === 0) {
+                        loadBoxplotData(selections.title);
+                    } else {
+                        renderBoxplotChart(boxplotData, selections.subtitle);
+                    }
+                }
+
+                if (charts.compare) {
+                    const filteredData = getFilteredData();
+                    if (filteredData.length === 0) {
+                        loadCompareData(selections.title);
+                    } else {
+                        renderCompareChart(filteredData);
+                    }
+                }
             }
         };
     })();
