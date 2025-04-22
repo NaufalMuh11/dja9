@@ -94,21 +94,19 @@
                   </div>
 
                   <div class="card-body">
-                     <div class="d-flex flex-column align-items-center">
-                        <div class="position-relative w-full">
-                           <h3 class="mb-1 text-center">Perbandingan Standar Biaya Masukan per Provinsi</h3>
-                           <div class="dropdown position-absolute top-0 end-0" id="sort-order-dropdown">
-                              <a class="dropdown-toggle text-reset text-decoration-none fs-5" href="" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                 Urutkan:<span id="selected-sort-order" class="ms-1">Nilai Normal</span>
-                              </a>
-                              <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-1">
-                                 <li><a class="dropdown-item fs-5 py-1" href="" data-value="normal">Nilai Normal</a></li>
-                                 <li><a class="dropdown-item fs-5 py-1 d-flex align-items-center" href="" data-value="asc">
-                                       Nilai Terendah
-                                    </a></li>
-                                 <li><a class="dropdown-item fs-5 py-1" href="" data-value="desc">Nilai Tertinggi</a></li>
-                              </ul>
-                           </div>
+                     <div class="d-flex align-items-center flex-column">
+                        <h3 class="mb-1 text-center">Perbandingan Standar Biaya Masukan per Provinsi</h3>
+                        <div class="dropdown ms-auto mx-2" id="sort-order-dropdown">
+                           <a class="dropdown-toggle text-reset text-decoration-none fs-5" href="" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              Urutkan:<span id="selected-sort-order" class="ms-1">Nilai Normal</span>
+                           </a>
+                           <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-1">
+                              <li><a class="dropdown-item fs-5 py-1" href="" data-value="normal">Nilai Normal</a></li>
+                              <li><a class="dropdown-item fs-5 py-1 d-flex align-items-center" href="" data-value="asc">
+                                    Nilai Terendah
+                                 </a></li>
+                              <li><a class="dropdown-item fs-5 py-1" href="" data-value="desc">Nilai Tertinggi</a></li>
+                           </ul>
                         </div>
 
                         <div id="bar-chart-dropdowns" class="d-flex gap-3 align-items-center mt-2">

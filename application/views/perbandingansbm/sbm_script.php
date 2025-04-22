@@ -78,15 +78,6 @@
                 shared: true,
                 intersect: false
             },
-            grid: {
-                padding: {
-                    top: -20,
-                    right: 0,
-                    left: -4,
-                    bottom: -4
-                },
-                strokeDashArray: 4
-            },
             zoom: {
                 enabled: false
             }
@@ -194,8 +185,7 @@
                     }
                 },
                 grid: {
-                    borderColor: themeColors.gridColor,
-                    strokeDashArray: 4
+                    borderColor: themeColors.gridColor
                 },
                 legend: {
                     labels: {
@@ -454,6 +444,9 @@
                         }
                     }
                 },
+                grid: {
+                    ...themeSettings.grid
+                },
                 theme: themeSettings.theme,
                 noData: noDataSettings
             };
@@ -516,7 +509,36 @@
                     type: 'line',
                     height: 500,
                     width: '100%',
-                    stacked: false
+                    stacked: false,
+                    events: {
+                        mounted: function(chart) {
+                            // Check screen width and update x-axis labels visibility
+                            const updateXAxisLabels = () => {
+                                const isMobile = window.innerWidth < 768;
+                                chart.updateOptions({
+                                    xaxis: {
+                                        ...themeSettings.xaxis,
+                                        categories: provinces,
+                                        labels: {
+                                            ...themeSettings.xaxis.labels,
+                                            show: !isMobile,
+                                            rotate: -90
+                                        },
+                                        title: {
+                                            ...themeSettings.xaxis.title,
+                                            text: 'Provinsi'
+                                        }
+                                    }
+                                }, false, false);
+                            };
+
+                            // Initial check
+                            updateXAxisLabels();
+
+                            // Add resize listener
+                            window.addEventListener('resize', updateXAxisLabels);
+                        }
+                    }
                 },
                 stroke: {
                     width: [3, 3, 0],
@@ -607,6 +629,9 @@
                         fontSize: '10px'
                     },
                     offsetY: -5
+                },
+                grid: {
+                    ...themeSettings.grid
                 },
                 theme: themeSettings.theme,
                 noData: noDataSettings
