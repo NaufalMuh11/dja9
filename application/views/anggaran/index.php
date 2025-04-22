@@ -135,7 +135,7 @@
 				<div class="col-xl-8 col-lg-7 mb-3">
 					<div class="card h-100">
 						<div class="card-body d-flex flex-column">
-							<div class="row mb-3">
+							<div class="row mb-2">
 								<div class="col">
 									<h5 class="card-title text-center">
 										Pola Penggunaan Modul <span class="fw-bold" style="color: #8979FF;">MyTask</span> Per Jam <br>Pada Bulan
@@ -289,3 +289,4 @@
 
 <!-- Event Listener -->
 <?php $this->load->view('anggaran/script'); ?>
+
