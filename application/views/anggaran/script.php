@@ -1,5 +1,54 @@
 <script>
-	document.addEventListener("DOMContentLoaded", function() {
+	// Add these constants at the top of your script
+    const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+    let refreshTimer;
+    let lastRefreshTime = new Date();
+
+    // Add refresh functions
+    function startAutoRefresh() {
+        if (refreshTimer) {
+            clearInterval(refreshTimer);
+        }
+        
+        refreshTimer = setInterval(async () => {
+            try {
+                await refreshData();
+            } catch (error) {
+                console.error('Auto-refresh failed:', error);
+            }
+        }, REFRESH_INTERVAL);
+    }
+
+    async function refreshData() {
+        const refreshIndicator = document.getElementById('refresh-indicator');
+        if (refreshIndicator) {
+            refreshIndicator.style.display = 'block';
+        }
+
+        try {
+            // Submit the form to refresh data
+            await submitFilterForm();
+            
+            // Update last refresh time
+            lastRefreshTime = new Date();
+            const lastUpdateElement = document.getElementById('lastUpdate');
+            if (lastUpdateElement) {
+                lastUpdateElement.textContent = lastRefreshTime.toLocaleTimeString();
+            }
+        } finally {
+            if (refreshIndicator) {
+                refreshIndicator.style.display = 'none';
+            }
+        }
+    }
+document.addEventListener("DOMContentLoaded", function() {
+	startAutoRefresh();
+	const refreshButton = document.getElementById('refreshButton');
+        if (refreshButton) {
+            refreshButton.addEventListener('click', async () => {
+                await refreshData();
+            });
+        }
     // Fungsi untuk mendapatkan warna berdasarkan tema
     function getThemeColors() {
         const isDarkMode = document.documentElement.getAttribute('data-bs-theme') === 'dark';
