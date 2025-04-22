@@ -36,7 +36,7 @@
 	<div class="page-body" style="margin: 10px 0">
 		<div class="container-fluid">
 			<!-- Rows for Statistics Card -->
-			<div class="row mb-3">
+			<div class="row g-3 mb-3">
 				<!-- Total Number of Users Card -->
 				<div class="col-sm-6 col-lg-4">
 					<div class="card rounded-3 h-100">
@@ -49,7 +49,7 @@
 							<div class="flex-grow-1">
 								<div class="d-flex justify-content-between align-items-center">
 									<div class="fw-bold fs-5">Total Pengguna</div>
-									<a href="javascript:void(0)" class="text-dark" data-bs-toggle="modal" data-bs-target="#dataModal" data-title="Total Pengguna" data-type="total_users">
+									<a href="javascript:void(0)" class="text-body" data-bs-toggle="modal" data-bs-target="#dataModal" data-title="Total Pengguna" data-type="total_users">
 										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-external-link">
 											<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 											<path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
@@ -86,7 +86,7 @@
 							<div class="flex-grow-1">
 								<div class="d-flex justify-content-between align-items-center">
 									<div class="fw-bold fs-5">Jumlah Layanan</div>
-									<a href="javascript:void(0)" class="text-dark" data-bs-toggle="modal" data-bs-target="#dataModal" data-title="Jumlah Layanan" data-type="total_services">
+									<a href="javascript:void(0)" class="text-body" data-bs-toggle="modal" data-bs-target="#dataModal" data-title="Jumlah Layanan" data-type="total_services">
 										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-external-link">
 											<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 											<path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
@@ -114,7 +114,7 @@
 							<div class="flex-grow-1">
 								<div class="d-flex justify-content-between align-items-center">
 									<div class="fw-bold fs-5">Jumlah Modul</div>
-									<a href="javascript:void(0)" class="text-dark" data-bs-toggle="modal" data-bs-target="#dataModal" data-title="Jumlah Modul" data-type="total_modules">
+									<a href="javascript:void(0)" class="text-body" data-bs-toggle="modal" data-bs-target="#dataModal" data-title="Jumlah Modul" data-type="total_modules">
 										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-external-link">
 											<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 											<path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
@@ -135,10 +135,10 @@
 				<div class="col-xl-8 col-lg-7 mb-3">
 					<div class="card h-100">
 						<div class="card-body d-flex flex-column">
-							<div class="row mb-3">
+							<div class="row">
 								<div class="col">
 									<h5 class="card-title text-center">
-										Pola Penggunaan Modul <span class="fw-bold" style="color: #8979FF;">MyTask</span> Per Jam <br>Pada Bulan
+										Pola Penggunaan Modul <span class="fw-bold" style="color: #8979FF;">MyTask</span> Per Jam <br> Pada Bulan
 										<span class="fw-bold" style="color: #8979FF;"><?php echo $month_name; ?></span>
 										tahun
 										<span class="fw-bold" style="color: #8979FF;"><?php echo $year; ?></span>
@@ -146,7 +146,7 @@
 								</div>
 							</div>
 							<!-- Website Access Chart -->
-							<div id="accessChart" class="flex-grow-1"></div>
+							<div id="accessChart" class="flex-grow-1 mt-2"></div>
 						</div>
 					</div>
 				</div>
@@ -186,7 +186,7 @@
 					<div class="card flex-grow-1">
 						<div class="card-body">
 							<h5 class="card-title text-center mb-3">3 Pengguna Dengan Aktivitas <span class="fw-bold" style="color:#8979FF;">MyTask</span> Terbanyak</h5>
-							<div class="table-responsive">
+							<div class="table-responsive" style="height: 260px;">
 								<table class="table" id="userTable">
 									<thead>
 										<tr>
@@ -195,7 +195,7 @@
 											<th class="text-end">Jumlah Aktivitas</th>
 										</tr>
 									</thead>
-									<tbody>
+									<tbody class="position-relative">
 										<!-- Data In Script -->
 									</tbody>
 								</table>
