@@ -1,403 +1,629 @@
 <script>
 	document.addEventListener("DOMContentLoaded", function() {
-		// Last update
-		document.getElementById('lastUpdate').innerHTML = `<?php echo get_last_update(); ?>`;
+    // Fungsi untuk mendapatkan warna berdasarkan tema
+    function getThemeColors() {
+        const isDarkMode = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        
+        return {
+            textColor: isDarkMode ? '#e0e0e0' : '#333333',
+            gridColor: isDarkMode ? '#444444' : '#e0e0e0',
+            borderColor: isDarkMode ? '#555555' : '#e0e0e0',
+            chartColors: isDarkMode ? 
+                ['#6f42c1', '#ffd54f', '#ff5252', '#4caf50', '#ff9800'] : 
+                ['#6f42c1', '#ffc107', '#dc3545', '#198754', '#ff9800'],
+            backgroundColor: isDarkMode ? 'transparent' : 'transparent',
+            tooltipBackground: isDarkMode ? '#424242' : '#fff',
+            tooltipTextColor: isDarkMode ? '#e0e0e0' : '#333333'
+        };
+    }
+    
+    // Fungsi untuk memperbarui chart ketika tema berubah
+    function updateChartsTheme() {
+        const colors = getThemeColors();
+        
+        // Update Access Chart
+        if (window.chart) {
+            window.chart.updateOptions({
+                chart: {
+                    background: colors.backgroundColor
+                },
+                grid: {
+                    borderColor: colors.gridColor,
+                },
+                xaxis: {
+                    labels: {
+                        style: {
+                            colors: colors.textColor
+                        }
+                    },
+                    title: {
+                        style: {
+                            color: colors.textColor
+                        }
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        style: {
+                            colors: colors.textColor
+                        }
+                    },
+                    title: {
+                        style: {
+                            color: colors.textColor
+                        }
+                    }
+                },
+                legend: {
+                    labels: {
+                        colors: colors.textColor
+                    }
+                },
+                colors: [colors.chartColors[0], colors.chartColors[1]],
+                tooltip: {
+                    theme: colors.tooltipBackground === '#424242' ? 'dark' : 'light',
+                    style: {
+                        fontSize: '12px',
+                        fontFamily: undefined
+                    }
+                }
+            });
+        }
+        
+        // Update Module Access Chart
+        if (window.chartModul) {
+            window.chartModul.updateOptions({
+                chart: {
+                    background: colors.backgroundColor
+                },
+                colors: colors.chartColors,
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            labels: {
+                                total: {
+                                    color: colors.textColor
+                                },
+                                value: {
+                                    color: colors.textColor
+                                }
+                            }
+                        }
+                    }
+                },
+                legend: {
+                    labels: {
+                        colors: colors.textColor
+                    }
+                },
+                tooltip: {
+                    theme: colors.tooltipBackground === '#424242' ? 'dark' : 'light',
+                    style: {
+                        fontSize: '12px',
+                        fontFamily: undefined
+                    }
+                }
+            });
+        }
+        
+        // Update Module Activity Chart
+        if (window.moduleActivityChart) {
+            window.moduleActivityChart.updateOptions({
+                chart: {
+                    background: colors.backgroundColor
+                },
+                colors: colors.chartColors,
+                grid: {
+                    borderColor: colors.gridColor
+                },
+                xaxis: {
+                    labels: {
+                        style: {
+                            colors: colors.textColor
+                        }
+                    },
+                    title: {
+                        style: {
+                            color: colors.textColor
+                        }
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        style: {
+                            colors: colors.textColor
+                        }
+                    },
+                    title: {
+                        style: {
+                            color: colors.textColor
+                        }
+                    }
+                },
+                legend: {
+                    labels: {
+                        colors: colors.textColor
+                    }
+                },
+                tooltip: {
+                    theme: colors.tooltipBackground === '#424242' ? 'dark' : 'light',
+                    style: {
+                        fontSize: '12px',
+                        fontFamily: undefined
+                    }
+                }
+            });
+        }
+    }
+    
+    // Last update
+    document.getElementById('lastUpdate').innerHTML = `<?php echo get_last_update(); ?>`;
 
-		// Access Chart
-		var hourlyData = <?php echo $hourly_users; ?>;
-		var options = {
-			series: [{
-				name: 'Tahun Ini',
-				data: hourlyData.current_year
-			}, {
-				name: 'Tahun Lalu',
-				data: hourlyData.previous_year
-			}],
-			chart: {
-				height: 280,
-				type: 'line',
-				toolbar: {
-					show: false
-				},
-				zoom: {
-					enabled: false
-				}
-			},
-			colors: ['#7a36b1', '#ffc107'],
-			dataLabels: {
-				enabled: false
-			},
-			stroke: {
-				curve: 'smooth',
-				width: 3
-			},
-			grid: {
-				show: true,
-				borderColor: '#e0e0e0',
-				xaxis: {
-					lines: {
-						show: false
-					}
-				},
-				yaxis: {
-					lines: {
-						show: true
-					}
-				},
-				padding: {
-					top: 0,
-					right: 20,
-					bottom: 0,
-					left: 10
-				}
-			},
-			xaxis: {
-				categories: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12',
-					'13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'
-				],
-				axisBorder: {
-					show: true
-				},
-				axisTicks: {
-					show: true
-				},
-				title: {
-					text: 'Jam',
-					offsetY: 0, // Adjusted offsetY
-					offsetX: 0,
-					style: {
-						fontSize: '12px'
-					}
-				},
-				labels: {
-					offsetY: 5 // Added space between labels and title
-				}
-			},
-			yaxis: {
-				min: 0,
-				max: Math.max(...hourlyData.current_year, ...hourlyData.previous_year) + 5, // Dynamic max + padding
-				tickAmount: 6,
-				labels: {
-					formatter: function(val) {
-						return val.toFixed(0);
-					}
-				},
-				title: {
-					text: 'Jumlah',
-					style: {
-						fontSize: '12px'
-					}
-				}
-			},
-			legend: {
-				position: 'top',
-				horizontalAlign: 'center',
-				offsetX: 0,
-				offsetY: 0,
-				markers: {
-					width: 8,
-					height: 8,
-					radius: 12
-				},
-				itemMargin: {
-					horizontal: 15
-				}
-			}
-		};
+    // Access Chart
+    var hourlyData = <?php echo $hourly_users; ?>;
+    const colors = getThemeColors();
+    
+    var options = {
+        series: [{
+            name: 'Tahun Ini',
+            data: hourlyData.current_year
+        }, {
+            name: 'Tahun Lalu',
+            data: hourlyData.previous_year
+        }],
+        chart: {
+            height: 270,
+            type: 'line',
+            toolbar: {
+                show: false
+            },
+            zoom: {
+                enabled: false
+            },
+            background: colors.backgroundColor
+        },
+        colors: [colors.chartColors[0], colors.chartColors[1]],
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            curve: 'smooth',
+            width: 3
+        },
+        grid: {
+            show: true,
+            borderColor: colors.gridColor,
+            xaxis: {
+                lines: {
+                    show: false
+                }
+            },
+            yaxis: {
+                lines: {
+                    show: true
+                }
+            },
+            padding: {
+                top: 0,
+                right: 20,
+                bottom: 0,
+                left: 10
+            }
+        },
+        xaxis: {
+            categories: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12',
+                '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'
+            ],
+            axisBorder: {
+                show: true,
+                color: colors.borderColor
+            },
+            axisTicks: {
+                show: true,
+                color: colors.borderColor
+            },
+            title: {
+                text: 'Jam',
+                offsetY: 0,
+                offsetX: 0,
+                style: {
+                    fontSize: '12px',
+                    color: colors.textColor
+                }
+            },
+            labels: {
+                offsetY: 5,
+                style: {
+                    colors: colors.textColor
+                }
+            }
+        },
+        yaxis: {
+            min: 0,
+            max: Math.max(...hourlyData.current_year, ...hourlyData.previous_year) + 5,
+            tickAmount: 6,
+            labels: {
+                formatter: function(val) {
+                    return val.toFixed(0);
+                },
+                style: {
+                    colors: colors.textColor
+                }
+            },
+            title: {
+                text: 'Jumlah',
+                style: {
+                    fontSize: '12px',
+                    color: colors.textColor
+                }
+            }
+        },
+        legend: {
+            position: 'top',
+            horizontalAlign: 'center',
+            offsetX: 0,
+            offsetY: 0,
+            markers: {
+                width: 8,
+                height: 8,
+                radius: 12
+            },
+            itemMargin: {
+                horizontal: 15
+            },
+            labels: {
+                colors: colors.textColor
+            }
+        },
+        tooltip: {
+            theme: colors.tooltipBackground === '#424242' ? 'dark' : 'light',
+            style: {
+                fontSize: '12px',
+                fontFamily: undefined
+            }
+        }
+    };
 
-		var chart = new ApexCharts(document.querySelector("#accessChart"), options);
-		chart.render();
+    var chart = new ApexCharts(document.querySelector("#accessChart"), options);
+    chart.render();
+    window.chart = chart; // Simpan referensi chart
 
-		// Module Access Chart
-		const moduleDistribution = <?php echo $module_distribution ?? '[]'; ?>;
-		const totalModules = moduleDistribution.reduce((sum, item) => sum + parseInt(item.access_count), 0);
+    // Module Access Chart
+    const moduleDistribution = <?php echo $module_distribution ?? '[]'; ?>;
+    const totalModules = moduleDistribution.reduce((sum, item) => sum + parseInt(item.access_count), 0);
 
-		var chartModul;
+    var chartModul;
 
-		// Check if data exists
-		if (!moduleDistribution || moduleDistribution.length === 0 || !totalModules) {
-			// Create a div to replace the chart with a message
-			const chartContainer = document.getElementById("chart-akses-modul");
+    // Check if data exists
+    if (!moduleDistribution || moduleDistribution.length === 0 || !totalModules) {
+        // Create a div to replace the chart with a message
+        const chartContainer = document.getElementById("chart-akses-modul");
 
-			// Clear any existing content
-			chartContainer.innerHTML = '';
+        // Clear any existing content
+        chartContainer.innerHTML = '';
 
-			// Create and style the no data message container
-			const noDataDiv = document.createElement('div');
-			noDataDiv.style.display = 'flex';
-			noDataDiv.style.flexDirection = 'column';
-			noDataDiv.style.alignItems = 'center';
-			noDataDiv.style.justifyContent = 'center';
-			noDataDiv.style.height = '350px';
-			noDataDiv.style.width = '100%';
+        // Create and style the no data message container
+        const noDataDiv = document.createElement('div');
+        noDataDiv.style.display = 'flex';
+        noDataDiv.style.flexDirection = 'column';
+        noDataDiv.style.alignItems = 'center';
+        noDataDiv.style.justifyContent = 'center';
+        noDataDiv.style.height = '350px';
+        noDataDiv.style.width = '100%';
 
-			// Add an icon (using a simple SVG)
-			const iconDiv = document.createElement('div');
-			iconDiv.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cccccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        // Add an icon (using a simple SVG)
+        const iconDiv = document.createElement('div');
+        iconDiv.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="${colors.textColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="12" y1="8" x2="12" y2="12"></line>
               <line x1="12" y1="16" x2="12.01" y2="16"></line>
           </svg>
       `;
 
-			// Add text message
-			const messageDiv = document.createElement('div');
-			messageDiv.textContent = 'Tidak ada aktivitas';
-			messageDiv.style.marginTop = '16px';
-			messageDiv.style.fontSize = '16px';
-			messageDiv.style.color = '#666666';
-			messageDiv.style.fontWeight = '500';
+        // Add text message
+        const messageDiv = document.createElement('div');
+        messageDiv.textContent = 'Tidak ada aktivitas';
+        messageDiv.style.marginTop = '16px';
+        messageDiv.style.fontSize = '16px';
+        messageDiv.style.color = colors.textColor;
+        messageDiv.style.fontWeight = '500';
 
-			// Append elements to container
-			noDataDiv.appendChild(iconDiv);
-			noDataDiv.appendChild(messageDiv);
-			chartContainer.appendChild(noDataDiv);
-		} else {
-			// Initialize chart with data
-			chartModul = new ApexCharts(
-				document.getElementById("chart-akses-modul"), {
-					chart: {
-						type: "donut",
-						height: 350,
-						background: 'transparent',
-						offsetY: 30,
-						offsetX: -10,
-						events: {
-							dataPointSelection: function(event, chartContext, config) {
-								setTimeout(() => {
-									const totalLabel = document.querySelector('.apexcharts-datalabels-group .apexcharts-datalabel-label');
-									const totalValue = document.querySelector('.apexcharts-datalabels-group .apexcharts-datalabel-value');
+        // Append elements to container
+        noDataDiv.appendChild(iconDiv);
+        noDataDiv.appendChild(messageDiv);
+        chartContainer.appendChild(noDataDiv);
+    } else {
+        // Initialize chart with data
+        chartModul = new ApexCharts(
+            document.getElementById("chart-akses-modul"), {
+                chart: {
+                    type: "donut",
+                    height: 350,
+                    background: colors.backgroundColor,
+                    offsetY: 30,
+                    offsetX: -10,
+                    events: {
+                        dataPointSelection: function(event, chartContext, config) {
+                            setTimeout(() => {
+                                const totalLabel = document.querySelector('.apexcharts-datalabels-group .apexcharts-datalabel-label');
+                                const totalValue = document.querySelector('.apexcharts-datalabels-group .apexcharts-datalabel-value');
 
-									if (totalLabel) {
-										totalLabel.style.fill = '#333333';
-									}
+                                if (totalLabel) {
+                                    totalLabel.style.fill = colors.textColor;
+                                }
 
-									if (totalValue) {
-										totalValue.style.fill = '#333333';
-									}
-								}, 50);
-							}
-						},
-						noData: {
-							text: 'Tidak ada aktivitas',
-							align: 'center',
-							verticalAlign: 'middle',
-							offsetX: 0,
-							offsetY: 0,
-							style: {
-								color: '#666666',
-								fontSize: '16px',
-								fontFamily: undefined
-							}
-						}
-					},
-					series: moduleDistribution.map(item => parseInt(item.access_count)),
-					labels: moduleDistribution.map(item => item.keterangan),
-					colors: ['#5D3FD3', '#dc3545', '#ffc107', '#198754', '#ff9800'],
-					plotOptions: {
-						pie: {
-							offsetY: 10,
-							startAngle: 0,
-							endAngle: 360,
-							donut: {
-								size: '75%',
-								labels: {
-									show: true,
-									name: {
-										offsetY: -10
-									},
-									value: {
-										offsetY: 0
-									},
-									total: {
-										show: true,
-										showAlways: true,
-										label: 'Jumlah Modul Yang Diakses',
-										fontSize: '12px',
-										fontWeight: 400,
-										color: '#333333',
-										offsetY: -10,
-										formatter: function() {
-											return totalModules.toLocaleString('id-ID') + ' Modul';
-										}
-									},
-									value: {
-										show: true,
-										fontSize: '24px',
-										fontWeight: 700,
-										color: '#333333',
-										offsetY: 5,
-										formatter: function(val) {
-											return parseInt(val).toLocaleString('id-ID') + ' Aktivitas';
-										}
-									}
-								}
-							}
-						}
-					},
-					stroke: {
-						width: 0
-					},
-					dataLabels: {
-						enabled: true,
-						formatter: function(val, opts) {
-							return Math.round(val) + '%';
-						},
-						dropShadow: {
-							enabled: false
-						}
-					},
-					tooltip: {
-						custom: function({
-							series,
-							seriesIndex,
-							dataPointIndex,
-							w
-						}) {
-							const label = w.config.labels[seriesIndex];
-							const value = series[seriesIndex];
-							return `<div style="background: ${w.config.colors[seriesIndex]}; font-size: 12px;font-weight: 600;color: white; padding: 6px 12px; border-radius: 4px;">
-								<span>${label}: ${new Intl.NumberFormat('id-ID').format(value)} Aktivitas</span>
-							</div>`;
-						},
-						theme: 'dark',
-						fillSeriesColor: true
-					},
-					legend: {
-						show: true,
-						position: "right",
-						offsetY: 40,
-						height: 230,
-						markers: {
-							width: 12,
-							height: 12,
-							radius: 2
-						},
-						itemMargin: {
-							horizontal: 0,
-							vertical: 8
-						}
-					}
-				});
+                                if (totalValue) {
+                                    totalValue.style.fill = colors.textColor;
+                                }
+                            }, 50);
+                        }
+                    },
+                    noData: {
+                        text: 'Tidak ada aktivitas',
+                        align: 'center',
+                        verticalAlign: 'middle',
+                        offsetX: 0,
+                        offsetY: 0,
+                        style: {
+                            color: colors.textColor,
+                            fontSize: '16px',
+                            fontFamily: undefined
+                        }
+                    }
+                },
+                series: moduleDistribution.map(item => parseInt(item.access_count)),
+                labels: moduleDistribution.map(item => item.keterangan),
+                colors: colors.chartColors,
+                plotOptions: {
+                    pie: {
+                        offsetY: 10,
+                        startAngle: 0,
+                        endAngle: 360,
+                        donut: {
+                            size: '75%',
+                            labels: {
+                                show: true,
+                                name: {
+                                    offsetY: -10
+                                },
+                                value: {
+                                    offsetY: 0
+                                },
+                                total: {
+                                    show: true,
+                                    showAlways: true,
+                                    label: 'Jumlah Modul Yang Diakses',
+                                    fontSize: '12px',
+                                    fontWeight: 400,
+                                    color: colors.textColor,
+                                    offsetY: -10,
+                                    formatter: function() {
+                                        return totalModules.toLocaleString('id-ID') + ' Modul';
+                                    }
+                                },
+                                value: {
+                                    show: true,
+                                    fontSize: '24px',
+                                    fontWeight: 700,
+                                    color: colors.textColor,
+                                    offsetY: 5,
+                                    formatter: function(val) {
+                                        return parseInt(val).toLocaleString('id-ID') + ' Aktivitas';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                stroke: {
+                    width: 0
+                },
+                dataLabels: {
+                    enabled: true,
+                    formatter: function(val, opts) {
+                        return Math.round(val) + '%';
+                    },
+                    dropShadow: {
+                        enabled: false
+                    },
+                    style: {
+                        colors: ['#fff']
+                    }
+                },
+                tooltip: {
+                    custom: function({
+                        series,
+                        seriesIndex,
+                        dataPointIndex,
+                        w
+                    }) {
+                        const label = w.config.labels[seriesIndex];
+                        const value = series[seriesIndex];
+                        const bgColor = w.config.colors[seriesIndex];
+                        const textColor = '#ffffff'; // Tetap putih untuk kontras
+                        
+                        return `<div style="background: ${bgColor}; font-size: 12px;font-weight: 600;color: ${textColor}; padding: 6px 12px; border-radius: 4px;">
+                            <span>${label}: ${new Intl.NumberFormat('id-ID').format(value)} Aktivitas</span>
+                        </div>`;
+                    },
+                    theme: colors.tooltipBackground === '#424242' ? 'dark' : 'light',
+                    fillSeriesColor: true
+                },
+                legend: {
+                    show: true,
+                    position: "right",
+                    offsetY: 40,
+                    height: 230,
+                    markers: {
+                        width: 12,
+                        height: 12,
+                        radius: 2
+                    },
+                    itemMargin: {
+                        horizontal: 0,
+                        vertical: 8
+                    },
+                    labels: {
+                        colors: colors.textColor
+                    }
+                }
+            });
 
-			// Render the chart
-			chartModul.render();
-		}
+        // Render the chart
+        chartModul.render();
+        window.chartModul = chartModul; // Simpan referensi chart
+    }
 
-		// Module Activity Chart
-		const moduleActivityData = <?php echo $module_activity_data ?? '[]'; ?>;
+    // Module Activity Chart
+    const moduleActivityData = <?php echo $module_activity_data ?? '[]'; ?>;
 
-		// Check if data exists
-		if (!moduleActivityData || moduleActivityData.length === 0) {
-			// Create a div to replace the chart with a message
-			const chartContainer = document.querySelector("#chart-aktivitas-modul");
+    // Check if data exists
+    if (!moduleActivityData || moduleActivityData.length === 0) {
+        // Create a div to replace the chart with a message
+        const chartContainer = document.querySelector("#chart-aktivitas-modul");
 
-			// Clear any existing content
-			chartContainer.innerHTML = '';
+        // Clear any existing content
+        chartContainer.innerHTML = '';
 
-			// Create and style the no data message container
-			const noDataDiv = document.createElement('div');
-			noDataDiv.style.display = 'flex';
-			noDataDiv.style.flexDirection = 'column';
-			noDataDiv.style.alignItems = 'center';
-			noDataDiv.style.justifyContent = 'center';
-			noDataDiv.style.height = '350px';
-			noDataDiv.style.width = '100%';
+        // Create and style the no data message container
+        const noDataDiv = document.createElement('div');
+        noDataDiv.style.display = 'flex';
+        noDataDiv.style.flexDirection = 'column';
+        noDataDiv.style.alignItems = 'center';
+        noDataDiv.style.justifyContent = 'center';
+        noDataDiv.style.height = '350px';
+        noDataDiv.style.width = '100%';
 
-			// Add an icon (using a simple SVG)
-			const iconDiv = document.createElement('div');
-			iconDiv.innerHTML = `
-		        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cccccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-		            <circle cx="12" cy="12" r="10"></circle>
-		            <line x1="12" y1="8" x2="12" y2="12"></line>
-		            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-		        </svg>
-		    `;
+        // Add an icon (using a simple SVG)
+        const iconDiv = document.createElement('div');
+        iconDiv.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="${colors.textColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+        `;
 
-			// Add text message
-			const messageDiv = document.createElement('div');
-			messageDiv.textContent = 'Tidak ada aktivitas';
-			messageDiv.style.marginTop = '16px';
-			messageDiv.style.fontSize = '16px';
-			messageDiv.style.color = '#666666';
-			messageDiv.style.fontWeight = '500';
+        // Add text message
+        const messageDiv = document.createElement('div');
+        messageDiv.textContent = 'Tidak ada aktivitas';
+        messageDiv.style.marginTop = '16px';
+        messageDiv.style.fontSize = '16px';
+        messageDiv.style.color = colors.textColor;
+        messageDiv.style.fontWeight = '500';
 
-			// Append elements to container
-			noDataDiv.appendChild(iconDiv);
-			noDataDiv.appendChild(messageDiv);
-			chartContainer.appendChild(noDataDiv);
-		} else {
-			var moduleActivityOptions = {
-				series: moduleActivityData,
-				chart: {
-					height: 350,
-					type: 'line',
-					toolbar: {
-						show: false
-					}
-				},
-				colors: ['#5D3FD3', '#dc3545', '#ffc107', '#198754', '#ff9800'],
-				dataLabels: {
-					enabled: false
-				},
-				stroke: {
-					curve: 'smooth',
-					width: 2
-				},
-				grid: {
-					borderColor: '#e0e0e0',
-					padding: {
-						top: 10,
-						right: 10,
-						bottom: 10,
-						left: 10
-					}
-				},
-				xaxis: {
-					categories: Array.from({
-						length: 31
-					}, (_, i) => {
-						return (i + 1).toString().padStart(2, '0');
-					}),
-					labels: {
-						rotate: -45,
-						rotateAlways: false
-					},
-					title: {
-						text: 'Tanggal'
-					}
-				},
-				yaxis: {
-					title: {
-						text: 'Jumlah Aktivitas'
-					}
-				},
-				legend: {
-					position: 'top',
-					horizontalAlign: 'right'
-				},
-				tooltip: {
-					shared: true,
-					intersect: false,
-					x: {
-						show: true,
-						formatter: function(val) {
-							return 'Aktivitas Tanggal ' + val;
-						}
-					},
-					y: {
-						formatter: function(val) {
-							return new Intl.NumberFormat('id-ID').format(val) + ' Aktivitas';
-						}
-					}
-				}
-			};
+        // Append elements to container
+        noDataDiv.appendChild(iconDiv);
+        noDataDiv.appendChild(messageDiv);
+        chartContainer.appendChild(noDataDiv);
+    } else {
+        var moduleActivityOptions = {
+            series: moduleActivityData,
+            chart: {
+                height: 350,
+                type: 'line',
+                toolbar: {
+                    show: false
+                },
+                background: colors.backgroundColor
+            },
+            colors: colors.chartColors,
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: 'smooth',
+                width: 2
+            },
+            grid: {
+                borderColor: colors.gridColor,
+                padding: {
+                    top: 10,
+                    right: 10,
+                    bottom: 10,
+                    left: 10
+                }
+            },
+            xaxis: {
+                categories: Array.from({
+                    length: 31
+                }, (_, i) => {
+                    return (i + 1).toString().padStart(2, '0');
+                }),
+                labels: {
+                    rotate: -45,
+                    rotateAlways: false,
+                    style: {
+                        colors: colors.textColor
+                    }
+                },
+                title: {
+                    text: 'Tanggal',
+                    style: {
+                        color: colors.textColor
+                    }
+                }
+            },
+            yaxis: {
+                title: {
+                    text: 'Jumlah Aktivitas',
+                    style: {
+                        color: colors.textColor
+                    }
+                },
+                labels: {
+                    style: {
+                        colors: colors.textColor
+                    }
+                }
+            },
+            legend: {
+                position: 'top',
+                horizontalAlign: 'right',
+                labels: {
+                    colors: colors.textColor
+                }
+            },
+            tooltip: {
+                shared: true,
+                intersect: false,
+                theme: colors.tooltipBackground === '#424242' ? 'dark' : 'light',
+                style: {
+                    fontSize: '12px',
+                    fontFamily: undefined
+                },
+                x: {
+                    show: true,
+                    formatter: function(val) {
+                        return 'Aktivitas Tanggal ' + val;
+                    }
+                },
+                y: {
+                    formatter: function(val) {
+                        return new Intl.NumberFormat('id-ID').format(val) + ' Aktivitas';
+                    }
+                }
+            }
+        };
 
-			var moduleActivityChart = new ApexCharts(document.querySelector("#chart-aktivitas-modul"), moduleActivityOptions);
-			moduleActivityChart.render();
-		}
-	});
+        var moduleActivityChart = new ApexCharts(document.querySelector("#chart-aktivitas-modul"), moduleActivityOptions);
+        moduleActivityChart.render();
+        window.moduleActivityChart = moduleActivityChart; // Simpan referensi chart
+    }
+    
+    // Deteksi perubahan tema
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.attributeName === 'data-bs-theme') {
+                updateChartsTheme();
+            }
+        });
+    });
+    
+    // Mulai observasi perubahan atribut data-bs-theme
+    observer.observe(document.documentElement, { attributes: true });
+});
 
 	document.addEventListener('DOMContentLoaded', function() {
 		// Get current year and month from PHP data
