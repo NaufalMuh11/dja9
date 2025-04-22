@@ -138,7 +138,7 @@
 							<div class="row mb-3">
 								<div class="col">
 									<h5 class="card-title text-center">
-										Pola Penggunaan Modul <span class="fw-bold" style="color: #8979FF;">MyTask</span> Per Jam Pada Bulan
+										Pola Penggunaan Modul <span class="fw-bold" style="color: #8979FF;">MyTask</span> Per Jam <br>Pada Bulan
 										<span class="fw-bold" style="color: #8979FF;"><?php echo $month_name; ?></span>
 										tahun
 										<span class="fw-bold" style="color: #8979FF;"><?php echo $year; ?></span>
