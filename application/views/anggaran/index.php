@@ -135,10 +135,10 @@
 				<div class="col-xl-8 col-lg-7 mb-3">
 					<div class="card h-100">
 						<div class="card-body d-flex flex-column">
-							<div class="row mb-2">
+							<div class="row mb-3">
 								<div class="col">
 									<h5 class="card-title text-center">
-										Pola Penggunaan Modul <span class="fw-bold" style="color: #8979FF;">MyTask</span> Per Jam <br>Pada Bulan
+										Pola Penggunaan Modul <span class="fw-bold" style="color: #8979FF;">MyTask</span> Per Jam Pada Bulan
 										<span class="fw-bold" style="color: #8979FF;"><?php echo $month_name; ?></span>
 										tahun
 										<span class="fw-bold" style="color: #8979FF;"><?php echo $year; ?></span>
@@ -186,7 +186,7 @@
 					<div class="card flex-grow-1">
 						<div class="card-body">
 							<h5 class="card-title text-center mb-3">3 Pengguna Dengan Aktivitas <span class="fw-bold" style="color:#8979FF;">MyTask</span> Terbanyak</h5>
-							<div class="table-responsive">
+							<div class="table-responsive" style="height: 260px;">
 								<table class="table" id="userTable">
 									<thead>
 										<tr>
@@ -195,7 +195,7 @@
 											<th class="text-end">Jumlah Aktivitas</th>
 										</tr>
 									</thead>
-									<tbody>
+									<tbody class="position-relative">
 										<!-- Data In Script -->
 									</tbody>
 								</table>
@@ -289,4 +289,3 @@
 
 <!-- Event Listener -->
 <?php $this->load->view('anggaran/script'); ?>
-

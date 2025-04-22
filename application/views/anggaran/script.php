@@ -378,20 +378,20 @@
 					horizontalAlign: 'right'
 				},
 				tooltip: {
-				shared: true,
-				intersect: false,
-				x: {
-					show: true,
-					formatter: function(val) {
-						return 'Aktivitas Tanggal ' + val;
-					}
-				},
-				y: {
-					formatter: function(val) {
-						return new Intl.NumberFormat('id-ID').format(val) + ' Aktivitas';
+					shared: true,
+					intersect: false,
+					x: {
+						show: true,
+						formatter: function(val) {
+							return 'Aktivitas Tanggal ' + val;
+						}
+					},
+					y: {
+						formatter: function(val) {
+							return new Intl.NumberFormat('id-ID').format(val) + ' Aktivitas';
+						}
 					}
 				}
-			}
 			};
 
 			var moduleActivityChart = new ApexCharts(document.querySelector("#chart-aktivitas-modul"), moduleActivityOptions);
@@ -451,13 +451,18 @@
 		displayUserData(usersData.top_users);
 	});
 
-	// Function to display user activity data
 	function displayUserData(users) {
 		const tableBody = document.querySelector("#userTable tbody");
 		tableBody.innerHTML = ''; // Clear table
 
 		if (!users || users.length === 0) {
-			tableBody.innerHTML = '<tr><td colspan="3" class="text-center">Tidak ada data untuk periode ini</td></tr>';
+			// Create a full-height centered no-data message
+			tableBody.innerHTML = `
+            <tr style="height: 180px;">
+                <td colspan="3" class="text-center align-middle">
+                    Tidak ada data untuk periode ini
+                </td>
+            </tr>`;
 			return;
 		}
 
@@ -468,19 +473,30 @@
 		filteredUsers.forEach(user => {
 			const profilePath = `files/profiles/${user.profilepic}`;
 			const row = `<tr class="fs-6">
-			<td class="py-3 align-middle">
-				<div class="d-flex align-items-center">
-					<img src="${profilePath}" onerror="this.onerror=null; this.src='files/profiles/000.png';" class="rounded-circle me-2" width="40" height="40" alt="${user.nmuser}">
-					<span>${user.nmuser}</span>
-				</div>
-			</td>
-			<td class="py-3 align-middle">${user.nmusergroup}</td>
-			<td class="py-3 align-middle text-end">${user.click_count}</td>
-		</tr>`;
+            <td class="py-3 align-middle">
+                <div class="d-flex align-items-center">
+                    <img src="${profilePath}" onerror="this.onerror=null; this.src='files/profiles/000.png';" class="rounded-circle me-2" width="40" height="40" alt="${user.nmuser}">
+                    <span>${user.nmuser}</span>
+                </div>
+            </td>
+            <td class="py-3 align-middle">${user.nmusergroup}</td>
+            <td class="py-3 align-middle text-end">${user.click_count}</td>
+        </tr>`;
 			tableBody.innerHTML += row;
 		});
-	}
 
+		// If we have fewer than 3 rows, add empty rows to maintain height
+		const rowCount = filteredUsers.length;
+		if (rowCount < 3) {
+			const emptyRowsNeeded = 3 - rowCount;
+			for (let i = 0; i < emptyRowsNeeded; i++) {
+				tableBody.innerHTML += `
+                <tr style="height: 60px;">
+                    <td colspan="3"></td>
+                </tr>`;
+			}
+		}
+	}
 
 	// Submit form when filter changes
 	function submitFilterForm() {
@@ -617,7 +633,6 @@
 					title: "Jumlah Modul Pada Layanan",
 					class: "text-left",
 					data: "module_count",
-					width: "100px",
 					render: function(data, type, row) {
 						const icon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ms-2"><path d="M6 9l6 6l6 -6"/></svg>`;
 						const value = data || "Unknown";
