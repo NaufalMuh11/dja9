@@ -80,7 +80,7 @@
                   <div class="card-body">
                      <div class="d-flex flex-column align-items-center">
                         <h3 class="mb-1 text-center">
-                           Komposisi SBM dalam Nilai Maksimum, Nilai Minimum, Nilai Rata-Rata, dan Interkuartil
+                           Komposisi SBM dalam Nilai Maksimum, Nilai Minimum, Nilai Median, dan Interkuartil
                         </h3>
                         <div class="d-flex w-100 justify-content-end mt-2">
                            <small id="boxplot-note" class="text-muted">* Biaya dalam ribuan rupiah</small>
@@ -135,6 +135,9 @@
 
                            <!-- Table container -->
                            <div class="table-responsive mt-4">
+                              <h3 class="mb-2 text-center">
+                                 Rincian Selisih Standar Biaya Masukan per Provinsi
+                              </h3>
                               <table class="table table-bordered table-striped" id="province-table">
                                  <thead>
                                     <tr></tr>

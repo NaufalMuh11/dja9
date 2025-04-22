@@ -666,10 +666,10 @@
             if (tableHeaders) {
                 tableHeaders.innerHTML = `
                     <th>Provinsi</th>
-                    <th>Biaya ${selections.year - 1} (Rp)</th>
-                    <th>Biaya ${selections.year} (Rp)</th>
-                    <th>Selisih (Rp)</th>
-                    <th>Perubahan (%)</th>
+                    <th>Biaya ${selections.year - 1}</th>
+                    <th>Biaya ${selections.year}</th>
+                    <th>Selisih (${selections.year} & ${selections.year -1 })</th>
+                    <th>Perubahan</th>
                 `;
             }
 
@@ -693,9 +693,9 @@
 
                 row.innerHTML = `
                     <td>${item.name}</td>
-                    <td>${new Intl.NumberFormat('id-ID').format(item.biaya_previous)}</td>
-                    <td>${new Intl.NumberFormat('id-ID').format(item.biaya_current)}</td>
-                    <td class="${item.difference > 0 ? 'text-success' : (item.difference < 0 ? 'text-danger' : '')}">${new Intl.NumberFormat('id-ID').format(item.difference)}</td>
+                    <td>Rp${new Intl.NumberFormat('id-ID').format(item.biaya_previous)}</td>
+                    <td>Rp${new Intl.NumberFormat('id-ID').format(item.biaya_current)}</td>
+                    <td class="${item.difference > 0 ? 'text-success' : (item.difference < 0 ? 'text-danger' : '')}">Rp${new Intl.NumberFormat('id-ID').format(item.difference)}</td>
                     <td class="${changeClass}">${item.percentage_change.toFixed(2)}%</td>
                 `;
 
