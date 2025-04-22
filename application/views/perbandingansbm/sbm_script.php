@@ -2,30 +2,25 @@
     // Initialize the module using an IIFE
     const SBMChartModule = (function() {
         // Private variables
-        const baseUrl = document.querySelector('meta[name="base_url"]')?.content || '';
+        const baseUrl = document.querySelector('meta[name="base_url"]') ? document.querySelector('meta[name="base_url"]').content || '' : '';
         const refreshInterval = 5 * 60 * 1000;
         let lastRefreshTime = new Date();
         let refreshTimer;
-        let isLoadingProvinceData = false;
-        let pendingProvinceDataRequest = false;
 
         // Chart instances
         let charts = {
             boxplot: null,
-            barDetail: null,
-            province: null
+            compare: null
         };
 
         // Data storage
         let chartData = {
-            bar: [],
             boxplot: [],
-            province: [],
+            compare: [],
             // Store original data for sorting purposes
             original: {
-                bar: [],
                 boxplot: [],
-                province: []
+                compare: []
             }
         };
 
@@ -42,11 +37,9 @@
             refreshButton: document.getElementById('refreshButton'),
             refreshIndicator: document.getElementById('refresh-indicator'),
             lastUpdateElement: document.getElementById('lastUpdate'),
-            barChartContainer: document.getElementById('chart-bar-detail'),
             boxplotContainer: document.getElementById('chart-boxplot'),
             provinceChartContainer: document.getElementById('province-chart-container'),
             provinceTableBody: document.getElementById('province-table-body'),
-            barChartSubtitle: document.getElementById('bar-chart-subtitle'),
             subtitleDropdown: document.getElementById('subtitle-dropdown'),
             sortOrderDropdown: document.getElementById('sort-order-dropdown'),
             selectedSortOrder: document.getElementById('selected-sort-order'),
@@ -56,94 +49,24 @@
         // Chart colors
         const chartColors = {
             primary: "#648FFF",
-            secondary: typeof tabler !== 'undefined' ? tabler.getColor("secondary") : "#9e9e9e",
-            success: typeof tabler !== 'undefined' ? tabler.getColor("green") : "#4caf50",
-            warning: "#ffb000",
-            danger: typeof tabler !== 'undefined' ? tabler.getColor("red") : "#f44336",
-            info: typeof tabler !== 'undefined' ? tabler.getColor("cyan") : "#00bcd4",
-            dark: typeof tabler !== 'undefined' ? tabler.getColor("dark") : "#212121",
-            purple: "#785EF0",
+            secondary: "#9e9e9e",
+            success: "#4caf50",
+            warning: "#ffc107",
+            danger: "#f44336",
+            info: "#00bcd4",
+            dark: "#212121",
+            purple: "#7a36b1",
             orange: "#FE6100",
-            lime: typeof tabler !== 'undefined' ? tabler.getColor("lime") : "#cddc39",
-            indigo: typeof tabler !== 'undefined' ? tabler.getColor("indigo") : "#3f51b5",
-            teal: typeof tabler !== 'undefined' ? tabler.getColor("teal") : "#009688",
+            lime: "#cddc39",
+            indigo: "#3f51b5",
+            teal: "#009688",
             pink: "#DC267F"
-        };
-
-        // Color generation functions
-        const colorGradientGenerator = {
-            // Generate colors in a gradient for a single base color
-            generateColorGradient: function(baseColor, count) {
-                // If no items or only one, return the base color
-                if (!count || count <= 1) {
-                    return [baseColor];
-                }
-
-                // Convert hex to RGB
-                const hexToRgb = (hex) => {
-                    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-                    return result ? {
-                        r: parseInt(result[1], 16),
-                        g: parseInt(result[2], 16),
-                        b: parseInt(result[3], 16)
-                    } : null;
-                };
-
-                // Convert RGB to hex
-                const rgbToHex = (r, g, b) => {
-                    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-                };
-
-                // Get base color in RGB
-                const baseRgb = hexToRgb(baseColor);
-                if (!baseRgb) return Array(count).fill(baseColor);
-
-                // Calculate step size for darkening/lightening
-                const step = 0.8 / (count - 1);
-
-                // Generate gradient colors
-                const colors = [];
-                for (let i = 0; i < count; i++) {
-                    // Adjust darkness from -40% to +40% of the base color
-                    const factor = 0.6 + (i * step);
-
-                    const r = Math.min(255, Math.max(0, Math.round(baseRgb.r * factor)));
-                    const g = Math.min(255, Math.max(0, Math.round(baseRgb.g * factor)));
-                    const b = Math.min(255, Math.max(0, Math.round(baseRgb.b * factor)));
-
-                    colors.push(rgbToHex(r, g, b));
-                }
-
-                return colors;
-            },
-
-            // Get color for specific SBM code
-            getColorForSBM: function(sbmCode) {
-                // Map SBM codes to base colors
-                const sbmColorMap = {
-                    '127': chartColors.primary, // Blue
-                    '128': chartColors.success, // Green
-                    '130': chartColors.warning, // Yellow/Orange
-                    '134': chartColors.teal, // Teal
-                    '135': chartColors.purple, // Purple
-                    '137': chartColors.pink, // Pink
-                    '139': chartColors.orange, // Orange
-                    '209': chartColors.lime, // Lime
-                    '210': chartColors.info, // Cyan
-                    '211': chartColors.indigo, // Indigo
-                    '214': chartColors.secondary, // Gray
-                    '215': chartColors.dark, // Dark
-                    '216': chartColors.danger // Red
-                };
-
-                // Return the mapped color or default to primary if not found
-                return sbmColorMap[sbmCode] || chartColors.primary;
-            }
         };
 
         // Common chart settings
         const commonChartSettings = {
             fontFamily: "inherit",
+            width: '100%',
             toolbar: {
                 show: false
             },
@@ -195,6 +118,7 @@
         // Utility functions
         function showLoader() {
             if (elements.refreshIndicator) {
+                updateRefreshIndicator();
                 elements.refreshIndicator.style.display = 'block';
             }
         }
@@ -209,12 +133,145 @@
             return elements.yearInput ? elements.yearInput.value : '2025';
         }
 
+        // Theme detection function
+        function isDarkMode() {
+            return document.body.classList.contains('theme-dark') ||
+                document.body.getAttribute('data-bs-theme') === 'dark';
+        }
+
+        // Update chart theme settings
+        function updateChartTheme() {
+            const isDark = isDarkMode();
+            const themeColors = {
+                textColor: isDark ? '#e9ecef' : '#495057',
+                gridColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                tooltipBackground: isDark ? '#1a2234' : '#ffffff',
+                tooltipText: isDark ? '#ffffff' : '#212529',
+                legendColor: isDark ? '#e9ecef' : '#495057',
+                backgroundColor: isDark ? '#1a2234' : '#ffffff',
+                boxplotMedian: isDark ? '#ffffff' : '#212121',
+                strokeColor: isDark ? '#ffffff' : '#000000'
+            };
+
+            // Update common chart settings for theme
+            commonChartSettings.tooltip.theme = isDark ? 'dark' : 'light';
+
+            // Additional theme-specific settings
+            return {
+                chart: {
+                    background: 'transparent',
+                    foreColor: themeColors.textColor
+                },
+                xaxis: {
+                    labels: {
+                        style: {
+                            colors: themeColors.textColor
+                        },
+                        rotate: -90
+                    },
+                    title: {
+                        style: {
+                            color: themeColors.textColor
+                        }
+                    },
+                    axisBorder: {
+                        color: themeColors.gridColor
+                    },
+                    axisTicks: {
+                        color: themeColors.gridColor
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        style: {
+                            colors: themeColors.textColor
+                        }
+                    },
+                    title: {
+                        style: {
+                            color: themeColors.textColor
+                        }
+                    }
+                },
+                grid: {
+                    borderColor: themeColors.gridColor,
+                    strokeDashArray: 4
+                },
+                legend: {
+                    labels: {
+                        colors: themeColors.textColor
+                    }
+                },
+                tooltip: {
+                    style: {
+                        fontSize: '12px',
+                        fontFamily: 'inherit'
+                    }
+                },
+                plotOptions: {
+                    boxPlot: {
+                        colors: {
+                            upper: themeColors.boxplotUpper,
+                            lower: themeColors.boxplotLower
+                        },
+                        medianColor: themeColors.boxplotMedian
+                    }
+                },
+                stroke: {
+                    colors: [themeColors.strokeColor]
+                },
+                markers: {
+                    strokeColors: themeColors.strokeColor,
+                    strokeWidth: isDark ? 1.5 : 1
+                },
+                theme: {
+                    mode: isDark ? 'dark' : 'light'
+                }
+            };
+        }
+
+        // Update refresh indicator for current theme
+        function updateRefreshIndicator() {
+            if (!elements.refreshIndicator) return;
+
+            const isDark = isDarkMode();
+
+            // Update background class
+            elements.refreshIndicator.classList.remove('bg-light', 'bg-dark');
+            elements.refreshIndicator.classList.add(isDark ? 'bg-dark' : 'bg-light');
+
+            // Update text color
+            const textElement = elements.refreshIndicator.querySelector('small');
+            if (textElement) {
+                textElement.classList.remove('text-dark', 'text-light');
+                textElement.classList.add(isDark ? 'text-light' : 'text-dark');
+            }
+
+            // Update border color if needed
+            elements.refreshIndicator.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+        }
+
+        // Set up theme change listener
+        function initThemeListener() {
+            // Watch for theme changes
+            const themeObserver = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === 'class' || mutation.attributeName === 'data-bs-theme') {
+                        // Update refresh indicator and chart themes
+                        SBMChartModule.updateTheme();
+                    }
+                });
+            });
+
+            // Start observing the document body for theme changes
+            themeObserver.observe(document.body, {
+                attributes: true
+            });
+        }
+
         // Fetch data functions
         async function fetchData(endpoint, params = {}) {
             try {
-                // Add year parameter
-                params.thang = params.thang || selections.year;
-
                 // Convert params to query string
                 const queryString = Object.keys(params)
                     .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
@@ -235,24 +292,22 @@
 
         async function fetchTitlesFromHierarchy() {
             try {
-                const response = await fetch(`${baseUrl}perbandingan/get_titles_from_hierarchy?thang=${selections.year}`);
+                const data = await fetchData('perbandingan/get_titles_from_hierarchy', {
+                    thang: selections.year
+                });
 
-                if (!response.ok) {
-                    throw new Error(`Network response was not ok: ${response.status}`);
-                }
-
-                const data = await response.json();
                 return data || [];
             } catch (error) {
                 console.error('Error fetching titles from hierarchy:', error);
                 // Fallback to original titles if error
-                return null;
+                return [];
             }
         }
 
         async function fetchBoxplotData(titleCode) {
             try {
                 const data = await fetchData('perbandingan/get_boxplot_data', {
+                    thang: selections.year,
                     kode: titleCode
                 });
                 return data || [];
@@ -262,32 +317,16 @@
             }
         }
 
-        async function fetchBarData(titleCode) {
-            try {
-                const data = await fetchData('perbandingan/get_bar_data', {
-                    kode: titleCode,
-                    thang: selections.year,
-                    sortOrder: getCurrentSortOrder()
-                });
-                return Array.isArray(data) ? data : [];
-            } catch (error) {
-                console.error('Error fetching bar data:', error);
-                return [];
-            }
-        }
-
-        async function fetchProvinceData() {
+        async function fetchCompareData(titleCode) {
             try {
                 const data = await fetchData('perbandingan/get_comparison_data', {
-                    kode: selections.title,
                     thang: selections.year,
-                    subtitle: selections.subtitle,
-                    sub_subtitle: selections.subSubtitle,
+                    kode: titleCode,
                     sortOrder: getCurrentSortOrder()
                 });
                 return data || [];
             } catch (error) {
-                console.error('Error fetching province data:', error);
+                console.error('Error fetching compare data:', error);
                 return [];
             }
         }
@@ -328,7 +367,10 @@
 
         // Chart rendering functions
         function renderBoxplotChart(data, subtitle) {
-            if (!elements.boxplotContainer) return;
+            if (!elements.boxplotContainer) {
+                console.warn('Boxplot container element not found');
+                return;
+            }
 
             if (!data || data.length === 0) {
                 if (charts.boxplot) {
@@ -346,20 +388,9 @@
                 y: item.y.map(val => val / 1000)
             }));
 
-            // Get base color for selected SBM
-            const baseColor = colorGradientGenerator.getColorForSBM(selections.title);
-
-            // Generate a darker color for the upper part of boxplot
-            const darkenColor = function(hex, percent) {
-                const num = parseInt(hex.slice(1), 16);
-                const amt = Math.round(2.55 * percent);
-                const R = (num >> 16) - amt;
-                const G = (num >> 8 & 0x00FF) - amt;
-                const B = (num & 0x0000FF) - amt;
-                return '#' + (0x1000000 + (R < 0 ? 0 : R) * 0x10000 + (G < 0 ? 0 : G) * 0x100 + (B < 0 ? 0 : B)).toString(16).slice(1);
-            };
-
-            const upperColor = darkenColor(baseColor, 20); // 20% darker for upper part
+            // Get theme-specific settings
+            const themeSettings = updateChartTheme();
+            const isDark = isDarkMode();
 
             const options = {
                 series: [{
@@ -368,32 +399,47 @@
                 }],
                 chart: {
                     ...commonChartSettings,
+                    ...themeSettings.chart,
                     type: 'boxPlot',
-                    height: 500
+                    height: 500,
+                    width: '100%'
                 },
                 plotOptions: {
                     boxPlot: {
                         colors: {
-                            upper: upperColor,
-                            lower: baseColor
-                        }
+                            upper: chartColors.purple,
+                            lower: chartColors.warning
+                        },
+                        medianColor: isDark ? '#ffffff' : chartColors.dark
                     }
                 },
+                stroke: {
+                    colors: [isDark ? '#ffffff' : '#000000']
+                },
+                markers: {
+                    ...themeSettings.markers
+                },
                 xaxis: {
+                    ...themeSettings.xaxis,
                     title: {
+                        ...themeSettings.xaxis.title,
                         text: 'SBM'
                     },
                     labels: {
+                        ...themeSettings.xaxis.labels,
                         rotate: -90,
                         trim: false,
                         maxHeight: 120
                     }
                 },
                 yaxis: {
+                    ...themeSettings.yaxis,
                     title: {
+                        ...themeSettings.yaxis.title,
                         text: 'Biaya (Ribu Rupiah)'
                     },
                     labels: {
+                        ...themeSettings.yaxis.labels,
                         formatter: function(value) {
                             return new Intl.NumberFormat('id-ID').format(value);
                         }
@@ -401,196 +447,35 @@
                 },
                 tooltip: {
                     ...commonChartSettings.tooltip,
+                    theme: themeSettings.theme.mode,
                     y: {
                         formatter: function(value) {
                             return new Intl.NumberFormat('id-ID').format(value);
                         }
                     }
                 },
+                theme: themeSettings.theme,
                 noData: noDataSettings
             };
 
             if (charts.boxplot) {
-                charts.boxplot.updateOptions(options);
+                charts.boxplot.updateOptions(options, false, true);
             } else {
                 charts.boxplot = new ApexCharts(elements.boxplotContainer, options);
                 charts.boxplot.render();
             }
         }
 
-        function renderBarChart(data) {
-            if (!elements.barChartContainer) return;
-
-            if (!data || data.length === 0) {
-                // Hide subtitle and dropdowns
-                if (elements.barChartSubtitle) {
-                    elements.barChartSubtitle.style.display = 'none';
-                }
-
-                if (elements.subtitleDropdown) {
-                    elements.subtitleDropdown.style.display = 'none';
-                }
-
-                if (elements.subSubtitleDropdown) {
-                    elements.subSubtitleDropdown.style.display = 'none';
-                }
-
-                // Update chart with no data
-                if (charts.barDetail) {
-                    charts.barDetail.updateOptions({
-                        series: [{
-                            name: 'Biaya',
-                            data: []
-                        }],
-                        xaxis: {
-                            categories: []
-                        },
-                        noData: noDataSettings
-                    });
-                } else {
-                    charts.barDetail = new ApexCharts(elements.barChartContainer, {
-                        series: [{
-                            name: 'Biaya',
-                            data: []
-                        }],
-                        chart: {
-                            ...commonChartSettings,
-                            type: 'bar',
-                            height: 400
-                        },
-                        noData: noDataSettings
-                    });
-                    charts.barDetail.render();
-                }
+        function renderCompareChart(data) {
+            if (!elements.provinceChartContainer) {
+                console.warn('Compare chart container element not found');
                 return;
             }
 
-            // Prepare data for chart
-            const categories = data.map(item => item.name);
-            const values = data.map(item => parseFloat(item.data) / 1000);
-
-            // Generate color gradient based on the selected SBM
-            const baseColor = colorGradientGenerator.getColorForSBM(selections.title);
-            const colorGradient = colorGradientGenerator.generateColorGradient(baseColor, values.length);
-
-            // Get chart title (from sub-subtitle if selected)
-            let chartTitle = "";
-            if (selections.subSubtitle) {
-                chartTitle = selections.subSubtitle;
-            }
-
-            // Update subtitle element
-            if (elements.barChartSubtitle) {
-                if (chartTitle) {
-                    elements.barChartSubtitle.textContent = chartTitle;
-                    elements.barChartSubtitle.style.display = 'block';
-                } else {
-                    elements.barChartSubtitle.style.display = 'none';
-                }
-            }
-
-            // Chart options
-            const options = {
-                series: [{
-                    name: 'Biaya',
-                    data: values
-                }],
-                chart: {
-                    ...commonChartSettings,
-                    type: 'bar',
-                    height: 400,
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: false,
-                        columnWidth: '55%',
-                        endingShape: 'rounded',
-                        distributed: true // This enables different colors for each bar
-                    },
-                },
-                dataLabels: {
-                    enabled: false
-                },
-                xaxis: {
-                    categories: categories,
-                    title: {
-                        text: 'Provinsi'
-                    },
-                    labels: {
-                        rotate: -90,
-                        trim: false,
-                        maxHeight: 120
-                    }
-                },
-                yaxis: {
-                    title: {
-                        text: 'Biaya (Ribu Rupiah)'
-                    },
-                    labels: {
-                        formatter: function(value) {
-                            return new Intl.NumberFormat('id-ID').format(value);
-                        }
-                    }
-                },
-                colors: colorGradient, // Use the generated color gradient
-                legend: {
-                    show: false // Hide legend since we're using distributed colors
-                },
-                tooltip: {
-                    ...commonChartSettings.tooltip,
-                    y: {
-                        formatter: function(value) {
-                            return 'Rp ' + new Intl.NumberFormat('id-ID').format(value * 1000);
-                        }
-                    }
-                },
-                noData: noDataSettings
-            };
-
-            if (charts.barDetail) {
-                charts.barDetail.updateOptions(options);
-            } else {
-                charts.barDetail = new ApexCharts(elements.barChartContainer, options);
-                charts.barDetail.render();
-            }
-        }
-
-        // Call this function to completely refresh the UI with the current sort preference
-        function refreshSortUI() {
-            if (!elements.selectedSortOrder) return;
-
-            // Get display text for current sort order
-            const sortOrderDisplayTexts = {
-                'normal': 'Urutan Normal',
-                'asc': 'Nilai Terendah',
-                'desc': 'Nilai Tertinggi'
-            };
-
-            // Update the UI element
-            elements.selectedSortOrder.textContent =
-                sortOrderDisplayTexts[selections.sortOrder] || 'Urutan Normal';
-
-            // Update the active class on menu items
-            if (elements.sortOrderMenu) {
-                const items = elements.sortOrderMenu.querySelectorAll('.dropdown-item');
-                items.forEach(item => {
-                    const itemValue = item.getAttribute('data-value');
-                    if (itemValue === selections.sortOrder) {
-                        item.classList.add('active');
-                    } else {
-                        item.classList.remove('active');
-                    }
-                });
-            }
-        }
-
-        function renderProvinceChart(data) {
-            if (!elements.provinceChartContainer) return;
-
             if (!data || data.length === 0) {
                 // Update chart with no data
-                if (charts.province) {
-                    charts.province.updateOptions({
+                if (charts.compare) {
+                    charts.compare.updateOptions({
                         series: [],
                         noData: noDataSettings
                     });
@@ -603,127 +488,113 @@
                 return;
             }
 
-            const provinces = data.map(item => item.province);
-            const values2025 = data.map(item => item.biaya_2025 / 1000);
-            const values2026 = data.map(item => item.biaya_2026 / 1000);
+            const provinces = data.map(item => item.name);
+            const valuesPrevious = data.map(item => item.biaya_previous / 1000);
+            const valuesCurrent = data.map(item => item.biaya_current / 1000);
             const percentageChanges = data.map(item => item.percentage_change);
 
-            // Get base color for selected SBM
-            const baseColor = colorGradientGenerator.getColorForSBM(selections.title);
-            // Get a complementary color for the second line
-            const complementaryColor = function(hex) {
-                // Convert hex to RGB
-                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-                if (!result) return chartColors.success;
-
-                // Simple complementary: lighten and shift hue slightly
-                const r = parseInt(result[1], 16);
-                const g = parseInt(result[2], 16);
-                const b = parseInt(result[3], 16);
-
-                // Make it lighter and greener
-                return `#${Math.min(255, Math.floor(r * 0.8)).toString(16).padStart(2, '0')}${Math.min(255, Math.floor(g * 1.2)).toString(16).padStart(2, '0')}${Math.min(255, Math.floor(b * 0.8)).toString(16).padStart(2, '0')}`;
-            };
+            // Get theme-specific settings
+            const themeSettings = updateChartTheme();
 
             const options = {
                 series: [{
-                        name: 'Biaya 2025',
-                        data: values2025,
-                        type: 'line'
-                    },
-                    {
-                        name: 'Biaya 2026',
-                        data: values2026,
-                        type: 'line'
-                    },
-                    {
-                        name: '% Perubahan',
-                        data: percentageChanges,
-                        yAxisIndex: 1
-                    }
-                ],
+                    name: `Biaya ${selections.year}`,
+                    data: valuesCurrent,
+                    type: 'line'
+                }, {
+                    name: `Biaya ${selections.year - 1}`,
+                    data: valuesPrevious,
+                    type: 'line'
+                }, {
+                    name: '% Perubahan',
+                    data: data.map(item => item.percentage_change),
+                    type: 'line'
+                }],
                 chart: {
                     ...commonChartSettings,
+                    ...themeSettings.chart,
                     type: 'line',
                     height: 500,
+                    width: '100%',
+                    stacked: false
                 },
                 stroke: {
                     width: [3, 3, 0],
                     curve: 'smooth',
-                    dashArray: [0, 0, 0]
                 },
                 markers: {
                     size: [5, 5, 0],
                     hover: {
                         size: 7
-                    }
+                    },
+                    ...themeSettings.markers
                 },
                 xaxis: {
+                    ...themeSettings.xaxis,
                     categories: provinces,
                     labels: {
-                        rotate: -90,
-                        rotateAlways: true,
-                        style: {
-                            fontSize: '11px'
-                        }
+                        ...themeSettings.xaxis.labels,
+                        rotate: -90
                     },
                     title: {
-                        text: 'Provinsi',
-                        style: {
-                            fontSize: '12px',
-                            fontWeight: 'bold'
-                        }
+                        ...themeSettings.xaxis.title,
+                        text: 'Provinsi'
                     }
                 },
                 yaxis: [{
+                        seriesName: `Biaya ${selections.year}`,
                         title: {
-                            text: 'Biaya (Rupiah)'
+                            ...themeSettings.yaxis.title,
+                            text: 'Biaya (Ribu Rupiah)'
                         },
                         labels: {
+                            ...themeSettings.yaxis.labels,
                             formatter: function(value) {
                                 return new Intl.NumberFormat('id-ID').format(value);
                             }
+                        },
+                    },
+                    {
+                        opposite: true,
+                        labels: {
+                            show: false
                         }
                     },
                     {
                         opposite: true,
                         title: {
+                            ...themeSettings.yaxis.title,
                             text: 'Persentase Perubahan (%)'
                         },
                         labels: {
+                            ...themeSettings.yaxis.labels,
                             formatter: function(value) {
-                                return (value / 1000).toFixed(2) + '%';
+                                return value + '%';
                             }
-                        },
-                        min: 0,
-                        tickAmount: 5
+                        }
                     }
                 ],
                 tooltip: {
                     ...commonChartSettings.tooltip,
+                    theme: themeSettings.theme.mode,
                     y: {
                         formatter: function(value, {
                             seriesIndex
                         }) {
                             if (seriesIndex === 2) {
-                                return value.toFixed(2) + '%';
+                                return value + '%';
                             }
                             return 'Rp ' + new Intl.NumberFormat('id-ID').format(value * 1000);
                         }
                     }
                 },
                 colors: [
-                    //before
-                    // chartColors.primary,
-                    // chartColors.success,
-                    // chartColors.dark
-
-                    //after
-                    baseColor,
-                    complementaryColor(baseColor),
+                    chartColors.purple,
+                    chartColors.warning,
                     chartColors.dark
                 ],
                 legend: {
+                    ...themeSettings.legend,
                     position: 'top'
                 },
                 dataLabels: {
@@ -733,23 +604,53 @@
                         return val.toFixed(2) + '%';
                     },
                     style: {
-                        fontSize: '10px',
-                        colors: [chartColors.dark]
+                        fontSize: '10px'
                     },
                     offsetY: -5
                 },
+                theme: themeSettings.theme,
                 noData: noDataSettings
             };
 
-            if (charts.province) {
-                charts.province.updateOptions(options);
+            if (charts.compare) {
+                charts.compare.updateOptions(options);
             } else {
-                charts.province = new ApexCharts(elements.provinceChartContainer, options);
-                charts.province.render();
+                charts.compare = new ApexCharts(elements.provinceChartContainer, options);
+                charts.compare.render();
             }
 
             // Update the table data
-            updateProvinceTable(data);
+            updateCompareTable(data);
+        }
+
+        // Call this function to completely refresh the UI with the current sort preference
+        function refreshSortUI() {
+            if (!elements.selectedSortOrder) return;
+
+            // Get display text for current sort order
+            const sortOrderDisplayTexts = {
+                'normal': 'Nilai Normal',
+                'asc': 'Nilai Terendah',
+                'desc': 'Nilai Tertinggi'
+            };
+
+            // Update the UI element
+            elements.selectedSortOrder.textContent =
+                sortOrderDisplayTexts[selections.sortOrder] || 'Nilai Normal';
+
+            // Update the active class on menu items
+            if (elements.sortOrderMenu) {
+                const items = elements.sortOrderMenu.querySelectorAll('.dropdown-item');
+                items.forEach(item => {
+                    if (!item) return;
+                    const itemValue = item.getAttribute('data-value');
+                    if (itemValue === selections.sortOrder) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
         }
 
         // Pagination variables
@@ -757,17 +658,32 @@
         const itemsPerPage = 5;
         let totalPages = 0;
 
-        function updateProvinceTable(data) {
+        function updateCompareTable(data) {
             if (!elements.provinceTableBody) return;
+
+            // Update table headers first
+            const tableHeaders = document.querySelector('#province-table thead tr');
+            if (tableHeaders) {
+                tableHeaders.innerHTML = `
+                    <th>Provinsi</th>
+                    <th>Biaya ${selections.year - 1} (Rp)</th>
+                    <th>Biaya ${selections.year} (Rp)</th>
+                    <th>Selisih (Rp)</th>
+                    <th>Perubahan (%)</th>
+                `;
+            }
 
             // Calculate pagination
             totalPages = Math.ceil(data.length / itemsPerPage);
             const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, data.length);
             const currentData = data.slice(startIndex, endIndex);
 
             // Clear existing table content
             elements.provinceTableBody.innerHTML = '';
+
+            // Create document fragment for better performance
+            const fragment = document.createDocumentFragment();
 
             // Add data for current page
             currentData.forEach(item => {
@@ -776,15 +692,17 @@
                     'text-success' : (item.percentage_change < 0 ? 'text-danger' : '');
 
                 row.innerHTML = `
-                    <td>${item.province}</td>
-                    <td>${new Intl.NumberFormat('id-ID').format(item.biaya_2025)}</td>
-                    <td>${new Intl.NumberFormat('id-ID').format(item.biaya_2026)}</td>
+                    <td>${item.name}</td>
+                    <td>${new Intl.NumberFormat('id-ID').format(item.biaya_previous)}</td>
+                    <td>${new Intl.NumberFormat('id-ID').format(item.biaya_current)}</td>
                     <td class="${item.difference > 0 ? 'text-success' : (item.difference < 0 ? 'text-danger' : '')}">${new Intl.NumberFormat('id-ID').format(item.difference)}</td>
                     <td class="${changeClass}">${item.percentage_change.toFixed(2)}%</td>
                 `;
 
-                elements.provinceTableBody.appendChild(row);
+                fragment.appendChild(row);
             });
+
+            elements.provinceTableBody.appendChild(fragment);
 
             // Update pagination UI
             updatePagination(data.length);
@@ -793,7 +711,7 @@
             const showingElement = document.getElementById('showing-entries');
             const totalElement = document.getElementById('total-entries');
             if (showingElement && totalElement) {
-                showingElement.textContent = `${startIndex + 1}-${Math.min(endIndex, data.length)}`;
+                showingElement.textContent = `${startIndex + 1}-${endIndex}`;
                 totalElement.textContent = data.length;
             }
         }
@@ -801,6 +719,14 @@
         function updatePagination(totalItems) {
             const paginationElement = document.getElementById('province-pagination');
             if (!paginationElement) return;
+
+            // Calculate total pages properly
+            totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+
+            // Ensure current page is valid
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
 
             paginationElement.innerHTML = '';
 
@@ -816,7 +742,9 @@
                 e.preventDefault();
                 if (currentPage > 1) {
                     currentPage--;
-                    updateProvinceTable(chartData.province);
+                    // Get filtered data based on current selections
+                    const filteredData = getFilteredData();
+                    updateCompareTable(filteredData);
                 }
             };
             paginationElement.appendChild(prevLi);
@@ -829,7 +757,9 @@
                 li.onclick = (e) => {
                     e.preventDefault();
                     currentPage = i;
-                    updateProvinceTable(chartData.province);
+                    // Get filtered data based on current selections
+                    const filteredData = getFilteredData();
+                    updateCompareTable(filteredData);
                 };
                 paginationElement.appendChild(li);
             }
@@ -846,7 +776,9 @@
                 e.preventDefault();
                 if (currentPage < totalPages) {
                     currentPage++;
-                    updateProvinceTable(chartData.province);
+                    // Get filtered data based on current selections
+                    const filteredData = getFilteredData();
+                    updateCompareTable(filteredData);
                 }
             };
             paginationElement.appendChild(nextLi);
@@ -857,6 +789,14 @@
             if (!elements.subtitleSelect) return;
 
             elements.subtitleSelect.innerHTML = '';
+
+            if (!subtitles || subtitles.length === 0) {
+                elements.subtitleSelect.classList.add('d-none');
+                return;
+            }
+
+            // Show the select element
+            elements.subtitleSelect.classList.remove('d-none');
 
             // Add subtitle options
             subtitles.forEach(subtitle => {
@@ -922,6 +862,25 @@
                 .map(item => item.sub_subtitle))];
         }
 
+        function getFilteredData() {
+            let filteredData = chartData.compare;
+
+            if (selections.subtitle) {
+                filteredData = filteredData.filter(item =>
+                    item.subtitle === selections.subtitle ||
+                    (!item.subtitle && !selections.subtitle)
+                );
+            }
+
+            if (selections.subSubtitle) {
+                filteredData = filteredData.filter(item =>
+                    item.sub_subtitle === selections.subSubtitle
+                );
+            }
+
+            return filteredData;
+        }
+
         // Initialize sort order dropdown
         function initSortOrderDropdown() {
             if (!elements.sortOrderDropdown || !elements.selectedSortOrder || !elements.sortOrderMenu) return;
@@ -935,20 +894,12 @@
 
                     // Get the selected sort order
                     const sortOrder = this.getAttribute('data-value');
-                    console.log(`Sort order selected: ${sortOrder}`);
 
                     // Update UI
                     elements.selectedSortOrder.textContent = this.textContent;
 
                     // Apply new sort order and fetch fresh data
                     await applySortOrder(sortOrder);
-
-                    // Save preference
-                    try {
-                        localStorage.setItem('sbm_chart_sort_order', sortOrder);
-                    } catch (e) {
-                        console.warn('Could not save sort order preference', e);
-                    }
                 });
             });
         }
@@ -966,19 +917,28 @@
                 // Update selection
                 selections.sortOrder = sortOrder;
 
-                // Fetch fresh bar data with new sort order
-                const barData = await fetchBarData(selections.title);
-                chartData.bar = barData;
+                // Only fetch province data with new sort order
+                const compareData = await fetchCompareData(selections.title);
+                chartData.compare = compareData;
 
                 // Apply current subtitle/sub-subtitle filtering
                 if (selections.subtitle) {
-                    const filteredData = barData.filter(item =>
+                    let filteredData = compareData.filter(item =>
                         item.subtitle === selections.subtitle ||
                         (!item.subtitle && !selections.subtitle)
                     );
-                    processSubSubtitles(filteredData, false);
+
+                    // Apply sub-subtitle filter if available
+                    if (selections.subSubtitle) {
+                        filteredData = filteredData.filter(item =>
+                            item.sub_subtitle === selections.subSubtitle
+                        );
+                        renderCompareChart(filteredData);
+                    } else {
+                        processSubSubtitles(filteredData);
+                    }
                 } else {
-                    processSubSubtitles(barData, false);
+                    processSubSubtitles(compareData);
                 }
 
                 // Update UI for sort order
@@ -992,9 +952,15 @@
         }
 
         // Process sub-subtitles
-        function processSubSubtitles(data, shouldLoadProvinceData = true) {
+        function processSubSubtitles(data) {
             if (!data || data.length === 0) {
-                renderBarChart([]);
+                // Hide dropdowns
+                if (elements.subSubtitleDropdown) {
+                    elements.subSubtitleDropdown.style.display = 'none';
+                }
+                if (elements.subtitleDropdown) {
+                    elements.subtitleDropdown.style.display = 'none';
+                }
                 return;
             }
 
@@ -1003,12 +969,13 @@
 
             if (subSubtitles.length > 0) {
                 // Update sub-subtitle dropdown
-                updateSubSubtitleDropdown(subSubtitles, shouldLoadProvinceData);
+                updateSubSubtitleDropdown(subSubtitles);
 
                 // Auto-select first sub-subtitle
                 if (subSubtitles.length > 0 && elements.selectedSubSubtitle) {
-                    elements.selectedSubSubtitle.textContent = subSubtitles[0];
-                    handleSubSubtitleChange(subSubtitles[0], shouldLoadProvinceData);
+                    const firstSubSubtitle = subSubtitles[0];
+                    elements.selectedSubSubtitle.textContent = firstSubSubtitle;
+                    handleSubSubtitleChange(firstSubSubtitle);
                 }
             } else {
                 // No sub-subtitles, hide dropdown
@@ -1016,13 +983,8 @@
                     elements.subSubtitleDropdown.style.display = 'none';
                 }
 
-                // Update chart with all data for this subtitle
-                renderBarChart(data);
-
-                // Only load province data if requested
-                if (shouldLoadProvinceData) {
-                    loadProvinceData();
-                }
+                // Render province chart with all data
+                renderCompareChart(data);
             }
 
             // Always hide subtitle dropdown (legacy UI element)
@@ -1031,8 +993,7 @@
             }
         }
 
-        // Handle sub-subtitle change
-        function handleSubSubtitleChange(subSubtitle, shouldLoadProvinceData = true) {
+        function handleSubSubtitleChange(subSubtitle) {
             // Skip if sub-subtitle hasn't actually changed
             if (selections.subSubtitle === subSubtitle) {
                 return;
@@ -1042,18 +1003,13 @@
             selections.subSubtitle = subSubtitle;
 
             // Filter data by both subtitle and sub-subtitle
-            const filteredData = chartData.bar.filter(item =>
+            const filteredProvinceData = chartData.compare.filter(item =>
                 (item.subtitle === selections.subtitle || !selections.subtitle) &&
                 item.sub_subtitle === subSubtitle
             );
 
-            // Update chart with filtered data
-            renderBarChart(filteredData);
-
-            // Update province data only if requested
-            if (shouldLoadProvinceData) {
-                loadProvinceData();
-            }
+            // Update province chart
+            renderCompareChart(filteredProvinceData);
         }
 
         // Data processing functions
@@ -1072,6 +1028,7 @@
                     if (elements.subtitleSelect) {
                         elements.subtitleSelect.disabled = true;
                         elements.subtitleSelect.innerHTML = '<option disabled selected>Subjudul</option>';
+                        elements.subtitleSelect.classList.add('d-none');
                     }
                     renderBoxplotChart([], null);
                     return;
@@ -1083,6 +1040,11 @@
                 if (hasSubtitles) {
                     // Get unique subtitles
                     const subtitles = [...new Set(data.map(item => item.subtitle))];
+
+                    // Show subtitle select
+                    if (elements.subtitleSelect) {
+                        elements.subtitleSelect.classList.remove('d-none');
+                    }
 
                     // Populate subtitle select
                     populateSubtitleSelect(subtitles);
@@ -1107,6 +1069,7 @@
                     if (elements.subtitleSelect) {
                         elements.subtitleSelect.disabled = true;
                         elements.subtitleSelect.innerHTML = '<option disabled selected>Subjudul</option>';
+                        elements.subtitleSelect.classList.add('d-none');
                     }
                     selections.subtitle = null;
                     renderBoxplotChart(data, null);
@@ -1119,18 +1082,20 @@
                 if (elements.subtitleSelect) {
                     elements.subtitleSelect.disabled = true;
                     elements.subtitleSelect.innerHTML = '<option disabled selected>Subjudul</option>';
+                    elements.subtitleSelect.classList.add('d-none');
                 }
             } finally {
                 hideLoader();
             }
         }
 
-        async function loadBarData(titleCode) {
+        async function loadCompareData(titleCode) {
             try {
                 showLoader();
 
-                const data = await fetchBarData(titleCode);
-                chartData.bar = data;
+                // Use fetchCompareData instead
+                const data = await fetchCompareData(titleCode);
+                chartData.compare = data || [];
 
                 // Reset selections
                 selections.title = titleCode;
@@ -1138,28 +1103,25 @@
 
                 // Get subtitle from boxplot if selected
                 if (selections.subtitle) {
-                    const filteredData = data.filter(item =>
+                    const filteredData = chartData.compare.filter(item =>
                         item.subtitle === selections.subtitle ||
                         (!item.subtitle && !selections.subtitle)
                     );
-                    processSubSubtitles(filteredData, false);
+                    processSubSubtitles(filteredData);
                 } else {
                     // Get first subtitle from data if available
-                    const subtitles = [...new Set(data.map(item => item.subtitle).filter(Boolean))];
+                    const subtitles = [...new Set(chartData.compare.map(item => item.subtitle).filter(Boolean))];
                     if (subtitles.length > 0) {
                         selections.subtitle = subtitles[0];
-                        const filteredData = data.filter(item => item.subtitle === subtitles[0]);
-                        processSubSubtitles(filteredData, false);
+                        const filteredData = chartData.compare.filter(item => item.subtitle === subtitles[0]);
+                        processSubSubtitles(filteredData);
                     } else {
                         // No subtitles, use all data
-                        processSubSubtitles(data, false);
+                        processSubSubtitles(chartData.compare);
                     }
                 }
             } catch (error) {
-                console.error('Error loading bar data:', error);
-
-                // Show error message
-                renderBarChart([]);
+                console.error('Error loading comparison data:', error);
 
                 // Hide dropdowns
                 if (elements.subSubtitleDropdown) {
@@ -1168,55 +1130,11 @@
                 if (elements.subtitleDropdown) {
                     elements.subtitleDropdown.style.display = 'none';
                 }
+
+                // Show empty province chart
+                renderCompareChart([]);
             } finally {
                 hideLoader();
-            }
-        }
-
-        async function loadProvinceData() {
-            // Reset pagination to first page when loading new data
-            currentPage = 1;
-
-            // If a request is already in progress, mark as pending and return
-            if (isLoadingProvinceData) {
-                pendingProvinceDataRequest = true;
-                return;
-            }
-
-            try {
-                isLoadingProvinceData = true;
-                pendingProvinceDataRequest = false;
-                showLoader();
-
-                // Add loading state to chart container
-                if (elements.provinceChartContainer) {
-                    elements.provinceChartContainer.classList.add('opacity-50');
-                }
-
-                // Fetch province data
-                const data = await fetchProvinceData();
-
-                // Store the data
-                chartData.province = data;
-
-                // Update chart
-                renderProvinceChart(data);
-            } catch (error) {
-                console.error('Error loading province data:', error);
-                // Error handling code...
-            } finally {
-                // Remove loading state
-                if (elements.provinceChartContainer) {
-                    elements.provinceChartContainer.classList.remove('opacity-50');
-                }
-
-                hideLoader();
-                isLoadingProvinceData = false;
-
-                // If a request came in while we were processing, handle it now
-                if (pendingProvinceDataRequest) {
-                    setTimeout(loadProvinceData, 100);
-                }
             }
         }
 
@@ -1272,7 +1190,7 @@
 
                 // Update charts with current selection
                 await loadBoxplotData(sbmCode);
-                await loadBarData(sbmCode);
+                await loadCompareData(sbmCode);
 
                 // Update lastRefreshTime after successful refresh
                 lastRefreshTime = new Date();
@@ -1372,7 +1290,7 @@
 
             // Reload data for the new selection
             loadBoxplotData(titleCode);
-            loadBarData(titleCode);
+            loadCompareData(titleCode);
         }
 
         function handleSubtitleChange(e) {
@@ -1387,22 +1305,19 @@
             selections.subtitle = subtitleValue;
             selections.subSubtitle = null;
 
-            // Filter existing bar data by subtitle
-            const filteredData = chartData.bar.filter(item =>
+            // Filter existing province data by subtitle
+            const filteredData = chartData.compare.filter(item =>
                 item.subtitle === subtitleValue || (!item.subtitle && !subtitleValue)
             );
 
             // Process sub-subtitles for the selected subtitle
-            processSubSubtitles(filteredData, false); // Pass false to avoid loading province data
+            processSubSubtitles(filteredData);
 
             // Update boxplot chart with current subtitle
             const boxplotData = chartData.boxplot.filter(item =>
                 item.subtitle === subtitleValue || (!item.subtitle && !subtitleValue)
             );
             renderBoxplotChart(boxplotData, subtitleValue);
-
-            // Now update province data since all other UI changes are complete
-            loadProvinceData();
         }
 
         // Setup auto-refresh
@@ -1462,31 +1377,6 @@
             await applySortOrder(sortOrder);
         }
 
-
-        // Restore saved preference during initialization
-        function restoreSavedPreferences() {
-            try {
-                const savedSortOrder = localStorage.getItem('sbm_chart_sort_order');
-                if (savedSortOrder && ['normal', 'asc', 'desc'].includes(savedSortOrder)) {
-                    selections.sortOrder = savedSortOrder;
-                    applySortOrder(savedSortOrder);
-
-                    // Update UI
-                    if (elements.selectedSortOrder) {
-                        const sortText = {
-                            'normal': 'Urutan Normal',
-                            'asc': 'Nilai Terendah',
-                            'desc': 'Nilai Tertinggi'
-                        } [savedSortOrder] || 'Urutan Normal';
-
-                        elements.selectedSortOrder.textContent = sortText;
-                    }
-                }
-            } catch (e) {
-                console.warn('Could not restore sort order preference', e);
-            }
-        }
-
         // Export public API
         return {
             // Initialize the module
@@ -1494,20 +1384,21 @@
                 try {
                     initEventListeners();
                     initSortOrderDropdown();
+                    initThemeListener();
+                    updateRefreshIndicator();
 
                     await initYearDropdown();
 
                     const titles = await fetchTitlesFromHierarchy();
 
                     if (titles && titles.length > 0) {
-                        // Update SBM select with titles from hierarchy
                         updateTitleSelect(titles);
                     }
 
                     // Initial data load
                     const sbmCode = elements.sbmSelect ? elements.sbmSelect.value : '127';
                     await loadBoxplotData(sbmCode);
-                    await loadBarData(sbmCode);
+                    await loadCompareData(sbmCode);
                     await updateLastUpdateTime();
 
                     setupAutoRefresh();
@@ -1543,6 +1434,18 @@
                     refreshTimer = null;
                 }
 
+                // Remove event listeners
+                if (elements.sbmSelect) {
+                    elements.sbmSelect.removeEventListener('change', handleTitleChange);
+                }
+                if (elements.subtitleSelect) {
+                    elements.subtitleSelect.removeEventListener('change', handleSubtitleChange);
+                }
+                if (elements.refreshButton) {
+                    elements.refreshButton.removeEventListener('click', refreshAllCharts);
+                }
+                document.removeEventListener('visibilitychange', visibilityChangeHandler);
+
                 // Destroy chart instances
                 Object.keys(charts).forEach(key => {
                     if (charts[key]) {
@@ -1551,7 +1454,36 @@
                     }
                 });
 
+                if (window.themeObserver) {
+                    window.themeObserver.disconnect();
+                    window.themeObserver = null;
+                }
+
                 console.log('SBM Chart Module destroyed');
+            },
+            updateTheme: function() {
+                updateRefreshIndicator();
+
+                // Update charts with new theme
+                if (charts.boxplot) {
+                    const boxplotData = chartData.boxplot.filter(item =>
+                        item.subtitle === selections.subtitle || (!item.subtitle && !selections.subtitle)
+                    );
+                    if (boxplotData.length === 0) {
+                        loadBoxplotData(selections.title);
+                    } else {
+                        renderBoxplotChart(boxplotData, selections.subtitle);
+                    }
+                }
+
+                if (charts.compare) {
+                    const filteredData = getFilteredData();
+                    if (filteredData.length === 0) {
+                        loadCompareData(selections.title);
+                    } else {
+                        renderCompareChart(filteredData);
+                    }
+                }
             }
         };
     })();
