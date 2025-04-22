@@ -2,8 +2,8 @@
 <link href="<?= base_url('assets/dist/css/dashboard.css'); ?>" rel="stylesheet" />
 <link href="<?= base_url('assets/plugins/sweetalert/sweetalert2.min.css'); ?>" rel="stylesheet" />
 <link href="<?= base_url('assets/dist/css/datatables.min.css'); ?>" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/@tabler/core@latest/dist/js/tabler.min.js"></script>
-<!-- <script src="<?= base_url('assets/dist/js/tabler.js'); ?>"></script> -->
+<!-- Remove CDN tabler -->
+<script src="<?= base_url('assets/dist/js/tabler.js'); ?>"></script>
 <script src="<?= base_url('assets/dist/js/axios.js'); ?>"></script>
 <script src="<?= base_url('assets/dist/js/theme.js'); ?>"></script>
 <script src="<?= base_url('assets/dist/js/papaparse.min.js'); ?>"></script>
