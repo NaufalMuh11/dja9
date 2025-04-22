@@ -36,7 +36,7 @@
 	<div class="page-body" style="margin: 10px 0">
 		<div class="container-fluid">
 			<!-- Rows for Statistics Card -->
-			<div class="row mb-3">
+			<div class="row g-3 mb-3">
 				<!-- Total Number of Users Card -->
 				<div class="col-sm-6 col-lg-4">
 					<div class="card rounded-3 h-100">
