@@ -8,7 +8,22 @@
             Referensi
           </div>
           <h2 class="page-title">
-            <span class="text-cyan">SBM&nbsp;</span>2026
+            <span class="text-cyan">SBM&nbsp;</span>
+            <input type="hidden" id="selected_thang">
+            <div class="dropdown" id="selectThang" disabled>
+              <a class="dropdown-toggle text-muted text-decoration-none" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                T.A. <?php echo $tahun_aktif; ?>
+              </a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item <?php echo $tahun_aktif == '2025' ? 'active' : ''; ?>" 
+                   href="<?php echo base_url('referensi?q=RefSBM&tahun=2025'); ?>">
+                   T.A. 2025
+                </a>
+                <a class="dropdown-item <?php echo $tahun_aktif == '2026' ? 'active' : ''; ?>" 
+                   href="<?php echo base_url('referensi?q=RefSBM&tahun=2026'); ?>">
+                   T.A. 2026
+                </a>
+            </div>
           </h2>
         </div>
 
@@ -23,7 +38,7 @@
 
           <div class="mb-3 d-flex justify-content-between align-items-center">
             <div>
-              <a href="#" onclick="window.history.back(); return false;" class="btn btn-icon" title="Kembali">
+              <a href="#" id="backButton" class="btn btn-icon" title="Kembali">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
               </a>
             </div>
@@ -44,7 +59,7 @@
 
             <tbody>
               <?php foreach ($tabel as $row) {
-                if ($row['biaya'] == 0) { ?>
+                  if ($row['biaya'] == 0) { ?>
                   <tr id="id_<?= $row['kdsbu'] ?>" class="Sub" style="margin: 0px">
                     <td colspan="3" class="text-left"><b> <?= $row['nmsbu'] ?> </b></td>
                   </tr>
@@ -55,7 +70,7 @@
                     <td class="text-end"> <?= number_format($row['biaya'], 0, ',', '.') ?></td>
                   </tr>
               <?php }
-              } ?>
+                } ?>
 
             </tbody>
           </table>
@@ -81,7 +96,39 @@
                 searchInput.value = '';
                 filterTable('');
               });
+
+              // Handle back button click
+              document.getElementById('backButton').addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = '<?php echo base_url("referensi?q=RefSBM&tahun=" . $tahun_aktif); ?>';
+              });
             });
+
+            document.addEventListener('DOMContentLoaded', function() {
+    // Update dropdown display
+    const dropdownToggle = document.querySelector('#selectThang .dropdown-toggle');
+    const currentThang = '<?php echo $tahun_aktif; ?>';
+    dropdownToggle.textContent = ` T.A. ${currentThang}`;
+
+    // Handle dropdown selection
+    const dropdownItems = document.querySelectorAll('#selectThang .dropdown-item');
+    dropdownItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const year = this.textContent.trim().replace('T.A. ', '');
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('tahun', year);
+            window.location.href = currentUrl.toString();
+        });
+
+        // Set active state
+        if (item.textContent.includes(currentThang)) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+});
           </script>
         </div>
       </div>

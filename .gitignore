@@ -2,6 +2,7 @@
 
 application/cache/*
 !application/cache/index.html
+application/config/config.php
 
 application/logs/*
 !application/logs/index.html
@@ -32,3 +33,5 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 *.sublime-project
 /tests/tests/
 /tests/results/
+
+.env

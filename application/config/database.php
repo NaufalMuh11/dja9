@@ -5,10 +5,10 @@ $active_group = 'default';
 $query_builder = TRUE;
 
 // setting db connection s
-$db_host = 'localhost';
-$db_username = 'root';
-$db_password = '';
-$db_port = '3306';
+$db_host = getenv('DB_HOST');
+$db_username = getenv('DB_USERNAME');
+$db_password = getenv('DB_PASSWORD');
+$db_port = getenv('DB_PORT');
 
 $db['default'] = array(
 	'dsn'	=> '',
@@ -33,7 +33,31 @@ $db['default'] = array(
 	'save_queries' => TRUE
 );
 
-//2025
+// satu
+$db['dbsatu'] = array(
+	'dsn'	=> '',
+	'hostname' => $db_host,
+	'username' => $db_username,
+	'password' => $db_password,
+	'port' 	   => $db_port,
+	'database' => 'dbsatu',
+	'dbdriver' => 'mysqli',
+	'dbprefix' => '',
+	'pconnect' => FALSE,
+	'db_debug' => FALSE,
+	'cache_on' => FALSE,
+	'cachedir' => '',
+	'char_set' => 'utf8',
+	'dbcollat' => 'utf8_general_ci',
+	'swap_pre' => '',
+	'encrypt' => FALSE,
+	'compress' => FALSE,
+	'stricton' => FALSE,
+	'failover' => array(),
+	'save_queries' => TRUE
+);
+
+// 2025
 $db['ref2025'] = array(
 	'dsn'	=> '',
 	'hostname' => $db_host,
@@ -80,13 +104,14 @@ $db['revisi2025'] = array(
 	'save_queries' => TRUE
 );
 
-$db['mytask_log'] = array(
+// 2026
+$db['dbref2026'] = array(
 	'dsn'	=> '',
 	'hostname' => $db_host,
 	'username' => $db_username,
 	'password' => $db_password,
 	'port' 	   => $db_port,
-	'database' => 't_mytask_log',
+	'database' => 'dbref2026',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
@@ -103,13 +128,13 @@ $db['mytask_log'] = array(
 	'save_queries' => TRUE
 );
 
-$db['mytask_link'] = array(
+$db['ref2026'] = array(
 	'dsn'	=> '',
 	'hostname' => $db_host,
 	'username' => $db_username,
 	'password' => $db_password,
 	'port' 	   => $db_port,
-	'database' => 't_mytask_link_',
+	'database' => 'dbref2026',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
