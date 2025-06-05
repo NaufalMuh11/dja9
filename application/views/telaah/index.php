@@ -12,7 +12,8 @@
                 </div>
                 <div class="col-auto">
                     <div class="btn-list">
-                        <button type="button" class="btn btn-outline-secondary" id="newChatBtn">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal"
+                            data-bs-target="#startChatModal" id="newChatBtn">
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                 <path d="M12 5l0 14"></path>
@@ -272,24 +273,6 @@
         opacity: 1;
     }
 
-    .delete-chat-btn {
-        background: none;
-        border: none;
-        color: #dc3545;
-        padding: 0.25rem;
-        border-radius: 0.25rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .delete-chat-btn:hover {
-        background-color: #dc3545;
-        color: white;
-    }
-
     .chat-history-item.active .delete-chat-btn {
         color: #fff;
     }
@@ -331,16 +314,6 @@
         background-color: #f8d7da;
         color: #721c24;
         border: 1px solid #f5c2c7;
-    }
-
-    .message-timestamp {
-        font-size: 0.75rem;
-        color: #6c757d;
-        margin-top: 0.25rem;
-    }
-
-    .user-message .message-timestamp {
-        color: #ffffff;
     }
 
     .citation-badge {
@@ -407,19 +380,6 @@
                 .replace(/'/g, "&#039;");
         }
 
-        function formatTimestamp(date) {
-            const dateObj = date instanceof Date ? date : new Date(date);
-
-            if (isNaN(dateObj.getTime())) {
-                return 'Invalid Date';
-            }
-
-            return dateObj.toLocaleTimeString('id-ID', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
         function generateId() {
             return Date.now().toString(36) + Math.random().toString(36).substr(2);
         }
@@ -459,6 +419,102 @@
                     toastElement.remove();
                 }
             }, duration + 500);
+        }
+
+        // Universal Modal Function
+        function showConfirmationModal(options) {
+            const {
+                title = 'Konfirmasi',
+                    message = 'Apakah Anda yakin?',
+                    type = 'info', // 'info', 'danger', 'warning'
+                    confirmText = 'Ya',
+                    cancelText = 'Batal',
+                    onConfirm = () => {},
+                    onCancel = () => {}
+            } = options;
+
+            const modalId = 'universalConfirmModal';
+
+            // Remove existing modal if any
+            const existingModal = document.getElementById(modalId);
+            if (existingModal) {
+                existingModal.remove();
+            }
+
+            const statusClass = {
+                'info': 'bg-info',
+                'danger': 'bg-danger',
+                'warning': 'bg-warning'
+            } [type] || 'bg-info';
+
+            const iconSvg = {
+                'info': `<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M12.802 2.165l5.575 2.389c.48 .206 .863 .589 1.07 1.07l2.388 5.574c.22 .512 .22 1.092 0 1.604l-2.389 5.575c-.206 .48 -.589 .863 -1.07 1.07l-5.574 2.388c-.512 .22 -1.092 .22 -1.604 0l-5.575 -2.389a2.036 2.036 0 0 1 -1.07 -1.07l-2.388 -5.574a2.036 2.036 0 0 1 0 -1.604l2.389 -5.575c.206 -.48 .589 -.863 1.07 -1.07l5.574 -2.388a2.036 2.036 0 0 1 1.604 0z" />
+                <path d="M12 16v.01" />
+                <path d="M12 13a2 2 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483" />`,
+                'danger': `<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M12 9v2m0 4v.01" />
+                  <path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75" />`,
+                'warning': `<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                   <path d="M12 9v2m0 4v.01" />
+                   <path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75" />`
+            } [type] || '';
+
+            const textClass = type === 'danger' ? 'text-danger' :
+                type === 'warning' ? 'text-warning' : 'text-info';
+
+            const buttonClass = type === 'danger' ? 'btn-danger' :
+                type === 'warning' ? 'btn-warning' : 'btn-info';
+
+            const modalHtml = `
+                <div class="modal" id="${modalId}" tabindex="-1">
+                    <div class="modal-dialog modal-sm" role="document">
+                        <div class="modal-content">
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <div class="modal-status ${statusClass}"></div>
+                            <div class="modal-body text-center py-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon mb-2 ${textClass} icon-lg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    ${iconSvg}
+                                </svg>
+                                <div>${escapeHtml(message)}</div>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="w-100">
+                                    <div class="row">
+                                        <div class="col">
+                                            <button class="btn w-100" data-bs-dismiss="modal" id="cancelBtn">${escapeHtml(cancelText)}</button>
+                                        </div>
+                                        <div class="col">
+                                            <button class="btn ${buttonClass} w-100" data-bs-dismiss="modal" id="confirmBtn">${escapeHtml(confirmText)}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+            const modal = new bootstrap.Modal(document.getElementById(modalId));
+            const modalElement = document.getElementById(modalId);
+
+            // Event listeners
+            modalElement.querySelector('#confirmBtn').addEventListener('click', () => {
+                onConfirm();
+            });
+
+            modalElement.querySelector('#cancelBtn').addEventListener('click', () => {
+                onCancel();
+            });
+
+            // Clean up when modal is hidden
+            modalElement.addEventListener('hidden.bs.modal', function() {
+                this.remove();
+            });
+
+            modal.show();
         }
 
         // Connection Status Management
@@ -621,7 +677,6 @@
         // Message Display Functions
         function addUserMessage(message, timestamp = new Date(), sessionId = currentSessionId) {
             const messageId = generateId();
-            const formattedTimestamp = formatTimestamp(timestamp);
             const safeMessage = escapeHtml(message).replace(/\n/g, '<br>');
 
             const messageHtml = `
@@ -630,7 +685,6 @@
                         <div class="message-content">
                             <div class="message-bubble p-3 bg-primary text-white">
                                 <div class="message-text">${safeMessage}</div>
-                                <div class="message-timestamp text-end opacity-75">${formattedTimestamp}</div>
                             </div>
                         </div>
                     </div>
@@ -640,7 +694,7 @@
             chatHistory.insertAdjacentHTML('beforeend', messageHtml);
             scrollChatToBottom();
 
-            // Add to history with sessionId
+            // Add to local history
             addToChatHistory({
                 id: messageId,
                 type: 'user',
@@ -652,7 +706,6 @@
 
         function addAIMessage(message, citations = [], isError = false, timestamp = new Date(), sessionId = currentSessionId) {
             const messageId = generateId();
-            const formattedTimestamp = formatTimestamp(timestamp);
             const messageClass = isError ? 'alert alert-danger' : '';
             const formattedHtmlMessage = isError ? `<p>${escapeHtml(message)}</p>` : formatAIMessage(message);
 
@@ -665,7 +718,6 @@
                         <div class="message-content">
                             <div class="message-bubble p-3 ${messageClass}">
                                 <div class="message-text">${formattedHtmlMessage}</div>
-                                <div class="message-timestamp">${formattedTimestamp}</div>
                             </div>
                         </div>
                     </div>
@@ -680,7 +732,7 @@
 
             scrollChatToBottom();
 
-            // Add to history with sessionId
+            // Add to local history
             addToChatHistory({
                 id: messageId,
                 type: 'ai',
@@ -692,9 +744,9 @@
             });
         }
 
-        function displayUserMessage(message, timestamp = new Date(), sessionId = currentSessionId) {
+
+        function displayUserMessage(message, sessionId = currentSessionId) {
             const messageId = generateId();
-            const formattedTimestamp = formatTimestamp(timestamp);
             const safeMessage = escapeHtml(message).replace(/\n/g, '<br>');
 
             const messageHtml = `
@@ -703,7 +755,6 @@
                         <div class="message-content">
                             <div class="message-bubble p-3 bg-primary text-white">
                                 <div class="message-text">${safeMessage}</div>
-                                <div class="message-timestamp text-end opacity-75">${formattedTimestamp}</div>
                             </div>
                         </div>
                     </div>
@@ -714,9 +765,8 @@
             scrollChatToBottom();
         }
 
-        function displayAIMessage(message, citations = [], isError = false, timestamp = new Date(), sessionId = currentSessionId) {
+        function displayAIMessage(message, citations = [], isError = false, sessionId = currentSessionId) {
             const messageId = generateId();
-            const formattedTimestamp = formatTimestamp(timestamp);
             const messageClass = isError ? 'alert alert-danger' : '';
             const formattedHtmlMessage = isError ? `<p>${escapeHtml(message)}</p>` : formatAIMessage(message);
 
@@ -729,7 +779,6 @@
                         <div class="message-content">
                             <div class="message-bubble p-3 ${messageClass}">
                                 <div class="message-text">${formattedHtmlMessage}</div>
-                                <div class="message-timestamp">${formattedTimestamp}</div>
                             </div>
                         </div>
                     </div>
@@ -857,19 +906,25 @@
         function addToChatHistory(messageData) {
             chatHistoryData.push(messageData);
             updateChatHistoryDisplay();
-            saveChatHistoryToStorage();
+
+            // Save to database dengan struktur yang sesuai model
+            if (messageData.sessionId) {
+                saveMessageToDatabase(messageData).catch(error => {
+                    console.warn('Message not saved to database:', error);
+                });
+            }
         }
 
-        function deleteChatSession(sessionId, event) {
-            event.stopPropagation();
+        async function deleteChatSession(sessionId) {
+            try {
+                // Delete from database first
+                await deleteChatSessionFromDatabase(sessionId);
 
-            if (confirm('Apakah Anda yakin ingin menghapus percakapan ini?')) {
-                // Hapus semua pesan dari session ini
+                // Remove from local data
                 chatHistoryData = chatHistoryData.filter(msg => msg.sessionId !== sessionId);
 
-                // Jika session yang dihapus adalah session yang sedang aktif
+                // If deleted session is currently active
                 if (currentSessionId === sessionId) {
-                    // Clear chat area
                     chatHistory.innerHTML = '';
                     citationList.innerHTML = `
                         <div class="text-muted text-center py-4">
@@ -879,11 +934,12 @@
                     currentSessionId = null;
                 }
 
-                // Update display dan simpan ke storage
                 updateChatHistoryDisplay();
-                saveChatHistoryToStorage();
-
                 showToast('Percakapan berhasil dihapus', 'success');
+
+            } catch (error) {
+                console.error('Failed to delete chat session:', error);
+                // Error toast already shown in deleteChatSessionFromDatabase
             }
         }
 
@@ -897,7 +953,6 @@
                 return;
             }
 
-            // Create a map of unique sessions
             const sessions = new Map();
             chatHistoryData.forEach(message => {
                 if (message.sessionId && message.type === 'user') {
@@ -910,7 +965,6 @@
                 }
             });
 
-            // Convert sessions map to array and sort by timestamp in descending order
             const sortedSessions = Array.from(sessions.entries())
                 .sort((a, b) => new Date(b[1].timestamp) - new Date(a[1].timestamp));
 
@@ -920,16 +974,14 @@
                 const messagePreview = data.message.length > 50 ?
                     data.message.substring(0, 50) + '...' :
                     data.message;
-                const messageTime = formatTimestamp(new Date(data.timestamp));
 
                 historyHtml += `
                     <div class="chat-history-item ${sessionId === currentSessionId ? 'active' : ''}" data-session-id="${sessionId}">
                         <div class="chat-history-content">
                             <div class="fw-bold">${escapeHtml(messagePreview)}</div>
-                            <div class="${sessionId === currentSessionId ? 'text-white-50' : 'text-muted'} small">${messageTime}</div>
                         </div>
                         <div class="chat-history-actions">
-                            <button type="button" class="delete-chat-btn" data-session-id="${sessionId}" title="Hapus percakapan">
+                            <button type="button" class="delete-chat-btn btn btn-ghost-danger border-0 p-2" data-session-id="${sessionId}" title="Hapus percakapan">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M3 6h18"></path>
                                     <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
@@ -948,22 +1000,43 @@
             // Add click handlers
             chatHistoryList.querySelectorAll('.chat-history-item').forEach(item => {
                 item.addEventListener('click', function(e) {
-                    // Jangan trigger jika click pada tombol delete
                     if (e.target.closest('.delete-chat-btn')) {
                         return;
                     }
-
                     const sessionId = this.dataset.sessionId;
                     loadChatSession(sessionId);
                 });
             });
 
-            // Add delete button handlers
+            // Modified delete button handlers - use modal instead of confirm
             chatHistoryList.querySelectorAll('.delete-chat-btn').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
                     const sessionId = this.dataset.sessionId;
-                    deleteChatSession(sessionId, e);
+                    const clickedButton = this;
+                    clickedButton.disabled = true;
+
+                    showConfirmationModal({
+                        title: 'Hapus Percakapan',
+                        message: 'Apakah Anda yakin ingin menghapus percakapan ini? Tindakan ini tidak dapat dibatalkan.',
+                        type: 'danger',
+                        confirmText: 'Hapus',
+                        cancelText: 'Batal',
+                        onConfirm: () => {
+                            deleteChatSession(sessionId)
+                                .catch(() => {
+                                    if (document.body.contains(clickedButton)) {
+                                        clickedButton.disabled = false;
+                                    }
+                                });
+                        },
+                        onCancel: () => {
+                            console.log('Delete cancelled');
+                            if (document.body.contains(clickedButton)) {
+                                clickedButton.disabled = false;
+                            }
+                        }
+                    });
                 });
             });
         }
@@ -977,34 +1050,147 @@
 
             sessionMessages.forEach(msg => {
                 if (msg.type === 'user') {
-                    const timestamp = new Date(msg.timestamp);
-                    displayUserMessage(msg.message, msg.timestamp, msg.sessionId);
-                } else if (msg.type === 'ai') {
-                    const timestamp = new Date(msg.timestamp);
-                    displayAIMessage(msg.message, msg.citations || [], msg.isError || false, msg.timestamp, msg.sessionId);
+                    displayUserMessage(msg.message, msg.sessionId);
+                } else if (msg.type === 'assistant') {
+                    displayAIMessage(msg.message, msg.citations || [], msg.isError || false, msg.sessionId);
                 }
             });
 
             updateChatHistoryDisplay();
         }
 
-        function saveChatHistoryToStorage() {
+        // Save chat session to database
+        async function saveChatSessionToDatabase(sessionData) {
             try {
-                localStorage.setItem('chatHistory', JSON.stringify(chatHistoryData));
+                const dbSessionData = {
+                    session_id: sessionData.session_id,
+                    title: sessionData.title || 'Chat Session',
+                };
+
+                const response = await makeApiRequest('/chat/save-session', {
+                    method: 'POST',
+                    body: JSON.stringify(dbSessionData)
+                });
+
+                if (!response.success) {
+                    throw new Error(response.message || 'Failed to save chat session');
+                }
+
+                return response;
             } catch (error) {
-                console.warn('Failed to save chat history to localStorage:', error);
+                console.error('Failed to save chat session:', error);
+                showToast('Gagal menyimpan percakapan: ' + error.message, 'error');
+                throw error;
             }
         }
 
-        function loadChatHistoryFromStorage() {
+        // Load chat sessions from database
+        async function loadChatSessionsFromDatabase() {
             try {
-                const stored = localStorage.getItem('chatHistory');
-                if (stored) {
-                    chatHistoryData = JSON.parse(stored);
-                    updateChatHistoryDisplay();
+                const response = await makeApiRequest('/chat/sessions', {
+                    method: 'GET'
+                });
+
+                if (!response.success) {
+                    throw new Error(response.message || 'Failed to load chat sessions');
                 }
+
+                return response.sessions || [];
             } catch (error) {
-                console.warn('Failed to load chat history from localStorage:', error);
+                console.error('Failed to load chat sessions:', error);
+                showToast('Gagal memuat riwayat percakapan: ' + error.message, 'warning');
+                return [];
+            }
+        }
+
+        // Delete chat session from database
+        async function deleteChatSessionFromDatabase(sessionId) {
+            try {
+                const response = await makeApiRequest(`/chat/session/${sessionId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.success) {
+                    throw new Error(response.message || 'Failed to delete chat session');
+                }
+
+                return response;
+            } catch (error) {
+                console.error('Failed to delete chat session:', error);
+                showToast('Gagal menghapus percakapan: ' + error.message, 'error');
+                throw error;
+            }
+        }
+
+        // Save individual message to database
+        async function saveMessageToDatabase(messageData) {
+            try {
+                const dbData = {
+                    session_id: messageData.sessionId,
+                    role: messageData.type === 'user' ? 'user' : 'assistant',
+                    content: messageData.message,
+                    reference: messageData.citations && messageData.citations.length > 0 ?
+                        JSON.stringify({
+                            citations: messageData.citations
+                        }) : null
+                };
+
+                const response = await makeApiRequest('/chat/save-message', {
+                    method: 'POST',
+                    body: JSON.stringify(dbData)
+                });
+
+                if (!response.success) {
+                    throw new Error(response.message || 'Failed to save message');
+                }
+
+                return response;
+            } catch (error) {
+                console.error('Failed to save message:', error);
+                throw error;
+            }
+        }
+
+        async function loadChatHistoryFromDatabase() {
+            try {
+                const sessions = await loadChatSessionsFromDatabase();
+
+                // Convert database format to local format
+                chatHistoryData = [];
+                sessions.forEach(session => {
+                    if (session.messages && Array.isArray(session.messages)) {
+                        session.messages.forEach(msg => {
+                            // Parse citations dari reference field
+                            let citations = [];
+                            if (msg.reference) {
+                                try {
+                                    const refData = JSON.parse(msg.reference);
+                                    if (refData.citations) {
+                                        citations = refData.citations;
+                                    }
+                                } catch (e) {
+                                    console.warn('Error parsing reference data:', e);
+                                }
+                            }
+
+                            chatHistoryData.push({
+                                id: msg.id || generateId(),
+                                type: msg.role, // gunakan 'role' dari database
+                                message: msg.content, // gunakan 'content' dari database
+                                citations: citations,
+                                timestamp: msg.timestamp || msg.message_timestamp,
+                                isError: false,
+                                sessionId: session.session_id
+                            });
+                        });
+                    }
+                });
+
+                updateChatHistoryDisplay();
+            } catch (error) {
+                console.warn('Failed to load chat history from database:', error);
+                chatHistoryData = [];
+                updateChatHistoryDisplay();
             }
         }
 
@@ -1063,6 +1249,17 @@
                 // Update UI
                 sendButton.disabled = true;
                 sendButton.querySelector('.button-text').textContent = 'Mengirim...';
+
+                // Jika belum ada session, buat session baru
+                if (!currentSessionId) {
+                    currentSessionId = 'session_' + generateId();
+
+                    // Save session ke database
+                    await saveChatSessionToDatabase({
+                        session_id: currentSessionId,
+                        title: message.substring(0, 50) + (message.length > 50 ? '...' : ''),
+                    });
+                }
 
                 // Add user message
                 addUserMessage(message);
@@ -1140,33 +1337,43 @@
         }
 
         function startNewChat() {
-            if (confirm('Apakah Anda yakin ingin memulai percakapan baru?')) {
-                // Clear current chat
-                chatHistory.innerHTML = '';
-                citationList.innerHTML = `
-                    <div class="text-muted text-center py-4">
-                        Referensi akan muncul saat AI memberikan jawaban
-                    </div>
-                `;
-
-                currentSessionId = null;
-
-                // Show loading and get welcome message
-                chatHistory.innerHTML = `
-                    <div class="text-center py-4" id="loadingWelcome">
-                        <div class="spinner-border spinner-border-sm text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
+            showConfirmationModal({
+                title: 'Percakapan Baru',
+                message: 'Apakah Anda yakin ingin memulai percakapan baru?',
+                type: 'info',
+                confirmText: 'Ya, Mulai Baru',
+                cancelText: 'Batal',
+                onConfirm: () => {
+                    // Clear current chat
+                    chatHistory.innerHTML = '';
+                    citationList.innerHTML = `
+                        <div class="text-muted text-center py-4">
+                            Referensi akan muncul saat AI memberikan jawaban
                         </div>
-                        <div class="text-muted mt-2">Memuat pesan selamat datang...</div>
-                    </div>
-                `;
+                    `;
 
-                messageInput.disabled = true;
-                sendButton.disabled = true;
+                    currentSessionId = null;
 
-                getWelcomeMessage();
-                showToast('Percakapan baru dimulai', 'info');
-            }
+                    // Show loading and get welcome message
+                    chatHistory.innerHTML = `
+                        <div class="text-center py-4" id="loadingWelcome">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div class="text-muted mt-2">Memuat pesan selamat datang...</div>
+                        </div>
+                    `;
+
+                    messageInput.disabled = true;
+                    sendButton.disabled = true;
+
+                    getWelcomeMessage();
+                    showToast('Percakapan baru dimulai', 'info');
+                },
+                onCancel: () => {
+                    console.log('New chat cancelled');
+                }
+            });
         }
 
         // Event Listeners
@@ -1200,30 +1407,8 @@
         newChatBtn.addEventListener('click', startNewChat);
         healthCheckBtn.addEventListener('click', checkHealth);
 
-        // Auto-save message as user types (debounced)
-        let saveTimeout;
-        messageInput.addEventListener('input', function() {
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => {
-                localStorage.setItem('draftMessage', this.value);
-            }, 1000);
-        });
-
-        // Load draft message on page load
-        const draftMessage = localStorage.getItem('draftMessage');
-        if (draftMessage) {
-            messageInput.value = draftMessage;
-            messageInput.style.height = 'auto';
-            messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + 'px';
-        }
-
-        // Clear draft when message is sent
-        function clearDraft() {
-            localStorage.removeItem('draftMessage');
-        }
-
         // Initialize
-        loadChatHistoryFromStorage();
+        loadChatHistoryFromDatabase();
         await getWelcomeMessage();
 
         // Periodic health check
