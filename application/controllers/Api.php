@@ -81,7 +81,8 @@ class Api extends CI_Controller
         if (empty($text)) return '';
         $text = preg_replace('/##\d+\$\$/', '', $text);
         // $text = preg_replace('/\*\*([^*]+)\*\*/', '$1', $text);
-        $text = preg_replace('/\s+/', ' ', $text);
+        $text = preg_replace('/[ \t]+/', ' ', $text);
+
         $text = trim($text);
         $encoding_fixes = ['â€œ' => '"', 'â€' => '"', 'â€™' => "'", 'Ã¡' => 'á', 'Ã©' => 'é', 'Ã­' => 'í', 'Ã³' => 'ó', 'Ãº' => 'ú', 'â€"' => '–', 'â€"' => '—'];
         $text = str_replace(array_keys($encoding_fixes), array_values($encoding_fixes), $text);
@@ -233,12 +234,44 @@ class Api extends CI_Controller
                 return;
             }
 
+            // Dapatkan detail sesi dari database untuk memeriksa statusnya
+            $session_details = $this->Ragflow_model->get_session_details($session_id, $this->current_user_id);
+
+            // Jika sesi tidak ditemukan, kirim error.
+            if (!$session_details) {
+                $this->json_response(['success' => false, 'message' => 'Session ID not found or access denied.'], 404);
+                return;
+            }
+
+            // Jika sesi BELUM AKTIF, ini adalah pesan pertama.
+            if ($session_details->is_active == 0) {
+                // Buat judul dari potongan pesan pertama
+                $title = mb_substr($user_message, 0, 50);
+                if (mb_strlen($user_message) > 50) {
+                    $title .= '...';
+                }
+
+                // Siapkan data untuk mengaktifkan sesi
+                $activation_data = [
+                    'session_name' => $title,
+                    'is_active' => 1
+                ];
+
+                // Update sesi di database
+                $this->Ragflow_model->save_or_update_session(
+                    $session_id,
+                    $this->current_user_id,
+                    $activation_data
+                );
+            }
+
             // Call RAGFlow for completion/chat
             $ragflow_chat_url = $this->ragflow_url . "/api/v1/agents/{$this->agent_id}/completions";
             $ragflow_payload = [
                 'question' => $user_message,
                 'stream' => false,
-                'session_id' => $session_id
+                'session_id' => $session_id,
+                'user_id' => $this->current_user_id
             ];
 
             $curl_result = $this->make_curl_request($ragflow_chat_url, $ragflow_payload, [], 'POST');
@@ -288,7 +321,7 @@ class Api extends CI_Controller
             }
             $this->test_server_connectivity();
 
-            $url = $this->ragflow_url . "/api/v1/agents/{$this->agent_id}/sessions";
+            $url = $this->ragflow_url . "/api/v1/agents/{$this->agent_id}/sessions?user_id=" . $this->current_user_id;
             $post_data = ['name' => 'UserSession_' . $this->current_user_id . '_' . date('Y-m-d_H-i-s') . '_' . uniqid()];
 
             $curl_result = $this->make_curl_request($url, $post_data, [], 'POST');
@@ -352,8 +385,11 @@ class Api extends CI_Controller
             // save_or_update_session will associate it with the current_user_id
             $result = $this->Ragflow_model->save_or_update_session(
                 $data['session_id'],
-                $data['title'] ?? 'Chat Session - ' . date('Y-m-d H:i:s'),
-                $this->current_user_id
+                $this->current_user_id,
+                [
+                    'session_name' => $data['title'],
+                    'is_active' => 0,
+                ],
             );
 
             if ($result) {
@@ -382,7 +418,7 @@ class Api extends CI_Controller
             CURLOPT_CONNECTTIMEOUT => 3,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => false,
-            CURLOPT_NOBODY => true // We only need to check connectivity, not get body
+            CURLOPT_NOBODY => true
         ]);
         curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -432,28 +468,32 @@ class Api extends CI_Controller
             return;
         }
         try {
-            // Create session with RAGFlow service
+            // 1. Buat sesi di layanan RAGFlow
             $ragflow_session_response = $this->create_ragflow_session();
 
             if (!$ragflow_session_response['success']) {
-                throw new Exception('Failed to create session with RAGFlow service: ' . ($ragflow_session_response['error'] ?? 'Unknown RAGFlow session creation error'));
+                throw new Exception('Failed to create session with RAGFlow service: ' . ($ragflow_session_response['error'] ?? 'Unknown error'));
             }
 
-            $ragflow_api_session_id = $ragflow_session_response['ragflow_session_id'];
-            $welcome_message_from_ragflow = $ragflow_session_response['message'];
+            $local_session_id = $ragflow_session_response['ragflow_session_id'];
 
-            $local_session_id = $ragflow_api_session_id;
+            // 2. Siapkan data untuk sesi TIDAK AKTIF
+            $inactive_session_data = [
+                'session_name' => 'Sesi Baru (Belum Aktif)',
+                'is_active' => 0
+            ];
 
-            // Save this new RAGFlow-originated session to our local database, associated with the user
+            // 3. Simpan sesi tidak aktif ini ke database lokal Anda
             $this->Ragflow_model->save_or_update_session(
                 $local_session_id,
-                'Chat Session - ' . date('Y-m-d H:i:s'),
-                $this->current_user_id
+                $this->current_user_id,
+                $inactive_session_data
             );
 
+            // 4. Kirim respons ke frontend seperti biasa
             $this->json_response([
                 'success' => true,
-                'message' => $welcome_message_from_ragflow,
+                'message' => $ragflow_session_response['message'],
                 'session_id' => $local_session_id,
                 'timestamp' => date('Y-m-d H:i:s')
             ]);
@@ -491,37 +531,43 @@ class Api extends CI_Controller
                 return;
             }
 
-            // Delete from local database, ensuring it belongs to the user
-            $local_delete_success = $this->Ragflow_model->delete_user_session_and_messages($session_id, $this->current_user_id);
+            // Check if session exists for user before deletion
+            $session_exists = $this->Ragflow_model->session_exists_for_user($session_id, $this->current_user_id);
 
-            if (!$local_delete_success) {
-                log_message('warning', 'Local DB deletion failed or session not found for user ' . $this->current_user_id . ' and session: ' . $session_id . '. Proceeding with RAGFlow deletion attempt.');
+            if (!$session_exists) {
+                $this->json_response(['success' => false, 'message' => 'Session not found or does not belong to this user.'], 404);
+                return;
             }
 
+            // Delete from local database
+            $local_delete_success = $this->Ragflow_model->delete_user_session_and_messages($session_id, $this->current_user_id);
+
             // Attempt to delete from RAGFlow API
-            // RAGFlow's session_id is assumed to be the same as our local $session_id here.
             try {
                 if (!empty($this->agent_id) && !empty($this->ragflow_url)) {
-                    $url = $this->ragflow_url . "/api/v1/agents/{$this->agent_id}/sessions?id={$session_id}";
-                    $curl_result = $this->make_curl_request($url, null, [], 'DELETE');
-                    // Allow 404 from RAGFlow as it might have been already deleted or never existed there for this user
+                    $url = $this->ragflow_url . "/api/v1/agents/{$this->agent_id}/sessions";
+                    $delete_data = ['session_id' => $session_id, 'user_id' => $this->current_user_id];
+                    $curl_result = $this->make_curl_request($url, $delete_data, [], 'DELETE');
+
+                    // Allow 404 from RAGFlow as it might have been already deleted or never existed there
                     if ($curl_result['http_code'] !== 404) {
                         $this->handle_http_response($curl_result['http_code'], $curl_result['response']);
                     }
                     log_message('info', 'Attempted RAGFlow session deletion for: ' . $session_id . '. Status: ' . $curl_result['http_code']);
                 }
             } catch (Exception $e) {
-                log_message('warning', 'Failed to delete session from RAGFlow service for user ' . $this->current_user_id . ' (session may not exist there or other issue): ' . $e->getMessage());
+                log_message('warning', 'Failed to delete session from RAGFlow service: ' . $e->getMessage());
             }
 
             if ($local_delete_success) {
-                $this->json_response(['success' => true, 'message' => 'Session deleted successfully from local DB for user. RAGFlow deletion attempted.']);
+                $this->json_response(['success' => true, 'message' => 'Session deleted successfully.']);
             } else {
-                $this->json_response(['success' => false, 'message' => 'Session not found in local DB for this user or failed to delete. RAGFlow deletion attempted.'], 404);
+                log_message('error', 'Local database deletion failed for session: ' . $session_id);
+                $this->json_response(['success' => false, 'message' => 'Failed to delete session from database.'], 500);
             }
         } catch (Exception $e) {
             log_message('error', 'Delete session logic error for user ' . $this->current_user_id . ': ' . $e->getMessage());
-            $this->json_response(['success' => false, 'message' => $e->getMessage()], 500);
+            $this->json_response(['success' => false, 'message' => 'Internal server error occurred.'], 500);
         }
     }
 

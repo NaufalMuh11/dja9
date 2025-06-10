@@ -36,6 +36,17 @@ class Ragflow_model extends CI_Model
     }
 
     /**
+     * Mendapatkan detail sebuah sesi berdasarkan ID dan User ID.
+     */
+    public function get_session_details($session_id, $user_id)
+    {
+        $this->db->from('ragflow_sessions');
+        $this->db->where('session_id', $session_id);
+        $this->db->where('user_id', $user_id);
+        return $this->db->get()->row();
+    }
+
+    /**
      * Nonaktifkan semua sesi untuk pengguna tertentu
      */
     public function deactivate_all_sessions($user_id)
@@ -131,12 +142,11 @@ class Ragflow_model extends CI_Model
 
 
     /**
-     * Simpan atau update session chat untuk pengguna tertentu
+     * Simpan atau update session chat untuk pengguna tertentu.
      */
-    public function save_or_update_session($session_id, $title = 'Chat Session', $user_id)
+    public function save_or_update_session($session_id, $user_id, $data)
     {
         if (empty($user_id)) {
-            // Prevent saving sessions without a user if user_id is mandatory
             log_message('error', 'Attempted to save session without user_id. Session ID: ' . $session_id);
             return false;
         }
@@ -146,36 +156,31 @@ class Ragflow_model extends CI_Model
         $this->db->where('user_id', $user_id);
         $existing = $this->db->get('ragflow_sessions')->row();
 
+        // Selalu tambahkan timestamp update jika data diubah
+        $data['updated_at'] = date('Y-m-d H:i:s');
+
         if ($existing) {
-            // Update existing session (it already belongs to the user)
-            $session_data = [
-                'session_name' => $title,
-                'updated_at' => date('Y-m-d H:i:s'),
-                'is_active' => 1
-            ];
+            // Update session yang ada
             $this->db->where('session_id', $session_id);
             $this->db->where('user_id', $user_id);
-            $this->db->update('ragflow_sessions', $session_data);
+            $this->db->update('ragflow_sessions', $data);
             return $this->db->affected_rows() >= 0;
         } else {
+            // Cek kolisi ID sesi (jika session_id sudah ada tapi milik user lain)
             $this->db->where('session_id', $session_id);
-            $collision_check = $this->db->get('ragflow_sessions')->row();
-            if ($collision_check) {
+            if ($this->db->get('ragflow_sessions')->num_rows() > 0) {
                 log_message('error', 'Session ID collision detected. Session ID: ' . $session_id);
                 return false;
             }
 
-            // Insert new session for this user
-            $session_data = [
-                'user_id' => $user_id,
-                'chat_id' => 'sa_' . $user_id . '_' . uniqid(),
-                'session_id' => $session_id,
-                'session_name' => $title,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
-                'is_active' => 1
-            ];
-            $this->db->insert('ragflow_sessions', $session_data);
+            // Tambahkan data yang hanya ada saat insert
+            $data['user_id'] = $user_id;
+            $data['session_id'] = $session_id;
+            $data['chat_id'] = 'sa_' . $user_id . '_' . uniqid();
+            $data['created_at'] = date('Y-m-d H:i:s');
+
+            // Insert sesi baru
+            $this->db->insert('ragflow_sessions', $data);
             return $this->db->insert_id();
         }
     }
@@ -189,6 +194,7 @@ class Ragflow_model extends CI_Model
         $this->db->from('ragflow_sessions rs');
         $this->db->join('ragflow_messages rm', 'rs.session_id = rm.session_id', 'left');
         $this->db->where('rs.user_id', $user_id);
+        $this->db->where('rs.is_active', 1);
         $this->db->order_by('rs.updated_at', 'DESC');
         $this->db->order_by('rm.created_at', 'ASC');
 

@@ -12,8 +12,7 @@
                 </div>
                 <div class="col-auto">
                     <div class="btn-list">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal"
-                            data-bs-target="#startChatModal" id="newChatBtn">
+                        <button type="button" class="btn btn-outline-secondary" id="newChatBtn">
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                 <path d="M12 5l0 14"></path>
@@ -38,8 +37,8 @@
             <div class="col-md-8">
                 <!-- Chat Container -->
                 <div class="card" style="height: calc(100vh - 200px);">
-                    <div class="card-body d-flex flex-column p-0">
-                        <!-- Chat History -->
+                    <div class="card-body d-flex flex-column p-0 h-100">
+                        <!-- Chat -->
                         <div class="chat-history flex-grow-1 overflow-auto p-3" id="chatHistory">
                             <div class="text-center py-4" id="loadingWelcome">
                                 <div class="spinner-border spinner-border-sm text-primary" role="status">
@@ -153,6 +152,13 @@
         background-color: #ffffff !important;
         border-radius: 0 15px 15px 15px !important;
         border: 1px solid #e9ecef;
+    }
+
+
+    .ai-message .message-bubble.error-bubble {
+        background-color: #f8d7da !important;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
     }
 
     .citation-item {
@@ -382,6 +388,29 @@
 
         function generateId() {
             return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        /**
+         * Mengubah objek error teknis menjadi pesan yang ramah untuk pengguna.
+         * @param {Error} error - Objek error yang ditangkap.
+         * @returns {string} - Pesan error yang user-friendly.
+         */
+        function getFriendlyErrorMessage(error) {
+            const errorMessage = error.message || '';
+            console.error("Original error:", errorMessage); // Tetap log error asli di console untuk debugging
+
+            if (errorMessage.includes('HTTP 500') || errorMessage.includes('HTTP 502') || errorMessage.includes('HTTP 503')) {
+                return "Maaf, sepertinya terjadi gangguan pada server kami. Tim teknis kami sudah diberitahu dan sedang menanganinya. Silakan coba lagi beberapa saat lagi.";
+            }
+            if (errorMessage.includes('Failed to fetch')) {
+                return "Tidak dapat terhubung ke server. Mohon periksa koneksi internet Anda dan coba lagi.";
+            }
+            if (errorMessage.includes('timeout')) {
+                return "Waktu respons server habis. Mungkin jaringan sedang padat. Silakan coba lagi.";
+            }
+
+            // Pesan default untuk error lainnya
+            return "Aduh, sepertinya terjadi sedikit kendala teknis. Mohon coba kirim ulang pesan Anda atau mulai percakapan baru.";
         }
 
         // Toast Notification System
@@ -706,7 +735,7 @@
 
         function addAIMessage(message, citations = [], isError = false, timestamp = new Date(), sessionId = currentSessionId) {
             const messageId = generateId();
-            const messageClass = isError ? 'alert alert-danger' : '';
+            const messageClass = isError ? 'error-bubble' : '';
             const formattedHtmlMessage = isError ? `<p>${escapeHtml(message)}</p>` : formatAIMessage(message);
 
             const messageHtml = `
@@ -735,7 +764,7 @@
             // Add to local history
             addToChatHistory({
                 id: messageId,
-                type: 'ai',
+                type: 'assistant',
                 message: message,
                 citations: citations,
                 timestamp: timestamp,
@@ -918,28 +947,63 @@
         async function deleteChatSession(sessionId) {
             try {
                 // Delete from database first
-                await deleteChatSessionFromDatabase(sessionId);
+                const deleteResult = await deleteChatSessionFromDatabase(sessionId);
 
-                // Remove from local data
-                chatHistoryData = chatHistoryData.filter(msg => msg.sessionId !== sessionId);
+                if (deleteResult.success) {
+                    // Deletion successful via API
+                    chatHistoryData = chatHistoryData.filter(msg => msg.sessionId !== sessionId);
 
-                // If deleted session is currently active
-                if (currentSessionId === sessionId) {
-                    chatHistory.innerHTML = '';
-                    citationList.innerHTML = `
-                        <div class="text-muted text-center py-4">
-                            Referensi akan muncul saat AI memberikan jawaban
-                        </div>
-                    `;
-                    currentSessionId = null;
+                    if (currentSessionId === sessionId) {
+                        chatHistory.innerHTML = '';
+                        citationList.innerHTML = `
+                            <div class="text-muted text-center py-4">
+                                Referensi akan muncul saat AI memberikan jawaban
+                            </div>
+                        `;
+                        currentSessionId = null;
+                    }
+
+                    updateChatHistoryDisplay();
+                    showToast('Percakapan berhasil dihapus', 'success');
+                    loadChatHistoryFromDatabase();
+                    await getWelcomeMessage();
+                } else {
+                    // API failed, but check if deletion actually succeeded
+                    console.warn('API deletion failed:', deleteResult.error);
+
+                    // Wait a moment for any pending database operations
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
+                    // Refresh and check if session still exists
+                    await loadChatHistoryFromDatabase();
+
+                    const sessionStillExists = chatHistoryData.some(msg => msg.sessionId === sessionId);
+
+                    if (!sessionStillExists) {
+                        // Session was actually deleted despite the API error
+                        if (currentSessionId === sessionId) {
+                            chatHistory.innerHTML = '';
+                            citationList.innerHTML = `
+                                <div class="text-muted text-center py-4">
+                                    Referensi akan muncul saat AI memberikan jawaban
+                                </div>
+                            `;
+                            currentSessionId = null;
+                        }
+                        console.info('Session deletion confirmed after database refresh');
+                        showToast('Percakapan berhasil dihapus', 'success');
+                        loadChatHistoryFromDatabase();
+                        await getWelcomeMessage();
+                    } else {
+                        // Session still exists, show error
+                        console.error('Session deletion failed:', deleteResult.error);
+                        showToast('Gagal menghapus percakapan: ' + deleteResult.error, 'error');
+                    }
                 }
 
-                updateChatHistoryDisplay();
-                showToast('Percakapan berhasil dihapus', 'success');
-
             } catch (error) {
-                console.error('Failed to delete chat session:', error);
-                // Error toast already shown in deleteChatSessionFromDatabase
+                console.error('Unexpected error during chat session deletion:', error);
+                showToast('Terjadi kesalahan tidak terduga', 'error');
             }
         }
 
@@ -1111,14 +1175,22 @@
                 });
 
                 if (!response.success) {
-                    throw new Error(response.message || 'Failed to delete chat session');
+                    return {
+                        success: false,
+                        error: response.message || 'Failed to delete chat session'
+                    };
                 }
 
-                return response;
+                return {
+                    success: true,
+                    data: response
+                };
             } catch (error) {
-                console.error('Failed to delete chat session:', error);
-                showToast('Gagal menghapus percakapan: ' + error.message, 'error');
-                throw error;
+                // Return error info instead of throwing
+                return {
+                    success: false,
+                    error: error.message || 'Network error occurred'
+                };
             }
         }
 
@@ -1230,8 +1302,8 @@
                     loadingWelcome.remove();
                 }
 
-                addAIMessage('Maaf, terjadi kesalahan saat memuat pesan selamat datang. Silakan coba lagi nanti.', [], true);
-                showToast('Gagal memuat pesan selamat datang: ' + error.message, 'error');
+                const friendlyError = getFriendlyErrorMessage(error);
+                addAIMessage(friendlyError, [], true);
 
                 // Still enable input so user can try
                 messageInput.disabled = false;
@@ -1296,8 +1368,8 @@
             } catch (error) {
                 console.error('Send message error:', error);
                 removeTypingIndicator();
-                addAIMessage(`Maaf, terjadi kesalahan: ${error.message}`, [], true);
-                showToast('Gagal mengirim pesan: ' + error.message, 'error');
+                const friendlyError = getFriendlyErrorMessage(error);
+                addAIMessage(friendlyError, [], true);
             } finally {
                 isSubmitting = false;
                 sendButton.disabled = false;
