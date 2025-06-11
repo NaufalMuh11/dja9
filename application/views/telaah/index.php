@@ -392,25 +392,26 @@
 
         /**
          * Mengubah objek error teknis menjadi pesan yang ramah untuk pengguna.
-         * @param {Error} error - Objek error yang ditangkap.
-         * @returns {string} - Pesan error yang user-friendly.
          */
         function getFriendlyErrorMessage(error) {
             const errorMessage = error.message || '';
-            console.error("Original error:", errorMessage); // Tetap log error asli di console untuk debugging
+            console.error("Original error:", errorMessage); // For debugging
 
-            if (errorMessage.includes('HTTP 500') || errorMessage.includes('HTTP 502') || errorMessage.includes('HTTP 503')) {
-                return "Maaf, sepertinya terjadi gangguan pada server kami. Tim teknis kami sudah diberitahu dan sedang menanganinya. Silakan coba lagi beberapa saat lagi.";
+            if (errorMessage.includes('HTTP 503') || errorMessage.includes('HTTP 502')) {
+                return "Layanan sedang tidak tersedia atau dalam pemeliharaan. Mohon coba lagi beberapa saat.";
+            }
+            if (errorMessage.includes('HTTP 500')) {
+                return "Maaf, terjadi gangguan pada server kami. Tim teknis kami telah diberitahu. Silakan coba lagi.";
             }
             if (errorMessage.includes('Failed to fetch')) {
-                return "Tidak dapat terhubung ke server. Mohon periksa koneksi internet Anda dan coba lagi.";
+                return "Gagal terhubung ke server. Mohon periksa koneksi internet Anda.";
             }
             if (errorMessage.includes('timeout')) {
-                return "Waktu respons server habis. Mungkin jaringan sedang padat. Silakan coba lagi.";
+                return "Waktu respons server habis. Jaringan mungkin sedang padat, silakan coba lagi.";
             }
 
             // Pesan default untuk error lainnya
-            return "Aduh, sepertinya terjadi sedikit kendala teknis. Mohon coba kirim ulang pesan Anda atau mulai percakapan baru.";
+            return "Aduh, terjadi sedikit kendala teknis. Silakan coba lagi.";
         }
 
         // Toast Notification System
@@ -442,12 +443,11 @@
             });
             toast.show();
 
-            // Auto remove after duration
             setTimeout(() => {
                 if (toastElement && toastElement.parentNode) {
                     toastElement.remove();
                 }
-            }, duration + 500);
+            }, duration + 1000);
         }
 
         // Universal Modal Function
@@ -733,10 +733,36 @@
             });
         }
 
-        function addAIMessage(message, citations = [], isError = false, timestamp = new Date(), sessionId = currentSessionId) {
+        function addAIMessage(message, options = {}) {
+            const config = {
+                citations: [],
+                isError: false,
+                retryable: false,
+                originalQuery: null,
+                timestamp: new Date(),
+                sessionId: currentSessionId,
+                ...options
+            };
+
             const messageId = generateId();
-            const messageClass = isError ? 'error-bubble' : '';
-            const formattedHtmlMessage = isError ? `<p>${escapeHtml(message)}</p>` : formatAIMessage(message);
+            const messageClass = config.isError ? 'error-bubble' : '';
+            const formattedHtmlMessage = config.isError ? `<p>${escapeHtml(message)}</p>` : formatAIMessage(message);
+
+            let actionsHtml = '';
+            if (config.isError && config.retryable && config.originalQuery) {
+                actionsHtml = `
+                    <div class="message-actions mt-2 pt-2 border-top">
+                        <button class="btn btn-sm btn-outline-danger btn-retry" data-original-query="${escapeHtml(config.originalQuery)}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-reload" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                <path d="M19.933 13.041a8 8 0 1 1 -9.925 -8.788c3.899 -1.002 7.935 1.007 9.425 4.747"></path>
+                                <path d="M20 4v5h-5"></path>
+                            </svg>
+                            Coba Lagi
+                        </button>
+                    </div>
+                `;
+            }
 
             const messageHtml = `
                 <div class="chat-message ai-message mb-3" data-message-id="${messageId}">
@@ -747,6 +773,7 @@
                         <div class="message-content">
                             <div class="message-bubble p-3 ${messageClass}">
                                 <div class="message-text">${formattedHtmlMessage}</div>
+                                ${actionsHtml}
                             </div>
                         </div>
                     </div>
@@ -755,24 +782,22 @@
 
             chatHistory.insertAdjacentHTML('beforeend', messageHtml);
 
-            if (!isError && citations.length > 0) {
-                updateCitations(citations);
+            if (!config.isError && config.citations.length > 0) {
+                updateCitations(config.citations);
             }
 
             scrollChatToBottom();
 
-            // Add to local history
             addToChatHistory({
                 id: messageId,
                 type: 'assistant',
                 message: message,
-                citations: citations,
-                timestamp: timestamp,
-                isError: isError,
-                sessionId: sessionId
+                citations: config.citations,
+                timestamp: config.timestamp,
+                isError: config.isError,
+                sessionId: config.sessionId
             });
         }
-
 
         function displayUserMessage(message, sessionId = currentSessionId) {
             const messageId = generateId();
@@ -937,7 +962,7 @@
             updateChatHistoryDisplay();
 
             // Save to database dengan struktur yang sesuai model
-            if (messageData.sessionId) {
+            if (messageData.sessionId && !messageData.isError) {
                 saveMessageToDatabase(messageData).catch(error => {
                     console.warn('Message not saved to database:', error);
                 });
@@ -946,64 +971,25 @@
 
         async function deleteChatSession(sessionId) {
             try {
-                // Delete from database first
                 const deleteResult = await deleteChatSessionFromDatabase(sessionId);
-
                 if (deleteResult.success) {
-                    // Deletion successful via API
-                    chatHistoryData = chatHistoryData.filter(msg => msg.sessionId !== sessionId);
-
-                    if (currentSessionId === sessionId) {
-                        chatHistory.innerHTML = '';
-                        citationList.innerHTML = `
-                            <div class="text-muted text-center py-4">
-                                Referensi akan muncul saat AI memberikan jawaban
-                            </div>
-                        `;
-                        currentSessionId = null;
-                    }
-
-                    updateChatHistoryDisplay();
                     showToast('Percakapan berhasil dihapus', 'success');
-                    loadChatHistoryFromDatabase();
-                    await getWelcomeMessage();
                 } else {
-                    // API failed, but check if deletion actually succeeded
-                    console.warn('API deletion failed:', deleteResult.error);
-
-                    // Wait a moment for any pending database operations
-                    await new Promise(resolve => setTimeout(resolve, 500));
-
-                    // Refresh and check if session still exists
-                    await loadChatHistoryFromDatabase();
-
-                    const sessionStillExists = chatHistoryData.some(msg => msg.sessionId === sessionId);
-
-                    if (!sessionStillExists) {
-                        // Session was actually deleted despite the API error
-                        if (currentSessionId === sessionId) {
-                            chatHistory.innerHTML = '';
-                            citationList.innerHTML = `
-                                <div class="text-muted text-center py-4">
-                                    Referensi akan muncul saat AI memberikan jawaban
-                                </div>
-                            `;
-                            currentSessionId = null;
-                        }
-                        console.info('Session deletion confirmed after database refresh');
-                        showToast('Percakapan berhasil dihapus', 'success');
-                        loadChatHistoryFromDatabase();
-                        await getWelcomeMessage();
-                    } else {
-                        // Session still exists, show error
-                        console.error('Session deletion failed:', deleteResult.error);
-                        showToast('Gagal menghapus percakapan: ' + deleteResult.error, 'error');
-                    }
+                    showToast('Gagal menghapus percakapan: ' + (deleteResult.error || 'Unknown error'), 'error');
                 }
-
             } catch (error) {
                 console.error('Unexpected error during chat session deletion:', error);
-                showToast('Terjadi kesalahan tidak terduga', 'error');
+                showToast('Terjadi kesalahan tidak terduga saat menghapus', 'error');
+            } finally {
+                const wasCurrentSession = currentSessionId === sessionId;
+                await loadChatHistoryFromDatabase();
+                const sessionStillExists = chatHistoryData.some(msg => msg.sessionId === sessionId);
+                if (wasCurrentSession && !sessionStillExists) {
+                    currentSessionId = null;
+                    chatHistory.innerHTML = `<div class="text-center py-4" id="loadingWelcome"><div class="spinner-border spinner-border-sm text-primary" role="status"></div><div class="text-muted mt-2">Memuat pesan selamat datang...</div></div>`;
+                    citationList.innerHTML = `<div class="text-muted text-center py-4">Referensi akan muncul...</div>`;
+                    await getWelcomeMessage();
+                }
             }
         }
 
@@ -1107,19 +1093,20 @@
 
         function loadChatSession(sessionId) {
             currentSessionId = sessionId;
-
             chatHistory.innerHTML = '';
-
             const sessionMessages = chatHistoryData.filter(msg => msg.sessionId === sessionId);
-
             sessionMessages.forEach(msg => {
                 if (msg.type === 'user') {
                     displayUserMessage(msg.message, msg.sessionId);
                 } else if (msg.type === 'assistant') {
-                    displayAIMessage(msg.message, msg.citations || [], msg.isError || false, msg.sessionId);
+                    addAIMessage(msg.message, {
+                        citations: msg.citations || [],
+                        isError: msg.isError || false,
+                        sessionId: msg.sessionId,
+                        timestamp: msg.timestamp
+                    });
                 }
             });
-
             updateChatHistoryDisplay();
         }
 
@@ -1294,18 +1281,14 @@
                     throw new Error(response.message || 'Failed to get welcome message');
                 }
             } catch (error) {
-                console.error('Welcome message error:', error);
-
-                // Remove loading indicator
                 const loadingWelcome = document.getElementById('loadingWelcome');
-                if (loadingWelcome) {
-                    loadingWelcome.remove();
-                }
+                if (loadingWelcome) loadingWelcome.remove();
 
                 const friendlyError = getFriendlyErrorMessage(error);
-                addAIMessage(friendlyError, [], true);
+                addAIMessage(friendlyError, {
+                    isError: true
+                });
 
-                // Still enable input so user can try
                 messageInput.disabled = false;
                 sendButton.disabled = false;
             }
@@ -1366,10 +1349,15 @@
                 }
 
             } catch (error) {
-                console.error('Send message error:', error);
                 removeTypingIndicator();
+
                 const friendlyError = getFriendlyErrorMessage(error);
-                addAIMessage(friendlyError, [], true);
+                addAIMessage(friendlyError, {
+                    isError: true,
+                    retryable: true,
+                    originalQuery: message
+                });
+
             } finally {
                 isSubmitting = false;
                 sendButton.disabled = false;
@@ -1479,13 +1467,29 @@
         newChatBtn.addEventListener('click', startNewChat);
         healthCheckBtn.addEventListener('click', checkHealth);
 
+        chatHistory.addEventListener('click', function(e) {
+            const retryButton = e.target.closest('.btn-retry');
+            if (retryButton) {
+                const originalQuery = retryButton.dataset.originalQuery;
+                if (originalQuery && !isSubmitting) {
+                    retryButton.closest('.chat-message.ai-message').remove();
+                    sendMessage(originalQuery);
+                }
+            }
+        });
+
         // Initialize
-        loadChatHistoryFromDatabase();
-        await getWelcomeMessage();
+        (async () => {
+            await loadChatHistoryFromDatabase();
+            // Cek jika tidak ada sesi aktif, baru panggil welcome message
+            if (chatHistoryData.length === 0) {
+                await getWelcomeMessage();
+            }
+        })();
 
         // Periodic health check
         setInterval(checkHealth, 5 * 60 * 1000);
 
-        console.log('RAG Chat initialized successfully');
+        // console.log('RAG Chat initialized successfully');
     });
 </script>

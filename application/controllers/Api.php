@@ -6,7 +6,7 @@ class Api extends CI_Controller
     private $ragflow_url;
     private $api_key;
     private $agent_id;
-    private $curl_timeout = 30;
+    private $curl_timeout = 120;
     private $curl_connect_timeout = 10;
     private $current_user_id;
 
@@ -90,7 +90,7 @@ class Api extends CI_Controller
     }
 
     /**
-     * Enhanced cURL helper with better error handling
+     * cURL helper
      */
     private function make_curl_request($url, $data = null, $headers = [], $method = null)
     {
@@ -126,11 +126,13 @@ class Api extends CI_Controller
             }
         } elseif (strtoupper($method) === 'DELETE') {
             $curl_options[CURLOPT_CUSTOMREQUEST] = "DELETE";
+            if ($data !== null) {
+                $curl_options[CURLOPT_POSTFIELDS] = is_array($data) ? json_encode($data) : $data;
+            }
         } elseif ($data !== null) { // Default to POST if data is present and method isn't specified as GET/DELETE etc.
             $curl_options[CURLOPT_POST] = true;
             $curl_options[CURLOPT_POSTFIELDS] = is_array($data) ? json_encode($data) : $data;
         }
-
 
         curl_setopt_array($ch, $curl_options);
 
@@ -151,8 +153,9 @@ class Api extends CI_Controller
         ];
     }
 
+
     /**
-     * Handle HTTP response codes with detailed error messages
+     * Handle HTTP response codes
      */
     private function handle_http_response($http_code, $response_body = '')
     {
@@ -525,12 +528,12 @@ class Api extends CI_Controller
      */
     private function _delete_session_logic($session_id)
     {
-        try {
-            if (empty($session_id)) {
-                $this->json_response(['success' => false, 'message' => 'Session ID is required for deletion.'], 400);
-                return;
-            }
+        if (empty($session_id)) {
+            $this->json_response(['success' => false, 'message' => 'Session ID is required for deletion.'], 400);
+            return;
+        }
 
+        try {
             // Check if session exists for user before deletion
             $session_exists = $this->Ragflow_model->session_exists_for_user($session_id, $this->current_user_id);
 
@@ -542,32 +545,36 @@ class Api extends CI_Controller
             // Delete from local database
             $local_delete_success = $this->Ragflow_model->delete_user_session_and_messages($session_id, $this->current_user_id);
 
+            if (!$local_delete_success) {
+                // Jika penghapusan lokal gagal, hentikan proses dan laporkan error.
+                log_message('error', 'Local database deletion failed for session: ' . $session_id . ' for user: ' . $this->current_user_id);
+                $this->json_response(['success' => false, 'message' => 'Failed to delete session from the primary database.'], 500);
+                return;
+            }
+
             // Attempt to delete from RAGFlow API
             try {
                 if (!empty($this->agent_id) && !empty($this->ragflow_url)) {
                     $url = $this->ragflow_url . "/api/v1/agents/{$this->agent_id}/sessions";
-                    $delete_data = ['session_id' => $session_id, 'user_id' => $this->current_user_id];
+                    $delete_data = [
+                        'ids' => [$session_id]
+                    ];
                     $curl_result = $this->make_curl_request($url, $delete_data, [], 'DELETE');
 
                     // Allow 404 from RAGFlow as it might have been already deleted or never existed there
-                    if ($curl_result['http_code'] !== 404) {
-                        $this->handle_http_response($curl_result['http_code'], $curl_result['response']);
+                    if ($curl_result['http_code'] >= 400 && $curl_result['http_code'] !== 404) {
+                        throw new Exception("RAGFlow API returned HTTP " . $curl_result['http_code']);
                     }
                     log_message('info', 'Attempted RAGFlow session deletion for: ' . $session_id . '. Status: ' . $curl_result['http_code']);
                 }
             } catch (Exception $e) {
-                log_message('warning', 'Failed to delete session from RAGFlow service: ' . $e->getMessage());
+                log_message('warning', 'Could not delete session from RAGFlow service (but local deletion was successful): ' . $e->getMessage());
             }
 
-            if ($local_delete_success) {
-                $this->json_response(['success' => true, 'message' => 'Session deleted successfully.']);
-            } else {
-                log_message('error', 'Local database deletion failed for session: ' . $session_id);
-                $this->json_response(['success' => false, 'message' => 'Failed to delete session from database.'], 500);
-            }
+            $this->json_response(['success' => true, 'message' => 'Session deleted successfully.']);
         } catch (Exception $e) {
-            log_message('error', 'Delete session logic error for user ' . $this->current_user_id . ': ' . $e->getMessage());
-            $this->json_response(['success' => false, 'message' => 'Internal server error occurred.'], 500);
+            log_message('error', 'Unexpected error in delete session logic for user ' . $this->current_user_id . ': ' . $e->getMessage());
+            $this->json_response(['success' => false, 'message' => 'An unexpected internal server error occurred.'], 500);
         }
     }
 

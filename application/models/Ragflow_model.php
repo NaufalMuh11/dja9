@@ -250,31 +250,33 @@ class Ragflow_model extends CI_Model
      */
     public function delete_user_session_and_messages($session_id, $user_id)
     {
-        // Verify the session belongs to the user before deleting
+        // Verifikasi kepemilikan sesi
         if (!$this->session_exists_for_user($session_id, $user_id)) {
             log_message('warning', "Attempt to delete session '$session_id' not belonging to user '$user_id' or session not found.");
             return false;
         }
 
+        // Memulai transaksi
         $this->db->trans_start();
 
-        // Delete messages first (foreign key constraint might exist)
+        // Hapus pesan terlebih dahulu
         $this->db->where('session_id', $session_id);
         $this->db->delete('ragflow_messages');
 
-        // Delete session, ensuring it's the one belonging to the user
+        // Hapus sesi, memastikan itu milik pengguna
         $this->db->where('session_id', $session_id);
         $this->db->where('user_id', $user_id);
         $this->db->delete('ragflow_sessions');
 
+        // Menyelesaikan transaksi
         $this->db->trans_complete();
 
         if ($this->db->trans_status() === FALSE) {
             log_message('error', "Transaction failed for deleting session '$session_id' for user '$user_id'.");
             return false;
+        } else {
+            return true;
         }
-        // Check if any rows were affected for the session deletion (implies it was found and deleted)
-        return $this->db->affected_rows() > 0;
     }
 
     /**
