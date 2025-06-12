@@ -33,296 +33,255 @@
    </div>
 
    <div class="page-body" style="margin-top: 10px; margin-bottom: 0px">
-      <div class="container-fluid">
-         <div class="row row-deck row-cards">
+    <div class="container-fluid">
+       <div class="card mb-3 rounded-3">
+            <div class="card-body">
+                <div class="row align-items-center mb-4">
+                    <div class="col">
+                        <p class="mb-0 fw-bolder fs-2 lh-1">Meet The Team</p>
+                        <p class="mb-0 fw-medium fst-italic fs-3 lh-1" style="color: #002DE3;">Magang Batch #1</p>
+                    </div>
+                    <div class="col-auto">
+                        <img src="<?= base_url('files/images/kemenkeu.png'); ?>" alt="Logo Kemenkeu" style="height: 40px; width: auto;">
+                    </div>
+                </div>
 
-            <!-- Judul - Progress -->
-            <div class="col-12">
-               <div class="card">
-                  <div style="padding: 10px">
-                     <div class="position-absolute top-10 left-0 px-1 mt-1 w-100">
-                        <div class="row g-1">
-                           <div class="col-8">
-                              <div>Progres Penyelesaian
-                                 &nbsp;
-                                 <span class="text-end text-cyan" onclick="modal_sbkk_datatable()" style="cursor: pointer;" data-toggle="tooltip" title="Tampilkan Data per K/L">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-window-maximize">
-                                       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                       <path d="M3 16m0 1a1 1 0 0 1 1 -1h3a1 1 0 0 1 1 1v3a1 1 0 0 1 -1 1h-3a1 1 0 0 1 -1 -1z" />
-                                       <path d="M4 12v-6a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-6" />
-                                       <path d="M12 8h4v4" />
-                                       <path d="M16 8l-5 5" />
+                
+                <div class="row g-4 justify-content-center mb-4">
+                    <!-- Team Member 1 -->
+                    <div class="col-lg-2 col-md-4 col-sm-6 col-12">
+                        <div class="text-center">
+                            <div class="mx-auto">
+                                <img src="<?= base_url('files/team/wulan1.png'); ?>" alt="Team Member 1"                             class="avatar-img rounded-circle mb-2" 
+                            style="object-fit: cover; transition: all 0.4s ease; cursor: pointer; transform-origin: center;" 
+                            onmouseover="this.style.transform='translateY(-10px) scale(1.05) rotate(-2deg)'; this.style.opacity='0.9'; this.classList.add('shadow-lg')" 
+                            onmouseout="this.style.transform='translateY(0px) scale(1) rotate(0deg)'; this.style.opacity='1'; this.classList.remove('shadow-lg')">
+                            </div>
+                            <h4 class="mt-2 mb-1 fs-3">Putri Wulan</h4>
+                            <p class="text-muted small mb-3">Posisi/Role</p>
+
+                            <div class="d-flex justify-content-center gap-2">
+                                <!-- Instagram -->
+                                <a href="https://instagram.com/username" target="_blank"
+                                    class="text-dark"
+                                    style="transition: transform 0.3s ease, color 0.3s ease;"
+                                    onmouseover="this.style.transform='scale(1.15)'; this.style.color='#666';"
+                                    onmouseout="this.style.transform='scale(1)'; this.style.color='#000';"
+                                    onmousedown="this.style.transform='scale(0.95)'"
+                                    onmouseup="this.style.transform='scale(1.15)'">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-instagram" viewBox="0 0 16 16">
+                                        <path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.9 3.9 0 0 0-1.417.923A3.9 3.9 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.9 3.9 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.9 3.9 0 0 0-.923-1.417A3.9 3.9 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599s.453.546.598.92c.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.5 2.5 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.5 2.5 0 0 1-.92-.598 2.5 2.5 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233s.008-2.388.046-3.231c.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92s.546-.453.92-.598c.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92m-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217m0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334"/>
                                     </svg>
-                                 </span>
-                              </div>
-                              <div class="text-muted small">Berdasarkan <b>Kementerian/Lembaga</b></div>
-                           </div>
-                           <div class="col-4" style="padding-right: 30px">
-                              <div class="text-end text-teal">
-                                 <h2 style="cursor: pointer;" data-toggle="tooltip" title="Tampilkan Data per K/L" onclick="modal_sbkk_datatable()"><span id="total_kl_sbkk">0</span> %</h2>
-                              </div>
-                           </div>
+                                </a>
+
+                                <!-- LinkedIn -->
+                                <a href="https://linkedin.com/in/username" target="_blank"
+                                    class="text-dark"
+                                    style="transition: transform 0.3s ease, color 0.3s ease;"
+                                    onmouseover="this.style.transform='scale(1.15)'; this.style.color='#666';"
+                                    onmouseout="this.style.transform='scale(1)'; this.style.color='#000';"
+                                    onmousedown="this.style.transform='scale(0.95)'"
+                                    onmouseup="this.style.transform='scale(1.15)'">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-linkedin" viewBox="0 0 16 16">
+                                        <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.30.678 0 7.225 0 7.225z"/>
+                                    </svg>
+                                </a>
+                            </div>
                         </div>
-                     </div>
-                     <div id="chart-KL" style="padding: 25px 0 0 0; height: 225px;"></div>
-                  </div>
-               </div>
-            </div>
+                    </div>
+                    
+                    <!-- Team Member 2 -->
+                    <div class="col-lg-2 col-md-4 col-sm-6 col-12">
+                        <div class="text-center">
+                            <div class="mx-auto">
+                            <img src="<?= base_url('files/team/jopan1.png'); ?>" 
+                            alt="Team Member 2" 
+                            class="avatar-img rounded-circle mb-2" 
+                            style="object-fit: cover; transition: all 0.4s ease; cursor: pointer; transform-origin: center;" 
+                            onmouseover="this.style.transform='translateY(-10px) scale(1.05) rotate(-2deg)'; this.style.opacity='0.9'; this.classList.add('shadow-lg')" 
+                            onmouseout="this.style.transform='translateY(0px) scale(1) rotate(0deg)'; this.style.opacity='1'; this.classList.remove('shadow-lg')">
+                            </div>
+                            <h4 class="mt-2 mb-1 fs-3">Gede Jovan</h4>
+                            <p class="text-muted small mb-3">Posisi/Role</p>
+                            <!-- Social media icons -->
+                            <div class="d-flex justify-content-center gap-2">
+                                <!-- Instagram -->
+                                <a href="https://instagram.com/username" target="_blank"
+                                    class="text-dark"
+                                    style="transition: transform 0.3s ease, color 0.3s ease;"
+                                    onmouseover="this.style.transform='scale(1.15)'; this.style.color='#666';"
+                                    onmouseout="this.style.transform='scale(1)'; this.style.color='#000';"
+                                    onmousedown="this.style.transform='scale(0.95)'"
+                                    onmouseup="this.style.transform='scale(1.15)'">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-instagram" viewBox="0 0 16 16">
+                                        <path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.9 3.9 0 0 0-1.417.923A3.9 3.9 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.9 3.9 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.9 3.9 0 0 0-.923-1.417A3.9 3.9 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599s.453.546.598.92c.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.5 2.5 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.5 2.5 0 0 1-.92-.598 2.5 2.5 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233s.008-2.388.046-3.231c.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92s.546-.453.92-.598c.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92m-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217m0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334"/>
+                                    </svg>
+                                </a>
 
-            <div class="col-6">
-               <div class="card">
-                  <div id="ambilData">AA</div>
-               </div>
-            </div>
-
-            <div class="col-6">
-               <div class="card">
-
-                  <!-- SBKK -->
-                  <div class="card-table" style="padding: 10px;">
-                     <div class="row">
-                        <div class="col">
-                           <div class="row g-1">
-                              <div class="col">
-                                 <div class="strong">SBK Khusus
-                                 </div>
-                                 <div class="text-muted small">Berdasarkan Penyelesaian</div>
-                              </div>
-                              <div class="col">
-                                 <div class="text-end text-teal">
-                                    <h2><span class="sbkk_ditetapkan_total">0</span> SBKK</h2>
-                                 </div>
-                              </div>
-                           </div>
-                           <div class="card-table table-responsive">
-                              <table class="table table-vcenter table-bordered table-nowrap table-list" style="margin-top: 0px; font-size: small;">
-                                 <thead>
-                                    <tr>
-                                       <td class="w-50">
-                                          <div class="strong text-muted">
-                                             <span style="font-size:large;"><b>SBKU </b></span>
-                                          </div>
-                                       </td>
-                                       <td class="text-end">
-                                          <div class="text-muted">Diajukan <span style="font-size:large;"><b> <span class="sbku_diajukan">162</span></b></span>
-                                          </div>
-                                       </td>
-                                       <td class="text-end">
-                                          <div class="text-muted">Disetujui <span style="font-size:large;"><b> <span class="sbku_disetujui">162</span> </b></span>
-                                          </div>
-                                       </td>
-                                       <td class="text-end">
-                                          <div class="text-muted">Ditetapkan <span style="font-size:large;"><b><span class="sbku_ditetapkan">162</span> </b></span></div>
-                                       </td>
-                                       <td class="text-end" style="padding: 5px;">
-                                          <div class="text-orange"><span style="font-size:large;"><b> <span class="sbku_persen">100.00</span>% </b></span></div>
-                                       </td>
-                                    </tr>
-                                 </thead>
-                                 <tbody>
-
-                                    <tr>
-                                       <td style="padding-top: 5px; padding-bottom: 5px;">
-                                          <h4 style="margin: 0">SBKU inisiatif <span class="text-purple">DJA</span></h4>
-                                       </td>
-                                       <td style="padding-top: 5px; padding-bottom: 5px;" class="text-end strong">
-                                          <span class="sbku_diajukan">162</span>
-                                       </td>
-                                       <td style="padding-top: 5px; padding-bottom: 5px;" class="text-end strong">
-                                          <span class="sbku_disetujui">162</span>
-                                       </td>
-                                       <td style="padding-top: 5px; padding-bottom: 5px;" class="text-end strong">
-                                          <span class="sbku_ditetapkan">162</span>
-                                       </td>
-                                       <td class="text-end" style="padding: 5px;">
-                                          <h3 class="text-orange text-end"><span class="sbku_persen">100.00</span>%</h3>
-                                       </td>
-                                    </tr>
-                                    <tr>
-                                       <td colspan="5" style="padding-top: 10px; padding-bottom: 10px;">
-                                          <!-- <div style="margin: 0">Terdapat link <span class="text-cyan strong">SBKU - RO</span>
-                                                   sejumlah <span class="strong text-orange">0 RO</span>
-                                                   &nbsp;
-                                                   <span class="text-end text-teal" data-bs-toggle="modal" data-bs-target="#modal-data" style="cursor: pointer;" data-toggle="tooltip" title="Tampilkan Link SBKU - RO">
-                                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-window-maximize">
-                                                         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                         <path d="M3 16m0 1a1 1 0 0 1 1 -1h3a1 1 0 0 1 1 1v3a1 1 0 0 1 -1 1h-3a1 1 0 0 1 -1 -1z" />
-                                                         <path d="M4 12v-6a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-6" />
-                                                         <path d="M12 8h4v4" />
-                                                         <path d="M16 8l-5 5" />
-                                                      </svg>
-                                                   </span>
-                                             </div> -->
-                                          <div class="mt-1">Belum terdapat <span class="text-cyan strong">RO</span> yang di-link dengan <span class="text-cyan strong">SBKU</span>.
-                                          </div>
-                                       </td>
-                                    </tr>
-                                 </tbody>
-                              </table>
-                           </div>
+                                <!-- LinkedIn -->
+                                <a href="https://linkedin.com/in/username" target="_blank"
+                                    class="text-dark"
+                                    style="transition: transform 0.3s ease, color 0.3s ease;"
+                                    onmouseover="this.style.transform='scale(1.15)'; this.style.color='#666';"
+                                    onmouseout="this.style.transform='scale(1)'; this.style.color='#000';"
+                                    onmousedown="this.style.transform='scale(0.95)'"
+                                    onmouseup="this.style.transform='scale(1.15)'">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-linkedin" viewBox="0 0 16 16">
+                                        <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.30.678 0 7.225 0 7.225z"/>
+                                    </svg>
+                                </a>
+                            </div>
                         </div>
-                     </div>
-                  </div>
+                    </div>
+                                                
+                    <!-- Team Member 3 -->
+                    <div class="col-lg-2 col-md-4 col-sm-6 col-12">
+                        <div class="text-center">
+                            <div class="mx-auto">
+                                <img src="<?=base_url('files/team/muh1.png'); ?>" alt="Team Member 3"                             class="avatar-img rounded-circle mb-2" 
+                            style="object-fit: cover; transition: all 0.4s ease; cursor: pointer; transform-origin: center;" 
+                            onmouseover="this.style.transform='translateY(-10px) scale(1.05) rotate(-2deg)'; this.style.opacity='0.9'; this.classList.add('shadow-lg')" 
+                            onmouseout="this.style.transform='translateY(0px) scale(1) rotate(0deg)'; this.style.opacity='1'; this.classList.remove('shadow-lg')">
+                            </div>
+                            <h4 class="mt-2 mb-1 fs-3">Naufal Muhammad</h4>
+                            <p class="text-muted small mb-3">Posisi/Role</p>
 
-               </div>
+                            <div class="d-flex justify-content-center gap-2">
+                                <!-- Instagram -->
+                                <a href="https://instagram.com/username" target="_blank"
+                                    class="text-dark"
+                                    style="transition: transform 0.3s ease, color 0.3s ease;"
+                                    onmouseover="this.style.transform='scale(1.15)'; this.style.color='#666';"
+                                    onmouseout="this.style.transform='scale(1)'; this.style.color='#000';"
+                                    onmousedown="this.style.transform='scale(0.95)'"
+                                    onmouseup="this.style.transform='scale(1.15)'">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-instagram" viewBox="0 0 16 16">
+                                        <path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.9 3.9 0 0 0-1.417.923A3.9 3.9 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.9 3.9 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.9 3.9 0 0 0-.923-1.417A3.9 3.9 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599s.453.546.598.92c.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.5 2.5 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.5 2.5 0 0 1-.92-.598 2.5 2.5 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233s.008-2.388.046-3.231c.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92s.546-.453.92-.598c.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92m-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217m0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334"/>
+                                    </svg>
+                                </a>
+
+                                <!-- LinkedIn -->
+                                <a href="https://linkedin.com/in/username" target="_blank"
+                                    class="text-dark"
+                                    style="transition: transform 0.3s ease, color 0.3s ease;"
+                                    onmouseover="this.style.transform='scale(1.15)'; this.style.color='#666';"
+                                    onmouseout="this.style.transform='scale(1)'; this.style.color='#000';"
+                                    onmousedown="this.style.transform='scale(0.95)'"
+                                    onmouseup="this.style.transform='scale(1.15)'">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-linkedin" viewBox="0 0 16 16">
+                                        <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.30.678 0 7.225 0 7.225z"/>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Team Member 4 -->
+                    <div class="col-lg-2 col-md-4 col-sm-6 col-12">
+                        <div class="text-center">
+                            <div class="mx-auto">
+                                <img src="<?=base_url('files/team/hendrik2.png'); ?>" alt="Team Member 4"                             class="avatar-img rounded-circle mb-2" 
+                            style="object-fit: cover; transition: all 0.4s ease; cursor: pointer; transform-origin: center;" 
+                            onmouseover="this.style.transform='translateY(-10px) scale(1.05) rotate(-2deg)'; this.style.opacity='0.9'; this.classList.add('shadow-lg')" 
+                            onmouseout="this.style.transform='translateY(0px) scale(1) rotate(0deg)'; this.style.opacity='1'; this.classList.remove('shadow-lg')">
+                            </div>
+                            <h4 class="mt-2 mb-1 fs-3">Hendrik</h4>
+                            <p class="text-muted small mb-3">Posisi/Role</p>
+
+                            <div class="d-flex justify-content-center gap-2">
+                                <!-- Instagram -->
+                                <a href="https://instagram.com/username" target="_blank"
+                                    class="text-dark"
+                                    style="transition: transform 0.3s ease, color 0.3s ease;"
+                                    onmouseover="this.style.transform='scale(1.15)'; this.style.color='#666';"
+                                    onmouseout="this.style.transform='scale(1)'; this.style.color='#000';"
+                                    onmousedown="this.style.transform='scale(0.95)'"
+                                    onmouseup="this.style.transform='scale(1.15)'">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-instagram" viewBox="0 0 16 16">
+                                        <path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.9 3.9 0 0 0-1.417.923A3.9 3.9 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.9 3.9 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.9 3.9 0 0 0-.923-1.417A3.9 3.9 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599s.453.546.598.92c.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.5 2.5 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.5 2.5 0 0 1-.92-.598 2.5 2.5 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233s.008-2.388.046-3.231c.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92s.546-.453.92-.598c.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92m-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217m0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334"/>
+                                    </svg>
+                                </a>
+
+                                <!-- LinkedIn -->
+                                <a href="https://linkedin.com/in/username" target="_blank"
+                                    class="text-dark"
+                                    style="transition: transform 0.3s ease, color 0.3s ease;"
+                                    onmouseover="this.style.transform='scale(1.15)'; this.style.color='#666';"
+                                    onmouseout="this.style.transform='scale(1)'; this.style.color='#000';"
+                                    onmousedown="this.style.transform='scale(0.95)'"
+                                    onmouseup="this.style.transform='scale(1.15)'">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-linkedin" viewBox="0 0 16 16">
+                                        <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.30.678 0 7.225 0 7.225z"/>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Team Member 5 -->
+                    <div class="col-lg-2 col-md-4 col-sm-6 col-12">
+                        <div class="text-center">
+                            <div class="mx-auto">
+                                <img src="<?=base_url('files/team/firdauss.png'); ?>" alt="Team Member 5"                             class="avatar-img rounded-circle mb-2" 
+                            style="object-fit: cover; transition: all 0.4s ease; cursor: pointer; transform-origin: center;" 
+                            onmouseover="this.style.transform='translateY(-10px) scale(1.05) rotate(-2deg)'; this.style.opacity='0.9'; this.classList.add('shadow-lg')" 
+                            onmouseout="this.style.transform='translateY(0px) scale(1) rotate(0deg)'; this.style.opacity='1'; this.classList.remove('shadow-lg')">
+                            </div>
+                            <h4 class="mt-2 mb-1 fs-3">Firdaus</h4>
+                            <p class="text-muted small mb-3">Posisi/Role</p>
+
+                            <div class="d-flex justify-content-center gap-2">
+                                <!-- Instagram -->
+                                <a href="https://instagram.com/username" target="_blank"
+                                    class="text-dark"
+                                    style="transition: transform 0.3s ease, color 0.3s ease;"
+                                    onmouseover="this.style.transform='scale(1.15)'; this.style.color='#666';"
+                                    onmouseout="this.style.transform='scale(1)'; this.style.color='#000';"
+                                    onmousedown="this.style.transform='scale(0.95)'"
+                                    onmouseup="this.style.transform='scale(1.15)'">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-instagram" viewBox="0 0 16 16">
+                                        <path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.9 3.9 0 0 0-1.417.923A3.9 3.9 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.9 3.9 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.9 3.9 0 0 0-.923-1.417A3.9 3.9 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599s.453.546.598.92c.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.5 2.5 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.5 2.5 0 0 1-.92-.598 2.5 2.5 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233s.008-2.388.046-3.231c.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92s.546-.453.92-.598c.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92m-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217m0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334"/>
+                                    </svg>
+                                </a>
+
+                                <!-- LinkedIn -->
+                                <a href="https://linkedin.com/in/username" target="_blank"
+                                    class="text-dark"
+                                    style="transition: transform 0.3s ease, color 0.3s ease;"
+                                    onmouseover="this.style.transform='scale(1.15)'; this.style.color='#666';"
+                                    onmouseout="this.style.transform='scale(1)'; this.style.color='#000';"
+                                    onmousedown="this.style.transform='scale(0.95)'"
+                                    onmouseup="this.style.transform='scale(1.15)'">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-linkedin" viewBox="0 0 16 16">
+                                        <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.30.678 0 7.225 0 7.225z"/>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
 
-         </div>
-      </div>
-   </div>
+
+            <div class="card rounded-3">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <img src="<?= base_url('files/gallery/gallery_dja.png'); ?>" class="img-fluid rounded" alt="team" style="width: 100%; height: 200px; object-fit: cover;">
+                            </div>
+                            <div class="col-md-3">
+                                <img src="<?= base_url('files/gallery/gallery_meet.png'); ?>" class="img-fluid rounded" alt="meeting" style="width: 100%; height: 200px; object-fit: cover;">
+                            </div>
+                            <div class="col-md-3">
+                                <img src="<?= base_url('files/gallery/gallery_farewell.png'); ?>" class="img-fluid rounded" alt="farewell photo" style="width: 100%; height: 200px; object-fit: cover;">
+                            </div>
+                            <div class="col-md-3">
+                                <img src="<?= base_url('files/gallery/gallery_lunch.png'); ?>" class="img-fluid rounded" alt="lunch" style="width: 100%; height: 200px; object-fit: cover;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
 </div>
-
-<script>
-   // Immediately Invoked Function Expression (IIFE) untuk menghindari variable global
-   (() => {
-      // Constants
-      const SITE_URL = '<?= site_url("dashboard?q=rangeThang") ?>';
-      const DEFAULT_THANG = '<?= $this->session->userdata("thang") ?>';
-
-      // DOM Elements
-      const elements = {
-         dropdownMenu: document.querySelector('#selectThang .dropdown-menu'),
-         dropdownToggle: document.querySelector('#selectThang .dropdown-toggle'),
-         selectedThangInput: document.getElementById('selected_thang'),
-         lastUpdate: document.getElementById('lastUpdate')
-      };
-
-      // Handlers
-      const handleThangSelection = (item, element) => {
-         // Remove active class from all items
-         document.querySelectorAll('#selectThang .dropdown-item')
-            .forEach(el => el.classList.remove('active'));
-
-         // Add active class to selected item
-         element.classList.add('active');
-
-         // Update UI
-         elements.dropdownToggle.textContent = `T.A. ${item}`;
-         elements.selectedThangInput.value = item;
-
-         // Here you can add your fetch data logic
-         // fetchData(item);
-      };
-
-      const createDropdownItem = (item) => {
-         const element = document.createElement('a');
-         Object.assign(element, {
-            className: 'dropdown-item',
-            href: '#',
-            textContent: `Tahun Anggaran ${item}`
-         });
-
-         element.addEventListener('click', (e) => {
-            e.preventDefault();
-            handleThangSelection(item, element);
-         });
-
-         return element;
-      };
-
-      const populateDropdown = (data) => {
-         // Clear existing items
-         elements.dropdownMenu.innerHTML = '';
-
-         // Add new items
-         const fragments = document.createDocumentFragment();
-         data.forEach(item => fragments.appendChild(createDropdownItem(item)));
-         elements.dropdownMenu.appendChild(fragments);
-
-         // Set default selection
-         const defaultItem = Array.from(elements.dropdownMenu.querySelectorAll('.dropdown-item'))
-            .find(item => item.textContent.includes(DEFAULT_THANG));
-
-         if (defaultItem) {
-            handleThangSelection(DEFAULT_THANG, defaultItem);
-         } else {
-            // Jika tidak ada default, pilih item pertama
-            const firstItem = elements.dropdownMenu.querySelector('.dropdown-item');
-            if (firstItem) {
-               const firstThang = firstItem.textContent.match(/\d+/)[0];
-               handleThangSelection(firstThang, firstItem);
-            }
-         }
-      };
-
-      const getSelectThang = async () => {
-         try {
-            const response = await axios.post(SITE_URL, {});
-            console.log('Thang ==>', response.data);
-            populateDropdown(response.data);
-         } catch (error) {
-            console.error('Error Response >>', error);
-         }
-      };
-
-      // Initialize
-      document.addEventListener('DOMContentLoaded', () => {
-         getSelectThang();
-         elements.lastUpdate.innerHTML = '<?php echo get_last_update(); ?>';
-      });
-   })();
-</script>
-
-<!-- Charts Progress -->
-<script>
-   const options = {
-      chart: {
-         type: "bar",
-         fontFamily: 'inherit',
-         height: 200,
-         // stacked: true,
-         sparkline: {
-            enabled: true
-         },
-         animations: {
-            enabled: true
-         },
-      },
-      dataLabels: {
-         enabled: false,
-      },
-      fill: {
-         colors: ["#ff7800"],
-         type: 'solid'
-      },
-      series: [{
-         name: "Progress",
-         // data prosentase 
-         data: [
-            70, 10.11, 8.22, 16.45, 17.43, 25.09, 16.11, 18.22, 24.33, 17.54, 12.65, 5.44, 6.54, 3.90, 8.65, 4.4, 14.76, 30.87, 17.32, 19.23, 15.78, 14.56, 25.34, 32.32, 10, 55.21, 60.11, 48.33, 52.32, 30.55
-         ]
-      }],
-      grid: {
-         strokeDashArray: 3,
-      },
-      xaxis: {
-         labels: {
-            padding: 0,
-         },
-         tooltip: {
-            enabled: false
-         },
-         axisBorder: {
-            show: false,
-         },
-      },
-      yaxis: {
-         labels: {
-            padding: 1
-         },
-      },
-      labels: [
-         // data kl 
-         '020 NMKL', '021 NMKL', '022 NMKL', '023 NMKL', '024 NMKL', '025 NMKL', '026 NMKL', '027 NMKL', '028 NMKL', '029 NMKL', '030 NMKL', '101 NMKL', '102 NMKL', '103 NMKL', '104 NMKL', '105 NMKL', '106 NMKL', '107 NMKL', '108 NMKL', '109 NMKL', '110 NMKL', '111 NMKL', '112 NMKL', '113 NMKL', '114 NMKL', '115 NMKL', '116 NMKL', '117 NMKL', '118 NMKL', '119 NMKL'
-      ],
-      legend: {
-         show: false,
-      },
-      point: {
-         show: false
-      }
-   }
-
-   var chart = new ApexCharts(document.getElementById("chart-KL"), options);
-   chart.render();
-</script>
