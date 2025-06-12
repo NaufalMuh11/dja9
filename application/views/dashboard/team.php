@@ -155,24 +155,113 @@
                 </div>
             </div>
 
-            <div class="card rounded-3">
+            <div class="card rounded-3 mb-3">
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-3">
-                            <img src="<?= base_url('files/gallery/gallery_dja.png'); ?>" class="img-fluid rounded" alt="team" style="width: 100%; height: 200px; object-fit: cover;">
+                        <div class="gallery-item">
+                                <img src="<?= base_url('files/gallery/gallery_dja.png'); ?>" class="img-fluid rounded" alt="team" style="width: 100%; height: 200px; object-fit: cover;">
+                                <div class="gallery-overlay">
+                                    <h4>Foto Terakhir</h4>
+                                    <p>Momen foto bersama di depan gedung DJA.</p>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-3">
-                            <img src="<?= base_url('files/gallery/gallery_meet.png'); ?>" class="img-fluid rounded" alt="meeting" style="width: 100%; height: 200px; object-fit: cover;">
+                            <div class="gallery-item">
+                                <img src="<?= base_url('files/gallery/gallery_meet.png'); ?>" class="img-fluid rounded" alt="meeting" style="width: 100%; height: 200px; object-fit: cover;">
+                                <div class="gallery-overlay">
+                                    <h4>Diskusi Tim</h4>
+                                    <p>Kolaborasi dalam sesi brainstorming projek.</p>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-3">
-                            <img src="<?= base_url('files/gallery/gallery_farewell.png'); ?>" class="img-fluid rounded" alt="farewell photo" style="width: 100%; height: 200px; object-fit: cover;">
+                            <div class="gallery-item">
+                                <img src="<?= base_url('files/gallery/gallery_farewell.png'); ?>" class="img-fluid rounded" alt="farewell photo" style="width: 100%; height: 200px; object-fit: cover;">
+                                <div class="gallery-overlay">
+                                    <h4>Foto Perpisahan</h4>
+                                    <p>Momen saat acara perpisahan dengan mentor dan rekan kerja.</p>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-3">
-                            <img src="<?= base_url('files/gallery/gallery_lunch.png'); ?>" class="img-fluid rounded" alt="lunch" style="width: 100%; height: 200px; object-fit: cover;">
+                            <div class="gallery-item">
+                                <img src="<?= base_url('files/gallery/gallery_lunch.png'); ?>" class="img-fluid rounded" alt="lunch" style="width: 100%; height: 200px; object-fit: cover;">
+                                <div class="gallery-overlay">
+                                    <h4>Makan Siang</h4>
+                                    <p>Makan pecel ayam bersama-sama.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>```
+</div>
+
+<style>
+        
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--tblr-border-radius);
+            cursor: pointer;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .gallery-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            backdrop-filter: blur(1px);
+            -webkit-backdrop-filter: blur(1px);
+            
+
+            opacity: 0;
+            transition: opacity 0.4s ease;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .gallery-overlay h4, .gallery-overlay p {
+            transform: translateY(10px);
+            opacity: 0;
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }
+        
+        .gallery-overlay p {
+            transition-delay: 0.1s;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.1); 
+        }
+
+        .gallery-item:hover .gallery-overlay {
+            opacity: 1;
+        }
+
+        .gallery-item:hover .gallery-overlay h4,
+        .gallery-item:hover .gallery-overlay p {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+    </style>
