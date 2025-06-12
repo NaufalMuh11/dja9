@@ -344,4 +344,16 @@ class Ragflow_model extends CI_Model
         $this->db->insert('ragflow_messages', $message_data);
         return $this->db->insert_id();
     }
+
+    /**
+     * Menghapus semua sesi yang tidak aktif dan lebih tua dari rentang waktu tertentu.
+     */
+    public function delete_old_inactive_sessions($interval = '7 DAY')
+    {
+        $this->db->where('is_active', 0);
+        $this->db->where("created_at < (NOW() - INTERVAL {$interval})");
+        $this->db->delete('ragflow_sessions');
+
+        return $this->db->affected_rows();
+    }
 }
