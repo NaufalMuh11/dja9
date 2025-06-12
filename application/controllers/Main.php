@@ -11,7 +11,7 @@ class Main extends CI_Controller
     function index()
     { // default page
         if (! $this->session->userdata('isLoggedIn')) redirect("login");
-        redirect(base_url('dashboard?q=d45h01'));
+        redirect(base_url('dashboard?q=d45h02'));
     }
 
     function rangeThang()
