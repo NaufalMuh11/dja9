@@ -70,12 +70,12 @@
 
             <div class="col-md-4">
                 <!-- Chat History Panel -->
-                <div class="card mb-3">
+                <div class="card mb-3 h-100">
                     <div class="card-header">
                         <h3 class="card-title">Riwayat Percakapan</h3>
                     </div>
                     <div class="card-body p-3">
-                        <div class="chat-history-list overflow-auto" style="max-height: 200px; height:200px" id="chatHistoryList">
+                        <div class="chat-history-list overflow-auto" style="height:200px" id="chatHistoryList">
                             <div class="text-muted text-center py-2">
                                 Belum ada riwayat percakapan
                             </div>
@@ -84,7 +84,8 @@
                 </div>
 
                 <!-- Citation Panel -->
-                <div class="card" style="height: calc(100vh - 450px);">
+                <!-- deactivated -->
+                <div class="card d-none" style="height: calc(100vh - 450px);">
                     <div class="card-header">
                         <h3 class="card-title">Referensi</h3>
                     </div>
@@ -722,15 +723,6 @@
 
             chatHistory.insertAdjacentHTML('beforeend', messageHtml);
             scrollChatToBottom();
-
-            // Add to local history
-            addToChatHistory({
-                id: messageId,
-                type: 'user',
-                message: message,
-                timestamp: timestamp,
-                sessionId: sessionId
-            });
         }
 
         function addAIMessage(message, options = {}) {
@@ -741,6 +733,7 @@
                 originalQuery: null,
                 timestamp: new Date(),
                 sessionId: currentSessionId,
+                saveToHistory: true,
                 ...options
             };
 
@@ -788,64 +781,17 @@
 
             scrollChatToBottom();
 
-            addToChatHistory({
-                id: messageId,
-                type: 'assistant',
-                message: message,
-                citations: config.citations,
-                timestamp: config.timestamp,
-                isError: config.isError,
-                sessionId: config.sessionId
-            });
-        }
-
-        function displayUserMessage(message, sessionId = currentSessionId) {
-            const messageId = generateId();
-            const safeMessage = escapeHtml(message).replace(/\n/g, '<br>');
-
-            const messageHtml = `
-                <div class="chat-message user-message mb-3" data-message-id="${messageId}">
-                    <div class="d-flex justify-content-end">
-                        <div class="message-content">
-                            <div class="message-bubble p-3 bg-primary text-white">
-                                <div class="message-text">${safeMessage}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            chatHistory.insertAdjacentHTML('beforeend', messageHtml);
-            scrollChatToBottom();
-        }
-
-        function displayAIMessage(message, citations = [], isError = false, sessionId = currentSessionId) {
-            const messageId = generateId();
-            const messageClass = isError ? 'alert alert-danger' : '';
-            const formattedHtmlMessage = isError ? `<p>${escapeHtml(message)}</p>` : formatAIMessage(message);
-
-            const messageHtml = `
-                <div class="chat-message ai-message mb-3" data-message-id="${messageId}">
-                    <div class="d-flex align-items-start">
-                        <div class="chat-avatar me-2">
-                            <img src="./files/images/logo.png" alt="AI" class="avatar" width="35" height="35" onerror="this.style.display='none'">
-                        </div>
-                        <div class="message-content">
-                            <div class="message-bubble p-3 ${messageClass}">
-                                <div class="message-text">${formattedHtmlMessage}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            chatHistory.insertAdjacentHTML('beforeend', messageHtml);
-
-            if (!isError && citations.length > 0) {
-                updateCitations(citations);
+            if (config.saveToHistory && !config.isError) {
+                addToChatHistory({
+                    id: messageId,
+                    type: 'assistant',
+                    message: message,
+                    citations: config.citations,
+                    timestamp: config.timestamp,
+                    isError: config.isError,
+                    sessionId: config.sessionId
+                });
             }
-
-            scrollChatToBottom();
         }
 
         function addTypingIndicator() {
@@ -1097,16 +1043,32 @@
             const sessionMessages = chatHistoryData.filter(msg => msg.sessionId === sessionId);
             sessionMessages.forEach(msg => {
                 if (msg.type === 'user') {
-                    displayUserMessage(msg.message, msg.sessionId);
+                    const messageId = generateId();
+                    const safeMessage = escapeHtml(msg.message).replace(/\n/g, '<br>');
+
+                    const messageHtml = `
+                        <div class="chat-message user-message mb-3" data-message-id="${messageId}">
+                            <div class="d-flex justify-content-end">
+                                <div class="message-content">
+                                    <div class="message-bubble p-3 bg-primary text-white">
+                                        <div class="message-text">${safeMessage}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    chatHistory.insertAdjacentHTML('beforeend', messageHtml);
                 } else if (msg.type === 'assistant') {
                     addAIMessage(msg.message, {
                         citations: msg.citations || [],
                         isError: msg.isError || false,
                         sessionId: msg.sessionId,
-                        timestamp: msg.timestamp
+                        timestamp: msg.timestamp,
+                        saveToHistory: false
                     });
                 }
             });
+            scrollChatToBottom();
             updateChatHistoryDisplay();
         }
 
@@ -1256,12 +1218,23 @@
         // API Functions
         async function getWelcomeMessage() {
             try {
+                // Don't make API call if already has session ID and chat history
+                if (currentSessionId && chatHistory.children.length > 1) {
+                    messageInput.disabled = false;
+                    sendButton.disabled = false;
+                    messageInput.focus();
+                    return;
+                }
+
                 const response = await makeApiRequest('/welcome', {
                     method: 'POST'
                 });
 
                 if (response.success) {
-                    currentSessionId = response.session_id;
+                    // Set session ID if not exists
+                    if (!currentSessionId) {
+                        currentSessionId = response.session_id;
+                    }
 
                     // Remove loading indicator
                     const loadingWelcome = document.getElementById('loadingWelcome');
@@ -1270,7 +1243,10 @@
                     }
 
                     if (response.message) {
-                        addAIMessage(response.message);
+                        // Display welcome message without saving to history
+                        addAIMessage(response.message, {
+                            saveToHistory: false
+                        });
                     }
 
                     // Enable input
@@ -1286,7 +1262,8 @@
 
                 const friendlyError = getFriendlyErrorMessage(error);
                 addAIMessage(friendlyError, {
-                    isError: true
+                    isError: true,
+                    saveToHistory: false
                 });
 
                 messageInput.disabled = false;
@@ -1305,19 +1282,34 @@
                 sendButton.disabled = true;
                 sendButton.querySelector('.button-text').textContent = 'Mengirim...';
 
-                // Jika belum ada session, buat session baru
+                // Make new session if not exists
                 if (!currentSessionId) {
                     currentSessionId = 'session_' + generateId();
 
                     // Save session ke database
-                    await saveChatSessionToDatabase({
-                        session_id: currentSessionId,
-                        title: message.substring(0, 50) + (message.length > 50 ? '...' : ''),
-                    });
+                    try {
+                        await saveChatSessionToDatabase({
+                            session_id: currentSessionId,
+                            title: message.substring(0, 50) + (message.length > 50 ? '...' : ''),
+                        });
+                    } catch (error) {
+                        console.warn('Failed to save session to database:', error);
+                    }
                 }
 
-                // Add user message
+                // Add user message dan simpan ke history
                 addUserMessage(message);
+
+                // Save user message to chat history and database
+                const userMessageData = {
+                    id: generateId(),
+                    type: 'user',
+                    message: message,
+                    timestamp: new Date(),
+                    sessionId: currentSessionId
+                };
+
+                addToChatHistory(userMessageData);
 
                 // Clear input
                 messageInput.value = '';
@@ -1339,7 +1331,13 @@
 
                 if (response.success) {
                     currentSessionId = response.session_id;
-                    addAIMessage(response.message, response.citations || []);
+
+                    // Add AI response with saveToHistory option
+                    addAIMessage(response.message, {
+                        citations: response.citations || [],
+                        sessionId: currentSessionId,
+                        saveToHistory: true
+                    });
 
                     if (response.citations && response.citations.length > 0) {
                         showToast(`Ditemukan ${response.citations.length} referensi`, 'info', 3000);
@@ -1355,7 +1353,8 @@
                 addAIMessage(friendlyError, {
                     isError: true,
                     retryable: true,
-                    originalQuery: message
+                    originalQuery: message,
+                    saveToHistory: false
                 });
 
             } finally {
@@ -1412,9 +1411,13 @@
                         </div>
                     `;
 
+                    // Reset session
                     currentSessionId = null;
 
-                    // Show loading and get welcome message
+                    // Update chat history display untuk menghilangkan highlight
+                    updateChatHistoryDisplay();
+
+                    // Show loading dan get welcome message
                     chatHistory.innerHTML = `
                         <div class="text-center py-4" id="loadingWelcome">
                             <div class="spinner-border spinner-border-sm text-primary" role="status">
@@ -1427,7 +1430,10 @@
                     messageInput.disabled = true;
                     sendButton.disabled = true;
 
-                    getWelcomeMessage();
+                    setTimeout(() => {
+                        getWelcomeMessage();
+                    }, 300);
+
                     showToast('Percakapan baru dimulai', 'info');
                 },
                 onCancel: () => {
@@ -1480,10 +1486,60 @@
 
         // Initialize
         (async () => {
-            await loadChatHistoryFromDatabase();
-            // Cek jika tidak ada sesi aktif, baru panggil welcome message
-            if (chatHistoryData.length === 0) {
-                await getWelcomeMessage();
+            try {
+                await loadChatHistoryFromDatabase();
+
+                if (chatHistoryData.length === 0) {
+                    // No history, show loading and get welcome message
+                    chatHistory.innerHTML = `
+                        <div class="text-center py-4" id="loadingWelcome">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div class="text-muted mt-2">Memuat pesan selamat datang...</div>
+                        </div>
+                    `;
+
+                    messageInput.disabled = true;
+                    sendButton.disabled = true;
+
+                    await getWelcomeMessage();
+                } else {
+                    // Ada history, enable input tanpa welcome message
+                    messageInput.disabled = false;
+                    sendButton.disabled = false;
+                    messageInput.focus();
+
+                    // Show default message if no current session
+                    if (!currentSessionId) {
+                        chatHistory.innerHTML = `
+                            <div class="text-center py-4 text-muted">
+                                <div class="mb-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                    </svg>
+                                </div>
+                                <h5>Selamat datang kembali!</h5>
+                                <p>Pilih percakapan dari riwayat atau mulai percakapan baru.</p>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('Initialization error:', error);
+
+                // Fallback jika ada error
+                messageInput.disabled = false;
+                sendButton.disabled = false;
+
+                chatHistory.innerHTML = `
+                    <div class="text-center py-4">
+                        <div class="alert alert-warning">
+                            <h5>Peringatan</h5>
+                            <p>Gagal memuat riwayat percakapan. Anda masih bisa memulai percakapan baru.</p>
+                        </div>
+                    </div>
+                `;
             }
         })();
 
