@@ -290,16 +290,6 @@ class Api extends CI_Controller
             $ai_answer = $this->clean_response_text($ragflow_response_data['data']['answer']);
             $citations = [];
 
-            if (isset($ragflow_response_data['data']['reference']['chunks']) && is_array($ragflow_response_data['data']['reference']['chunks'])) {
-                foreach ($ragflow_response_data['data']['reference']['chunks'] as $chunk) {
-                    $citations[] = [
-                        'title' => $chunk['document_name'] ?? 'Unknown Document',
-                        'text' => $this->clean_response_text($chunk['content_ltxt'] ?? ($chunk['content_html'] ?? ($chunk['content'] ?? 'No content'))),
-                        'source' => $chunk['doc_id'] ?? ($chunk['kb_id'] ?? ($chunk['source'] ?? null))
-                    ];
-                }
-            }
-
             $this->json_response([
                 'success' => true,
                 'message' => $ai_answer,
@@ -615,7 +605,8 @@ class Api extends CI_Controller
                 return;
             }
 
-            // $data contains: session_id, role, content, and optionally reference
+            $data['reference'] = null;
+
             // The model's save_individual_message doesn't need user_id directly, as session_id is already validated for the user.
             $message_id = $this->Ragflow_model->save_individual_message($data);
 

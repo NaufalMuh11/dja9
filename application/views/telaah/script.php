@@ -42,7 +42,6 @@
         const sendButton = document.getElementById('sendButton');
         const newChatBtn = document.getElementById('newChatBtn');
         const chatHistoryList = document.getElementById('chatHistoryList');
-        const citationList = document.getElementById('citationList');
         const toastContainer = document.getElementById('toastContainer');
 
         // State Management
@@ -454,10 +453,6 @@
 
             chatHistory.insertAdjacentHTML('beforeend', messageHtml);
 
-            if (!config.isError && config.citations.length > 0) {
-                updateCitations(config.citations);
-            }
-
             scrollChatToBottom();
 
             if (config.saveToHistory && !config.isError) {
@@ -465,7 +460,7 @@
                     id: messageId,
                     type: 'assistant',
                     message: message,
-                    citations: config.citations,
+                    citations: [],
                     timestamp: config.timestamp,
                     isError: config.isError,
                     sessionId: config.sessionId
@@ -511,76 +506,6 @@
             chatHistory.scrollTop = chatHistory.scrollHeight;
         }
 
-        // Citation Management
-        function updateCitations(citations) {
-            if (citations.length === 0) {
-                citationList.innerHTML = `
-                    <div class="text-muted text-center py-4">
-                        Tidak ada referensi untuk pesan ini
-                    </div>
-                `;
-                return;
-            }
-
-            const citationsHtml = citations.map((citation, index) => `
-                <div class="citation-item" data-citation-index="${index}">
-                    <div class="citation-badge">Referensi ${index + 1}</div>
-                    <div class="fw-bold">${escapeHtml(citation.title)}</div>
-                    <div class="text-muted mt-1">${escapeHtml(citation.text.substring(0, 200))}${citation.text.length > 200 ? '...' : ''}</div>
-                </div>
-            `).join('');
-
-            citationList.innerHTML = citationsHtml;
-
-            // Add click handlers for citations
-            citationList.querySelectorAll('.citation-item').forEach(item => {
-                item.addEventListener('click', function() {
-                    const index = this.dataset.citationIndex;
-                    const citation = citations[index];
-                    showCitationModal(citation);
-                });
-            });
-        }
-
-        function showCitationModal(citation) {
-            const modalHtml = `
-                <div class="modal fade" id="citationModal" tabindex="-1">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">${escapeHtml(citation.title)}</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="citation-content">
-                                    ${escapeHtml(citation.text).replace(/\n/g, '<br>')}
-                                </div>
-                                ${citation.source ? `<div class="mt-3 text-muted"><strong>Sumber:</strong> ${escapeHtml(citation.source)}</div>` : ''}
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            // Remove existing modal
-            const existingModal = document.getElementById('citationModal');
-            if (existingModal) {
-                existingModal.remove();
-            }
-
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-            const modal = new bootstrap.Modal(document.getElementById('citationModal'));
-            modal.show();
-
-            // Auto remove modal after it's hidden
-            document.getElementById('citationModal').addEventListener('hidden.bs.modal', function() {
-                this.remove();
-            });
-        }
-
         // Chat History Management
         function addToChatHistory(messageData) {
             chatHistoryData.push(messageData);
@@ -612,7 +537,6 @@
                 if (wasCurrentSession && !sessionStillExists) {
                     currentSessionId = null;
                     chatHistory.innerHTML = `<div class="text-center py-4" id="loadingWelcome"><div class="spinner-border spinner-border-sm text-primary" role="status"></div></div>`;
-                    citationList.innerHTML = `<div class="text-muted text-center py-4">Referensi akan muncul...</div>`;
                     await getWelcomeMessage();
                 }
             }
@@ -739,7 +663,7 @@
                     chatHistory.insertAdjacentHTML('beforeend', messageHtml);
                 } else if (msg.type === 'assistant') {
                     addAIMessage(msg.message, {
-                        citations: msg.citations || [],
+                        citations: [],
                         isError: msg.isError || false,
                         sessionId: msg.sessionId,
                         timestamp: msg.timestamp,
@@ -829,10 +753,7 @@
                     session_id: messageData.sessionId,
                     role: messageData.type === 'user' ? 'user' : 'assistant',
                     content: messageData.message,
-                    reference: messageData.citations && messageData.citations.length > 0 ?
-                        JSON.stringify({
-                            citations: messageData.citations
-                        }) : null
+                    reference: null
                 };
 
                 const response = await makeApiRequest('/chat/save-message', {
@@ -860,24 +781,11 @@
                 sessions.forEach(session => {
                     if (session.messages && Array.isArray(session.messages)) {
                         session.messages.forEach(msg => {
-                            // Parse citations dari reference field
-                            let citations = [];
-                            if (msg.reference) {
-                                try {
-                                    const refData = JSON.parse(msg.reference);
-                                    if (refData.citations) {
-                                        citations = refData.citations;
-                                    }
-                                } catch (e) {
-                                    console.warn('Error parsing reference data:', e);
-                                }
-                            }
-
                             chatHistoryData.push({
                                 id: msg.id || generateId(),
                                 type: msg.role,
                                 message: msg.content,
-                                citations: citations,
+                                citations: [],
                                 timestamp: msg.timestamp || msg.message_timestamp,
                                 isError: false,
                                 sessionId: session.session_id
@@ -1013,14 +921,10 @@
 
                     // Add AI response with saveToHistory option
                     addAIMessage(response.message, {
-                        citations: response.citations || [],
+                        citations: [],
                         sessionId: currentSessionId,
                         saveToHistory: true
                     });
-
-                    if (response.citations && response.citations.length > 0) {
-                        showToast(`Ditemukan ${response.citations.length} referensi`, 'info', 3000);
-                    }
                 } else {
                     throw new Error(response.message || 'Failed to send message');
                 }
@@ -1070,11 +974,6 @@
                 onConfirm: () => {
                     // Clear current chat
                     chatHistory.innerHTML = '';
-                    citationList.innerHTML = `
-                        <div class="text-muted text-center py-4">
-                            Referensi akan muncul saat AI memberikan jawaban
-                        </div>
-                    `;
 
                     // Reset session
                     currentSessionId = null;

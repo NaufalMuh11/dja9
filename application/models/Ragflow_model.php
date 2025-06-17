@@ -220,24 +220,12 @@ class Ragflow_model extends CI_Model
 
             if ($row['message_id']) {
                 $citations = [];
-                if (!empty($row['reference'])) {
-                    $reference_data = json_decode($row['reference'], true);
-                    if (json_last_error() === JSON_ERROR_NONE && isset($reference_data['citations']) && is_array($reference_data['citations'])) {
-                        $citations = $reference_data['citations'];
-                    } else if (json_last_error() === JSON_ERROR_NONE && is_array($reference_data)) {
-                        // If reference is a simple array, treat it as citations directly
-                        $citations = $reference_data;
-                    } else {
-                        log_message('error', 'Invalid JSON format for reference: ' . json_last_error_msg());
-                    }
-                }
 
                 $sessions[$session_id_key]['messages'][] = [
                     'id' => $row['message_id'],
                     'role' => $row['role'],
                     'content' => $row['content'],
                     'citations' => $citations,
-                    // 'reference' => $row['reference'], // Optionally exclude raw reference if citations are parsed
                     'timestamp' => $row['message_timestamp']
                 ];
             }
@@ -318,20 +306,7 @@ class Ragflow_model extends CI_Model
      */
     public function save_assistant_message($session_id, $content, $citations = [])
     {
-        // session_id should be validated by controller to belong to current user
         $reference_data = null;
-        if (!empty($citations)) {
-            // Ensure citations are structured correctly before encoding
-            $valid_citations = [];
-            foreach ($citations as $citation) {
-                if (isset($citation['title']) && isset($citation['text'])) {
-                    $valid_citations[] = $citation;
-                }
-            }
-            if (!empty($valid_citations)) {
-                $reference_data = json_encode(['citations' => $valid_citations]);
-            }
-        }
 
         $message_data = [
             'session_id' => $session_id,

@@ -267,6 +267,50 @@
         .chat-layout.collapsed .sidebar {
             width: 280px !important;
         }
+
+        .chat-layout.offcanvas-show .sidebar .sidebar-dynamic-content,
+        .chat-layout.offcanvas-show .sidebar .chat-history-list,
+        .chat-layout.offcanvas-show .sidebar .btn-text {
+            opacity: 1 !important;
+            visibility: visible !important;
+            height: auto !important;
+            max-width: none !important;
+            overflow: visible !important;
+            pointer-events: auto !important;
+            margin: initial !important;
+            padding: initial !important;
+        }
+
+        .chat-layout.offcanvas-show .sidebar .sidebar-action {
+            justify-content: flex-start !important;
+        }
+
+        /* Mengembalikan ukuran penuh Tombol "Chat Baru" */
+        .chat-layout.offcanvas-show .sidebar .sidebar-action .btn {
+            width: 100% !important;
+            height: auto !important;
+            padding: 0.5rem 1rem !important;
+        }
+
+        /* Mengembalikan gap dan perataan ikon + teks di dalam tombol */
+        .chat-layout.offcanvas-show .sidebar .btn-icon-text {
+            justify-content: flex-start !important;
+            gap: 0.75rem !important;
+        }
+
+        /* Mengembalikan style spesifik untuk area riwayat */
+        .chat-layout.offcanvas-show .sidebar .sidebar-dynamic-content {
+            padding: 0 1rem !important;
+            margin-top: 0.75rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+
+        /* Mengembalikan kemampuan scroll untuk daftar riwayat */
+        .chat-layout.offcanvas-show .sidebar .chat-history-list {
+            overflow: auto !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
     }
 
     .chat-history {
