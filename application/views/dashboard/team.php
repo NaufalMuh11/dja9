@@ -227,8 +227,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="card rounded-3 mb-3 animate-on-load delay-6">
             
             </div>
         </div>
