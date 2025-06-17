@@ -139,6 +139,9 @@
               <a class="dropdown-item" href="dashboard?q=d45h01">
                 Monitoring&nbsp;<b>Efisiensi Anggaran</b>
               </a>
+              <a class="dropdown-item" href="dashboard?q=d45h02">
+                Dashboard&nbsp;<b>Magang</b>
+              </a>
             </div>
           </li>
 

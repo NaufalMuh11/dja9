@@ -14,6 +14,7 @@ class Dashboard extends CI_Controller
 		else show_404();
 
 		if ($menu == 'd45h01') $this->monitoring_blokir();
+		elseif ($menu == 'd45h02') $this->dashboard_magang();
 		elseif ($menu == 'rangeThang') echo $this->rangeThang();
 		else show_404();
 	}
@@ -21,6 +22,12 @@ class Dashboard extends CI_Controller
 	private function monitoring_blokir()
 	{
 		$data['view'] = 'dashboard/blokir_monitoring';
+		$this->load->view('main/main', $data);
+	}
+
+	private function dashboard_magang()
+	{
+		$data['view'] = 'dashboard/team';
 		$this->load->view('main/main', $data);
 	}
 

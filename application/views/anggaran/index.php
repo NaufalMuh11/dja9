@@ -279,10 +279,10 @@
 		top_users: <?php echo $top_users_by_month ?? '[]'; ?>
 	};
 
-	console.log(usersData.total_users);
-	console.log(usersData.active_users);
-	console.log(usersData.total_modules)
-	console.log(usersData.total_services)
+	// console.log(usersData.total_users);
+	// console.log(usersData.active_users);
+	// console.log(usersData.total_modules)
+	// console.log(usersData.total_services)
 
 	// console.log(usersData.top_users);
 </script>
