@@ -14,7 +14,7 @@
     ```
 4.  **Salin file `.env.example`** menjadi `.env`. File ini akan digunakan untuk menyimpan semua konfigurasi sensitif Anda.
     ```bash
-    cp env .env
+    cp .env.example .env
     ```
 
 ---
