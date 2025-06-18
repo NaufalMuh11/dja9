@@ -86,7 +86,7 @@
                             <input type="text" id="historySearchInput" class="form-control" placeholder="Cari riwayat...">
                         </div>
                     </div>
-                    <div class="chat-history-list flex-grow-1 overflow-auto" id="chatHistoryList">
+                    <div class="chat-history-list flex-grow-1 overflow-auto mt-2" id="chatHistoryList">
                         <div class="text-muted text-center py-2">Belum ada riwayat percakapan</div>
                     </div>
                 </div>
