@@ -476,9 +476,8 @@
                             <img src="./files/images/logo.png" alt="AI" class="avatar" width="35" height="35" onerror="this.style.display='none'">
                         </div>
                         <div class="message-content">
-                            <div class="message-bubble p-3 bg-white border">
+                            <div class="p-2 ps-0">
                                 <div class="typing-indicator">
-                                    <span>AI sedang mengetik</span>
                                     <div class="typing-dots">
                                         <div class="typing-dot"></div>
                                         <div class="typing-dot"></div>
